@@ -10,6 +10,7 @@
 
 ;; Const
 
+(def pypi-latest-version "latest")
 (def pypi-base-url "https://pypi.org/pypi/")
 (def pypi-license-classifier-regex #"License :: .*")
 (def pypi-classifier-split-regex #" :: ")
@@ -78,7 +79,10 @@
 (defn get-package-response
   "Return response of a request to PyPI package page of given name and version"
   [name version]
-  (let [url (str/join "/" [pypi-base-url name version "json"])]
+  (let [url
+        (if (= version pypi-latest-version)
+          (str/join "/" [pypi-base-url name "json"])
+          (str/join "/" [pypi-base-url name version "json"]))]
     (http-get-or-nil url)))
 
 
@@ -153,6 +157,8 @@
 (defn -main
   "App entry point"
   [& args]
-  (if (= (count args) 2)
-    (println (get-license-name-with-verdict (first args) (second args)))
-    (println usage)))
+
+  (cond
+    (= (count args) 1) (println (get-license-name-with-verdict (first args) pypi-latest-version))
+    (= (count args) 2) (println (get-license-name-with-verdict (first args) (second args)))
+    :else (println usage)))
