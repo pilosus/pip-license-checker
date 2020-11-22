@@ -13,10 +13,59 @@
 (def pypi-base-url "https://pypi.org/pypi/")
 (def pypi-license-classifier-regex #"License :: .*")
 (def pypi-classifier-split-regex #" :: ")
+(def ignore-case-regex-modifier #"(?i)")
 (def license-error-name "Error")
+(def copyleft-license "Copyleft")
+(def not-copyleft-license "No Copyleft")
+(def error-copyleft-license "???")
+(def copyleft-licenses
+  "Free software licenses (Copyleft)"
+  ;; https://en.wikipedia.org/wiki/Comparison_of_free_and_open-source_software_licences
+  [
+   #"Affero"
+   #"EUPL"
+   #"European Union Public Licence"
+   #"FDL"
+   #"GNU Affero General Public License"
+   #"GNU Free Documentation License"
+   #"GNU General Public License"
+   #"GPL"
+   #"GNU Lesser General Public License"
+   #"GNU Library or Lesser General Public License"
+   #"GNU"
+   #"IBM Public License"
+   #"LGPL"
+   #"MPL"
+   #"Mozilla Public License"
+   #"OSL"
+   #"Open Software License"])
 
 
 ;; Logic
+
+(defn concat-re-patterns-
+  [patterns]
+  (re-pattern (apply str (interpose "|" (map #(str "(" % ")") patterns)))))
+
+
+(defn combine-re-patterns
+  "Concatenate sequence of regex into a single one with optional regexp modifier"
+  ([patterns]
+   (concat-re-patterns- patterns))
+  ([modifier patterns]
+   (re-pattern (str modifier (concat-re-patterns- patterns)))))
+
+
+(defn get-copyleft-verdict
+  "Return string with a verdict if license name matches one of the copyleft licenses"
+  [name]
+  (let [pattern (combine-re-patterns ignore-case-regex-modifier copyleft-licenses)
+        matches (some some? (re-find pattern name))]
+    (cond
+      (= name license-error-name) error-copyleft-license
+      (true? matches) copyleft-license
+      :else not-copyleft-license)))
+
 
 (defn http-get-or-nil
   "Return response of HTTP GET request or nil in case of exception"
@@ -46,10 +95,10 @@
   [body]
   (let [classifiers (:classifiers (:info body))]
     (if (some? classifiers)
-      (let [license-classifier 
-            (first 
-             (filter 
-              (fn [classifier] (re-matches pypi-license-classifier-regex classifier)) 
+      (let [license-classifier
+            (first
+             (filter
+              (fn [classifier] (re-matches pypi-license-classifier-regex classifier))
               classifiers))]
         (if (some? license-classifier)
           (last (str/split license-classifier pypi-classifier-split-regex))
@@ -60,11 +109,12 @@
 (defn find-license
   "Find license in PyPI package response body"
   [body]
-  (let [license-field (:license (:info body))]
+  (let [license-field-data (:license (:info body))
+        classifiers-field-data (find-license-in-classifiers body)]
     (if
-        (some? license-field)
-        license-field
-        (find-license-in-classifiers body))))
+        (some? classifiers-field-data)
+        classifiers-field-data
+        license-field-data)))
 
 
 (defn get-license
@@ -74,6 +124,13 @@
     (if (some? data)
       (find-license (parse-package-response-body data))
       license-error-name)))
+
+
+(defn get-license-name-with-verdict
+  [name version]
+  (let [license-name (get-license name version)
+        license-verdict (get-copyleft-verdict license-name)]
+    (format "%s:%-30s %-30s %s" name version license-name license-verdict)))
 
 
 ;; Entry point
@@ -97,5 +154,5 @@
   "App entry point"
   [& args]
   (if (= (count args) 2)
-    (println (get-license (first args) (second args)))
+    (println (get-license-name-with-verdict (first args) (second args)))
     (println usage)))
