@@ -11,7 +11,7 @@
 ;; Const
 
 (def pypi-latest-version "latest")
-(def pypi-base-url "https://pypi.org/pypi/")
+(def pypi-base-url "https://pypi.org/pypi")
 (def pypi-license-classifier-regex #"License :: .*")
 (def pypi-classifier-split-regex #" :: ")
 (def ignore-case-regex-modifier #"(?i)")
@@ -23,26 +23,30 @@
   "Free software licenses (Copyleft)"
   ;; https://en.wikipedia.org/wiki/Comparison_of_free_and_open-source_software_licences
   [
-   #"Affero"
-   #"EUPL"
+   #"^Affero"
+   #"^EUPL"
    #"European Union Public Licence"
-   #"FDL"
+   #"^FDL"
    #"GNU Affero General Public License"
    #"GNU Free Documentation License"
    #"GNU General Public License"
-   #"GPL"
+   #"^GPL"
    #"GNU Lesser General Public License"
    #"GNU Library or Lesser General Public License"
-   #"GNU"
+   #"^GNU"
    #"IBM Public License"
-   #"LGPL"
-   #"MPL"
+   #"^LGPL"
+   #"^MPL"
    #"Mozilla Public License"
-   #"OSL"
+   #"^OSL"
    #"Open Software License"])
 
 
+;;
 ;; Logic
+;;
+
+;; Copyleft verdict
 
 (defn concat-re-patterns-
   [patterns]
@@ -68,6 +72,8 @@
       :else not-copyleft-license)))
 
 
+;; API requests
+
 (defn http-get-or-nil
   "Return response of HTTP GET request or nil in case of exception"
   [url]
@@ -85,6 +91,8 @@
           (str/join "/" [pypi-base-url name version "json"]))]
     (http-get-or-nil url)))
 
+
+;; JSON parsing
 
 (defn parse-package-response-body
   "Parse JSON string to a hashmap"
@@ -126,7 +134,10 @@
   [name version]
   (let [data (get-package-response name version)]
     (if (some? data)
-      (find-license (parse-package-response-body data))
+      (let [license-name (find-license (parse-package-response-body data))]
+        (if (some? license-name)
+          license-name
+          license-error-name))
       license-error-name)))
 
 
