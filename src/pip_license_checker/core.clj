@@ -11,7 +11,7 @@
 ;; Const
 
 (def pypi-latest-version "latest")
-(def pypi-base-url "https://pypi.org/pypi/")
+(def pypi-base-url "https://pypi.org/pypi")
 (def pypi-license-classifier-regex #"License :: .*")
 (def pypi-classifier-split-regex #" :: ")
 (def ignore-case-regex-modifier #"(?i)")
@@ -134,7 +134,10 @@
   [name version]
   (let [data (get-package-response name version)]
     (if (some? data)
-      (find-license (parse-package-response-body data))
+      (let [license-name (find-license (parse-package-response-body data))]
+        (if (some? license-name)
+          license-name
+          license-error-name))
       license-error-name)))
 
 
