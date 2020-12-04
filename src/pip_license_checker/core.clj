@@ -5,7 +5,9 @@
    [cheshire.core :as json]
    [clj-http.client :as http]
    [clojure.string :as str]
-   [clojure.walk :as walk]))
+   [clojure.walk :as walk]
+   [clojure.java.io :as io]
+   [pip-license-checker.file :as file]))
 
 
 ;; Const
@@ -15,6 +17,7 @@
    :connection-timeout 3000
    :max-redirects 3})
 
+(def requirement-args-regex #"^(?:--requirement|-r)")
 (def pypi-latest-version "latest")
 (def pypi-base-url "https://pypi.org/pypi")
 (def pypi-license-classifier-regex #"License :: .*")
@@ -147,10 +150,12 @@
 
 
 (defn get-license-name-with-verdict
-  [name version]
-  (let [license-name (get-license name version)
+  ([name]
+   (get-license-name-with-verdict name pypi-latest-version))
+  ([name version]
+   (let [license-name (get-license name version)
         license-verdict (get-copyleft-verdict license-name)]
-    (format "%s:%-30s %-30s %s" name version license-name license-verdict)))
+    (format "%s:%-30s %-30s %s" name version license-name license-verdict))))
 
 
 ;; Entry point
@@ -170,11 +175,28 @@
    "  version: version of the package"))
 
 
+(defn scan-requirements-file
+  "Return a vector of file lines"
+  [path]
+  (with-open [rdr (io/reader path)]
+    (doseq [line (line-seq rdr)]
+      (let [[name version] (file/line->dep line)]
+        (println (get-license-name-with-verdict name version))))))
+
+
+(defn two-arguments-options
+  [first-arg second-arg]
+  (if (re-matches requirement-args-regex first-arg)
+    (scan-requirements-file second-arg)
+    (println (get-license-name-with-verdict first-arg second-arg))))
+
+
 (defn -main
   "App entry point"
   [& args]
-
-  (cond
-    (= (count args) 1) (println (get-license-name-with-verdict (first args) pypi-latest-version))
-    (= (count args) 2) (println (get-license-name-with-verdict (first args) (second args)))
-    :else (println usage)))
+  (let [[first-arg second-arg] args
+        num-of-args (count args)]
+    (cond
+      (= num-of-args 1) (println (get-license-name-with-verdict first-arg))
+      (= num-of-args 2) (two-arguments-options first-arg second-arg)
+      :else (println usage))))
