@@ -19,7 +19,7 @@ cd pip-license-checker
 Option 1. Run the code with ``lein``:
 
 ```bash
-Lein run  # with optional arguments [package-name] [version]
+lein run  # with optional arguments [package-name] [version]
 lein run piny 0.6.0
 lein aiostream
 ```

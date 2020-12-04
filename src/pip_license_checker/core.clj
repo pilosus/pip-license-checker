@@ -10,6 +10,11 @@
 
 ;; Const
 
+(def http-settings
+  {:socket-timeout 3000
+   :connection-timeout 3000
+   :max-redirects 3})
+
 (def pypi-latest-version "latest")
 (def pypi-base-url "https://pypi.org/pypi")
 (def pypi-license-classifier-regex #"License :: .*")
@@ -78,7 +83,7 @@
   "Return response of HTTP GET request or nil in case of exception"
   [url]
   (try
-    (http/get url)
+    (http/get url http-settings)
     (catch Exception e nil)))
 
 
