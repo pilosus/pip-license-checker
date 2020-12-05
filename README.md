@@ -28,6 +28,10 @@ lein run aiostream
 
 # scan all packages in requirements file
 lein run -r resources/requirements.txt
+
+# scan packages matching regex pattern
+# e.g. all lines except containing "aio.*" packages
+lein run -r resources/requirements.txt -m '(?!aio).*'
 ```
 
 Option 2. Compile and run an ``uberjar`` standalone:

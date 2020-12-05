@@ -181,27 +181,36 @@
   (get-description
    "Usage:"
    "pip_license_checker [name] [version]"
-   "pip_license_checker [-r|--requirement] [path]"
+   "pip_license_checker [-r|--requirement] [path] [-m|--match] [regex]"
    "  name: name of existing PyPI package"
    "  version: version of the package"
    "  -r, --requirement: option flag to scan requirements.txt file"
-   "  path: path to a requirements text file"))
+   "  path: path to a requirements text file"
+   "  -m, --match: option flag to use regular expression for file filtering"
+   "  regex: Perl Compatible Regular Expression (PCRE)"
+   "Examples:"
+   "pip_license_checker aiohttp 3.7.2"
+   "pip_license_checker -r resources/requirements.txt"
+   "pip_license_checker -r resources/requirements.txt -m '(?!aio).*'"))
 
 
 (defn multiple-args-start
   "Helper for multiple argument main start"
-  [first-arg second-arg]
-  (if (re-matches requirement-args-regex first-arg)
-    (file/print-file second-arg get-license-name-with-verdict)
+  ([first-arg second-arg]
+   (if (re-matches requirement-args-regex first-arg)
+    (file/print-file second-arg get-license-name-with-verdict nil)
     (println (get-license-name-with-verdict first-arg second-arg))))
+  ([req-opt path match-opt pattern]
+   (file/print-file path get-license-name-with-verdict pattern)))
 
 
 (defn -main
   "App entry point"
   [& args]
-  (let [[first-arg second-arg] args
+  (let [[first-arg second-arg third-arg fourth-arg] args
         num-of-args (count args)]
     (cond
       (= num-of-args 1) (println (get-license-name-with-verdict first-arg))
       (= num-of-args 2) (multiple-args-start first-arg second-arg)
+      (= num-of-args 4) (multiple-args-start first-arg second-arg third-arg fourth-arg)
       :else (println usage))))

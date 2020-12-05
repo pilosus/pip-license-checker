@@ -81,11 +81,13 @@
 
 (defn print-file
   "Apply function to parsed deps, print results"
-  [path action]
+  [path action pattern]
   (if (not (.exists (io/file path)))
     (print-file-exception-message path)
     (let [lines (path->lines path)
-          filtered (filtered-lines lines)
+          filtered (if (some? pattern)
+                     (filtered-lines lines pattern)
+                     (filtered-lines lines))
           deps (map line->dep filtered)]
       (doseq [[name version] deps]
         (println (action name version))))))
