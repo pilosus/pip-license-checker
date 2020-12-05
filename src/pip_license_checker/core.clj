@@ -170,9 +170,12 @@
   "Usage message"
   (get-description
    "Usage:"
-   "pip_license_checker name version"
+   "pip_license_checker [name] [version]"
+   "pip_license_checker [-r|--requirement] [path]"
    "  name: name of existing PyPI package"
-   "  version: version of the package"))
+   "  version: version of the package"
+   "  -r, --requirement: option flag to scan requirements.txt file"
+   "  path: path to a requirements text file"))
 
 
 (defn scan-requirements-file

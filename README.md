@@ -19,9 +19,15 @@ cd pip-license-checker
 Option 1. Run the code with ``lein``:
 
 ```bash
-lein run  # with optional arguments [package-name] [version]
+# see usage message
+lein run
+
+# check a single package
 lein run piny 0.6.0
 lein aiostream
+
+# scan all packages in requirements file
+lein -r /path/to/requirements.txt
 ```
 
 Option 2. Compile and run an ``uberjar`` standalone:
