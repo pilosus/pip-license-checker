@@ -5,7 +5,9 @@
    [cheshire.core :as json]
    [clj-http.client :as http]
    [clojure.string :as str]
-   [clojure.walk :as walk]))
+   [clojure.walk :as walk]
+   [clojure.java.io :as io]
+   [pip-license-checker.file :as file]))
 
 
 ;; Const
@@ -15,15 +17,23 @@
    :connection-timeout 3000
    :max-redirects 3})
 
+
 (def pypi-latest-version "latest")
 (def pypi-base-url "https://pypi.org/pypi")
+
+
+(def requirement-args-regex #"^(?:--requirement|-r)")
 (def pypi-license-classifier-regex #"License :: .*")
 (def pypi-classifier-split-regex #" :: ")
 (def ignore-case-regex-modifier #"(?i)")
+
 (def license-error-name "Error")
-(def copyleft-license "Copyleft")
-(def not-copyleft-license "No Copyleft")
-(def error-copyleft-license "???")
+
+(def copyleft-license-type "Copyleft")
+(def permissive-license-type "Permissive")
+(def other-license-type "Other")
+(def error-license-type "???")
+
 (def copyleft-licenses
   "Free software licenses (Copyleft)"
   ;; https://en.wikipedia.org/wiki/Comparison_of_free_and_open-source_software_licences
@@ -53,7 +63,7 @@
 
 ;; Copyleft verdict
 
-(defn concat-re-patterns-
+(defn concat-re-patterns
   [patterns]
   (re-pattern (apply str (interpose "|" (map #(str "(" % ")") patterns)))))
 
@@ -61,9 +71,9 @@
 (defn combine-re-patterns
   "Concatenate sequence of regex into a single one with optional regexp modifier"
   ([patterns]
-   (concat-re-patterns- patterns))
+   (concat-re-patterns patterns))
   ([modifier patterns]
-   (re-pattern (str modifier (concat-re-patterns- patterns)))))
+   (re-pattern (str modifier (concat-re-patterns patterns)))))
 
 
 (defn get-copyleft-verdict
@@ -72,9 +82,9 @@
   (let [pattern (combine-re-patterns ignore-case-regex-modifier copyleft-licenses)
         matches (some some? (re-find pattern name))]
     (cond
-      (= name license-error-name) error-copyleft-license
-      (true? matches) copyleft-license
-      :else not-copyleft-license)))
+      (= name license-error-name) error-license-type
+      (true? matches) copyleft-license-type
+      :else other-license-type)))
 
 
 ;; API requests
@@ -147,10 +157,15 @@
 
 
 (defn get-license-name-with-verdict
-  [name version]
-  (let [license-name (get-license name version)
-        license-verdict (get-copyleft-verdict license-name)]
-    (format "%s:%-30s %-30s %s" name version license-name license-verdict)))
+  ([name]
+   (get-license-name-with-verdict name pypi-latest-version))
+  ([name version]
+   (let [license-name (get-license name version)
+        license-verdict (get-copyleft-verdict license-name)
+         package-name (if (some? version)
+                        (str name ":" version)
+                        name)]
+     (format "%-50s %-50s %-50s" package-name license-name license-verdict))))
 
 
 ;; Entry point
@@ -165,16 +180,37 @@
   "Usage message"
   (get-description
    "Usage:"
-   "pip_license_checker name version"
+   "pip_license_checker [name] [version]"
+   "pip_license_checker [-r|--requirement] [path] [-m|--match] [regex]"
    "  name: name of existing PyPI package"
-   "  version: version of the package"))
+   "  version: version of the package"
+   "  -r, --requirement: option flag to scan requirements.txt file"
+   "  path: path to a requirements text file"
+   "  -m, --match: option flag to use regular expression for file filtering"
+   "  regex: Perl Compatible Regular Expression (PCRE)"
+   "Examples:"
+   "pip_license_checker aiohttp 3.7.2"
+   "pip_license_checker -r resources/requirements.txt"
+   "pip_license_checker -r resources/requirements.txt -m '(?!aio).*'"))
+
+
+(defn multiple-args-start
+  "Helper for multiple argument main start"
+  ([first-arg second-arg]
+   (if (re-matches requirement-args-regex first-arg)
+    (file/print-file second-arg get-license-name-with-verdict nil)
+    (println (get-license-name-with-verdict first-arg second-arg))))
+  ([req-opt path match-opt pattern]
+   (file/print-file path get-license-name-with-verdict pattern)))
 
 
 (defn -main
   "App entry point"
   [& args]
-
-  (cond
-    (= (count args) 1) (println (get-license-name-with-verdict (first args) pypi-latest-version))
-    (= (count args) 2) (println (get-license-name-with-verdict (first args) (second args)))
-    :else (println usage)))
+  (let [[first-arg second-arg third-arg fourth-arg] args
+        num-of-args (count args)]
+    (cond
+      (= num-of-args 1) (println (get-license-name-with-verdict first-arg))
+      (= num-of-args 2) (multiple-args-start first-arg second-arg)
+      (= num-of-args 4) (multiple-args-start first-arg second-arg third-arg fourth-arg)
+      :else (println usage))))
