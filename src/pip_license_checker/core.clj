@@ -154,8 +154,11 @@
    (get-license-name-with-verdict name pypi-latest-version))
   ([name version]
    (let [license-name (get-license name version)
-        license-verdict (get-copyleft-verdict license-name)]
-    (format "%-50s %-50s %-50s" (str name ":" version) license-name license-verdict))))
+        license-verdict (get-copyleft-verdict license-name)
+         package-name (if (some? version)
+                        (str name ":" version)
+                        name)]
+     (format "%-50s %-50s %-50s" package-name license-name license-verdict))))
 
 
 ;; Entry point
@@ -178,19 +181,11 @@
    "  path: path to a requirements text file"))
 
 
-(defn scan-requirements-file
-  "Return a vector of file lines"
-  [path]
-  (with-open [rdr (io/reader path)]
-    (doseq [line (line-seq rdr)]
-      (let [[name version] (file/line->dep line)]
-        (println (get-license-name-with-verdict name version))))))
-
-
-(defn two-arguments-options
+(defn multiple-args-start
+  "Helper for multiple argument main start"
   [first-arg second-arg]
   (if (re-matches requirement-args-regex first-arg)
-    (scan-requirements-file second-arg)
+    (file/print-file second-arg get-license-name-with-verdict)
     (println (get-license-name-with-verdict first-arg second-arg))))
 
 
@@ -201,5 +196,5 @@
         num-of-args (count args)]
     (cond
       (= num-of-args 1) (println (get-license-name-with-verdict first-arg))
-      (= num-of-args 2) (two-arguments-options first-arg second-arg)
+      (= num-of-args 2) (multiple-args-start first-arg second-arg)
       :else (println usage))))
