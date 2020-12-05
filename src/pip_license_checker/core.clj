@@ -17,16 +17,23 @@
    :connection-timeout 3000
    :max-redirects 3})
 
-(def requirement-args-regex #"^(?:--requirement|-r)")
+
 (def pypi-latest-version "latest")
 (def pypi-base-url "https://pypi.org/pypi")
+
+
+(def requirement-args-regex #"^(?:--requirement|-r)")
 (def pypi-license-classifier-regex #"License :: .*")
 (def pypi-classifier-split-regex #" :: ")
 (def ignore-case-regex-modifier #"(?i)")
+
 (def license-error-name "Error")
-(def copyleft-license "Copyleft")
-(def not-copyleft-license "No Copyleft")
-(def error-copyleft-license "???")
+
+(def copyleft-license-type "Copyleft")
+(def permissive-license-type "Permissive")
+(def other-license-type "Other")
+(def error-license-type "???")
+
 (def copyleft-licenses
   "Free software licenses (Copyleft)"
   ;; https://en.wikipedia.org/wiki/Comparison_of_free_and_open-source_software_licences
@@ -56,7 +63,7 @@
 
 ;; Copyleft verdict
 
-(defn concat-re-patterns-
+(defn concat-re-patterns
   [patterns]
   (re-pattern (apply str (interpose "|" (map #(str "(" % ")") patterns)))))
 
@@ -64,9 +71,9 @@
 (defn combine-re-patterns
   "Concatenate sequence of regex into a single one with optional regexp modifier"
   ([patterns]
-   (concat-re-patterns- patterns))
+   (concat-re-patterns patterns))
   ([modifier patterns]
-   (re-pattern (str modifier (concat-re-patterns- patterns)))))
+   (re-pattern (str modifier (concat-re-patterns patterns)))))
 
 
 (defn get-copyleft-verdict
@@ -75,9 +82,9 @@
   (let [pattern (combine-re-patterns ignore-case-regex-modifier copyleft-licenses)
         matches (some some? (re-find pattern name))]
     (cond
-      (= name license-error-name) error-copyleft-license
-      (true? matches) copyleft-license
-      :else not-copyleft-license)))
+      (= name license-error-name) error-license-type
+      (true? matches) copyleft-license-type
+      :else other-license-type)))
 
 
 ;; API requests

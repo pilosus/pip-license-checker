@@ -1,0 +1,9 @@
+aiohttp[speedups]==3.7.2
+piny>=0.6
+#aiosmtpd > 1.2
+aiostream
+aiocache~=0.11.1
+aiokafka == 0.6.*
+aiopg == 2.3.5  # no such version, error expected
+https://example.com/package_3.0.3.dev1820+49a8884-cp34-none-win_amd64.whl
+workflow-tools>=0.5.0,<=0.6.0 ; python_version > '3.6'

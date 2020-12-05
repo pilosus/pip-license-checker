@@ -61,25 +61,25 @@
 
 (def license-params
   [["GPLv3"
-    core/copyleft-license
+    core/copyleft-license-type
     "GPL lumped with version"]
    ["gnu general public license"
-    core/copyleft-license
+    core/copyleft-license-type
     "GPL case insensitive"]
    ["Not exactly GPLv3"
-    core/not-copyleft-license
+    core/other-license-type
     "GPL at the end"]
    ["Not IBM Public License"
-    core/copyleft-license
+    core/copyleft-license-type
     "IBM license name in the middle"]
    ["MIT"
-    core/not-copyleft-license
+    core/other-license-type
     "Permissive license"]
    ["Custom Big Corporation's EULA"
-    core/not-copyleft-license
+    core/other-license-type
     "Proprietory license"]
    [""
-    core/not-copyleft-license
+    core/other-license-type
     "Empty license name"]])
 
 (deftest test-get-copyleft-verdict-ok

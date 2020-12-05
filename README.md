@@ -24,10 +24,10 @@ lein run
 
 # check a single package
 lein run piny 0.6.0
-lein aiostream
+lein run aiostream
 
 # scan all packages in requirements file
-lein -r /path/to/requirements.txt
+lein run -r resources/requirements.txt
 ```
 
 Option 2. Compile and run an ``uberjar`` standalone:

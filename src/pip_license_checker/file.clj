@@ -69,16 +69,18 @@
 
 
 ;;
-;; Integration
+;; Integration (side effects)
 ;;
 
 
 (defn print-file-exception-message
+  "Print error message for file path"
   [path]
   (println "No such file: " path))
 
 
 (defn print-file
+  "Apply function to parsed deps, print results"
   [path action]
   (if (not (.exists (io/file path)))
     (print-file-exception-message path)

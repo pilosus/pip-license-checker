@@ -13,12 +13,19 @@
    ["SomeProject == 1.3.*", ["SomeProject", "1.3"] "Wildcard patch version"]
    ["SomeProject != 1.3", ["SomeProject", "1.3"] "Not equal"]  ;; FIXME
    ["SomeProject == 1.3.4 ; python_version < '2.7'", ["SomeProject", "1.3.4"] "Environment markers"]
-   ["SomeProject == 1.3.4 @ file:///somewhere/", ["SomeProject", "1.3.4"] "Direct reference"]
-   ["https://example.com/package_3.0.3.dev1820+49a8884-cp34-none-win_amd64.whl" nil "File path"]
-   ["#aiohttp==3.7.2" nil "Comment"]
-   ["-r requirements.dev.txt" nil "Option starting with -"]
-   ["--find-links http://some.archives.com/archives" nil "Option starting with --"]])
+   ["SomeProject == 1.3.4 @ file:///somewhere/", ["SomeProject", "1.3.4"] "Direct reference"]])
 
+
+(def requirements-lines
+  [["ok-dep=~0.1.2"
+    "yet_another_ok_package>=1.2.7,<2"
+   "https://example.com/package_3.0.3.dev1820+49a8884-cp34-none-win_amd64.whl"
+   "#aiohttp==3.7.2"
+   "-r requirements.dev.txt"
+   "--find-links http://some.archives.com/archives"]
+   ["ok-dep=~0.1.2"
+    "yet_another_ok_package>=1.2.7,<2"]
+   ["ok-dep=~0.1.2"]])
 
 
 (deftest test-line->dep
@@ -26,3 +33,16 @@
     (doseq [[line expected-vector description] dependencies]
       (testing description
         (is (= expected-vector (file/line->dep line)))))))
+
+
+(deftest test-filtered-lines-no-extra-filter
+  (testing "Filtering strings with default filters"
+    (let [[input-lines expected-lines] requirements-lines]
+      (is (= expected-lines (file/filtered-lines input-lines))))))
+
+
+(deftest test-filtered-lines-with-extra-filter
+  (testing "Extra filters to exclude yet_another* packages"
+    (let [[input-lines _ expected-lines] requirements-lines]
+      (is (= expected-lines
+             (file/filtered-lines input-lines "(?!yet_another).*"))))))
