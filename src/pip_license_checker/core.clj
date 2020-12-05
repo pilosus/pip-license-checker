@@ -155,7 +155,7 @@
   ([name version]
    (let [license-name (get-license name version)
         license-verdict (get-copyleft-verdict license-name)]
-    (format "%s:%-30s %-30s %s" name version license-name license-verdict))))
+    (format "%-50s %-50s %-50s" (str name ":" version) license-name license-verdict))))
 
 
 ;; Entry point
