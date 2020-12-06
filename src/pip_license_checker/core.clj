@@ -46,11 +46,7 @@
    #"GNU Free Documentation License"
    #"GNU General Public License"
    #"^GPL"
-   #"GNU Lesser General Public License"
-   #"GNU Library or Lesser General Public License"
-   #"^GNU"
    #"IBM Public License"
-   #"^LGPL"
    #"^MPL"
    #"Mozilla Public License"
    #"^OSL"
@@ -59,21 +55,26 @@
 (def permissive-licenses
   [
    #"CeCILL-B Free Software License Agreement"
-   #"CeCILL-B"
+   #"^CeCILL-B"
    #"License :: CeCILL-C Free Software License Agreement"
-   #"CeCILL-C"
+   #"^CeCILL-C"
    #"CEA CNRS Inria Logiciel Libre License"
-   #"CeCILL-2.1"  ;; http://cecill.info/index.en.html
+   #"^CeCILL-2.1"  ;; http://cecill.info/index.en.html
    #"Academic Free License"
-   #"AFL"
+   #"^AFL"
    #"Apache Software License"
-   #"Apache"
+   #"^Apache"
    #"BSD License"
-   #"BSD"
+   #"^BSD"
+   #"Historical Permission Notice and Disclaimer"
+   #"^HPND"
+   #"GNU Lesser General Public License"
+   #"GNU Library or Lesser General Public License"
+   #"^LGPL"
    #"MIT License"
-   #"MIT"
+   #"^MIT"
    #"ISC License"
-   #"ISCL"
+   #"^ISCL"
    #"Python Software Foundation License"
    #"Python License"
    #"Unlicense"
@@ -201,7 +202,7 @@
          package-name (if (some? version)
                         (str name ":" version)
                         name)]
-     (format "%-30s %-30s %-30s" package-name license-name license-verdict))))
+     (format "%-35s %-55s %-30s" package-name license-name license-verdict))))
 
 
 ;; Entry point
@@ -222,12 +223,12 @@
    "  version: version of the package"
    "  -r, --requirement: option flag to scan requirements.txt file"
    "  path: path to a requirements text file"
-   "  -m, --match: option flag to use regular expression for file filtering"
+   "  -e, --exclude: option flag exclude lines matching regular expression"
    "  regex: Perl Compatible Regular Expression (PCRE)"
    "Examples:"
    "pip_license_checker aiohttp 3.7.2"
    "pip_license_checker -r resources/requirements.txt"
-   "pip_license_checker -r resources/requirements.txt -m '(?!aio).*'"))
+   "pip_license_checker --requirement resources/requirements.txt --exclude 'aio.*'"))
 
 
 (defn multiple-args-start

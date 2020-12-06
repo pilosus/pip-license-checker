@@ -40,7 +40,7 @@ Synx                           Other/Proprietary License      Other
 
 ### scan packages matching regex pattern
 ### e.g. all lines except containing "aio.*" packages
-lein run -r resources/requirements.txt -m '(?!aio).*'
+lein run -r resources/requirements.txt -e 'aio.*'
 
 piny:0.6                       MIT License                    Permissive
 workflow-tools:0.5.0           Apache Software License        Permissive
