@@ -14,7 +14,8 @@
 ;; https://www.python.org/dev/peps/pep-0440/#version-specifiers
 (def trim-spaces-and-comments-regex #"(?:\s+)|(?:#.*)")
 (def trim-comment-regex #"#.*")
-(def skip-line-regex #"^(?!(?:https?:\/\/|#|-)).*")
+(def skip-line-regex #"^(?:https?:\/\/|#|-).*")
+(def skip-blank-line-regex #"^\s*$")
 (def split-dep-regex #"(===|==|>=|<=|~=|!=)|(<|>)")
 (def split-multiple-versions #"(\s+|,)")
 (def split-extra-deps-regex #"\[")
@@ -32,14 +33,14 @@
 
 
 (defn filtered-lines
-  "Filter vec of strings by predefined rules and an optional pattern
-  (filtered-lines lines)  ;; only predefined filters
-  (filtered-lines lines \"(?!aio).*\")  ;; exclude lines with aio.*"
+  "Filter out vec of strings by predefined rules and an optional pattern"
   ([lines]
-   (filter #(re-matches skip-line-regex %) lines))
+   (->>
+    (remove #(re-matches skip-blank-line-regex %) lines)
+    (remove #(re-matches skip-line-regex %))))
   ([lines pattern-string]
    (let [pattern (re-pattern pattern-string)
-         filtered (filter #(re-matches pattern %) lines)]
+         filtered (remove #(re-matches pattern %) lines)]
      (filtered-lines filtered))))
 
 

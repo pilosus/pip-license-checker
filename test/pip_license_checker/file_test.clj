@@ -45,4 +45,4 @@
   (testing "Extra filters to exclude yet_another* packages"
     (let [[input-lines _ expected-lines] requirements-lines]
       (is (= expected-lines
-             (file/filtered-lines input-lines "(?!yet_another).*"))))))
+             (file/filtered-lines input-lines "(yet_another).*"))))))
