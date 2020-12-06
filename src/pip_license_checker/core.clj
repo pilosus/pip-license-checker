@@ -56,6 +56,36 @@
    #"^OSL"
    #"Open Software License"])
 
+(def permissive-licenses
+  [
+   #"CeCILL-B Free Software License Agreement"
+   #"CeCILL-B"
+   #"License :: CeCILL-C Free Software License Agreement"
+   #"CeCILL-C"
+   #"CEA CNRS Inria Logiciel Libre License"
+   #"CeCILL-2.1"  ;; http://cecill.info/index.en.html
+   #"Academic Free License"
+   #"AFL"
+   #"Apache Software License"
+   #"Apache"
+   #"BSD License"
+   #"BSD"
+   #"MIT License"
+   #"MIT"
+   #"ISC License"
+   #"ISCL"
+   #"Python Software Foundation License"
+   #"Python License"
+   #"Unlicense"
+   #"Universal Permissive License"
+   #"UPL"
+   #"W3C License"
+   #"W3C"
+   #"zlib/libpng License"
+   #"zlib/libpng"
+   #"Public Domain"
+   ])
+
 
 ;;
 ;; Logic
@@ -65,7 +95,7 @@
 
 (defn concat-re-patterns
   [patterns]
-  (re-pattern (apply str (interpose "|" (map #(str "(" % ")") patterns)))))
+  (re-pattern (apply str (interpose "|" (map #(str "(?:" % ")") patterns)))))
 
 
 (defn combine-re-patterns
@@ -76,15 +106,21 @@
    (re-pattern (str modifier (concat-re-patterns patterns)))))
 
 
-(defn get-copyleft-verdict
-  "Return string with a verdict if license name matches one of the copyleft licenses"
+(defn find-license-type
+  "Return string with a verdict of license type"
   [name]
-  (let [pattern (combine-re-patterns ignore-case-regex-modifier copyleft-licenses)
-        matches (some some? (re-find pattern name))]
-    (cond
-      (= name license-error-name) error-license-type
-      (true? matches) copyleft-license-type
-      :else other-license-type)))
+  (let
+      [copyleft-pattern
+       (combine-re-patterns ignore-case-regex-modifier copyleft-licenses)
+       copyleft-matches (some? (re-find copyleft-pattern name))
+       permissive-pattern
+       (combine-re-patterns ignore-case-regex-modifier permissive-licenses)
+       permissive-matches (some? (re-find permissive-pattern name))]
+      (cond
+        (= name license-error-name) error-license-type
+        (true? copyleft-matches) copyleft-license-type
+        (true? permissive-matches) permissive-license-type
+        :else other-license-type)))
 
 
 ;; API requests
@@ -161,11 +197,11 @@
    (get-license-name-with-verdict name pypi-latest-version))
   ([name version]
    (let [license-name (get-license name version)
-        license-verdict (get-copyleft-verdict license-name)
+        license-verdict (find-license-type license-name)
          package-name (if (some? version)
                         (str name ":" version)
                         name)]
-     (format "%-50s %-50s %-50s" package-name license-name license-verdict))))
+     (format "%-30s %-30s %-30s" package-name license-name license-verdict))))
 
 
 ;; Entry point

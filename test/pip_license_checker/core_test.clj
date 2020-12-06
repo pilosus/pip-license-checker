@@ -18,21 +18,21 @@
 
 (def re-patterns-no-modifier-params
   [[["name"]
-    #"(name)"
+    #"(?:name)"
     "One pattern without modifier"]
    [["name" "[0-9]+"]
-    #"(name)|([0-9]+)"
+    #"(?:name)|(?:[0-9]+)"
     "Multiple patterns without modifier"]])
 
 
 (def re-patterns-with-modifier-params
   [[["name"]
     #"(?i)"
-    #"(?i)(name)"
+    #"(?i)(?:name)"
     "One pattern with modifier"]
   [["name" "[0-9]+"]
    #"(?i)"
-   #"(?i)(name)|([0-9]+)"
+   #"(?i)(?:name)|(?:[0-9]+)"
    "Multiple patterns with modifier"]])
 
 (deftest test-combine-re-patterns-without-modifier
@@ -82,16 +82,16 @@
     core/other-license-type
     "Empty license name"]])
 
-(deftest test-get-copyleft-verdict-ok
+(deftest test-find-license-type-ok
   (testing "Get copyleft verdict for license name"
     (doseq [[license-name expected-verdict description] license-params]
       (testing description
-        (is (= expected-verdict (core/get-copyleft-verdict license-name)))))))
+        (is (= expected-verdict (core/find-license-type license-name)))))))
 
 
-(deftest test-get-copyleft-verdict-ok
+(deftest test-find-license-type-ok
   (testing "Nil name throws exception"
-    (is (thrown? NullPointerException (core/get-copyleft-verdict nil)))))
+    (is (thrown? NullPointerException (core/find-license-type nil)))))
 
 
 ;;

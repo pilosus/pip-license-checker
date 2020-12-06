@@ -12,7 +12,7 @@
 ;; See PyPI specs
 ;; https://pip.pypa.io/en/stable/reference/pip_install/#requirements-file-format
 ;; https://www.python.org/dev/peps/pep-0440/#version-specifiers
-(def trim-whitespace-regex #"\s+")
+(def trim-spaces-and-comments-regex #"(?:\s+)|(?:#.*)")
 (def trim-comment-regex #"#.*")
 (def skip-line-regex #"^(?!(?:https?:\/\/|#|-)).*")
 (def split-dep-regex #"(===|==|>=|<=|~=|!=)|(<|>)")
@@ -63,7 +63,7 @@
 (defn line->dep
   "Parse line into dependency record"
   [line]
-  (let [trimmed (str/replace line trim-whitespace-regex "")
+  (let [trimmed (str/replace line trim-spaces-and-comments-regex "")
         [name version] (str/split trimmed split-dep-regex)]
     (vec (filter some? [(trimmed-dep-name name) (trimmed-dep-version version)]))))
 
