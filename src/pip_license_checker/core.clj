@@ -7,7 +7,11 @@
    [clojure.string :as str]
    [clojure.walk :as walk]
    [clojure.java.io :as io]
-   [pip-license-checker.file :as file]))
+   [clojure.tools.cli :refer [parse-opts]]
+   [pip-license-checker.file :as file]
+   [pip-license-checker.filters :as filters]
+   [pip-license-checker.parsers :as parsers]
+))
 
 
 ;; Const
@@ -204,50 +208,105 @@
                         name)]
      (format "%-35s %-55s %-30s" package-name license-name license-verdict))))
 
+;;
+;; [+] Get all packages from CLI args into one vector ->
+;; [+] Apply internal filters ->
+;; [+] Apply user-defined filters ->
+;; [+] Parse packages to [name version] ->
+;; [] Fetch license for each package ->
+;; [] Format output (? possibly print total stats)
+;;
 
+
+(defn get-all-requirements
+  "Get a sequence of all requirements"
+  [packages requirements]
+  (let [file-packages (file/get-requirement-lines requirements)]
+    (concat packages file-packages)))
+
+
+
+;;
 ;; Entry point
-
-(defn get-description
-  "Return multiline description"
-  [& strings]
-  (str/join "\n" strings))
+;;
 
 
-(def usage
-  "Usage message"
-  (get-description
-   "Usage:"
-   "pip_license_checker [name] [version]"
-   "pip_license_checker [-r|--requirement] [path] [-m|--match] [regex]"
-   "  name: name of existing PyPI package"
-   "  version: version of the package"
-   "  -r, --requirement: option flag to scan requirements.txt file"
-   "  path: path to a requirements text file"
-   "  -e, --exclude: option flag exclude lines matching regular expression"
-   "  regex: Perl Compatible Regular Expression (PCRE)"
-   "Examples:"
-   "pip_license_checker aiohttp 3.7.2"
-   "pip_license_checker -r resources/requirements.txt"
-   "pip_license_checker --requirement resources/requirements.txt --exclude 'aio.*'"))
+(defn process-requirements
+  "Apply filters and get verdicts for all requirements"
+  [packages requirements options]
+  (let [exclude-pattern (:exclude options)]
+    (->> (get-all-requirements packages requirements)
+         (filters/remove-requirements-internal-rules)
+         (filters/remove-requirements-user-rules exclude-pattern)
+         (map filters/sanitize-requirement)
+         (map filters/requirement->map)
+)))
 
 
-(defn multiple-args-start
-  "Helper for multiple argument main start"
-  ([first-arg second-arg]
-   (if (re-matches requirement-args-regex first-arg)
-    (file/print-file second-arg get-license-name-with-verdict nil)
-    (println (get-license-name-with-verdict first-arg second-arg))))
-  ([req-opt path match-opt pattern]
-   (file/print-file path get-license-name-with-verdict pattern)))
 
+(defn usage [options-summary]
+  (->> ["pip-license-checker - check Python PyPI package license"
+        ""
+        "Usage:"
+        "pip-license-checker [options]... [package]..."
+        ""
+        "Description:"
+        "  package                      List of package names in format `name[==version]`"
+        ""
+        options-summary
+        ""
+        "Examples:"
+        "pip-license-checker django"
+        "pip-license-checker aiohttp:3.7.2 piny:0.6.0 django"
+        "pip-license-checker -r resources/requirements.txt"
+        "pip-license-checker -r file1.txt -r file2.txt -r file3.txt"
+        "pip-license-checker --requirements resources/requirements.txt --exclude 'aio.*'"]
+       (str/join \newline)))
+
+(defn error-msg [errors]
+  (str "The following errors occurred while parsing:\n"
+       (str/join \newline errors)))
+
+(def cli-options
+  [
+   ;; FIXME update with :multi true update-fn: conj once clojure.tools.cli 1.0.195 (?) released
+   ["-r" "--requirements NAME" "Requirement file name to read"
+    :default []
+    :assoc-fn #(update %1 %2 conj %3)
+    :validate [#(.exists (io/file %)) "Requirement file does not exist"]]
+   ["-e" "--exclude REGEX" "PCRE to exclude matching packages. Used only if [package]... or requirement files specified"
+    :parse-fn #(re-pattern %)]
+   ["-h" "--help"]])
+
+(defn validate-args
+  "Parse and validate CLI arguments for entrypoint"
+  [args]
+  (let [{:keys [options arguments errors summary] :as parsed-args} (parse-opts args cli-options)]
+    (println parsed-args)  ;; FIXME remove after debugging
+    (cond
+      (:help options)
+      {:exit-message (usage summary) :ok? true}
+      errors
+      {:exit-message (error-msg errors)}
+      (or
+       (> (count arguments) 0)
+       (> (count (:requirements options)) 0))
+      {:requirements (:requirements options)
+       :packages arguments
+       :options (dissoc options :requirements)}
+      :else
+      {:exit-message (usage summary)})))
+
+(defn exit
+  "Exit from the app with exit status"
+  [status msg]
+  (println msg)
+  (System/exit status))
 
 (defn -main
   "App entry point"
   [& args]
-  (let [[first-arg second-arg third-arg fourth-arg] args
-        num-of-args (count args)]
-    (cond
-      (= num-of-args 1) (println (get-license-name-with-verdict first-arg))
-      (= num-of-args 2) (multiple-args-start first-arg second-arg)
-      (= num-of-args 4) (multiple-args-start first-arg second-arg third-arg fourth-arg)
-      :else (println usage))))
+  (let [{:keys [packages requirements options exit-message ok?] :as parsed-args} (validate-args args)]
+    (if exit-message
+      (exit (if ok? 0 1) exit-message)
+      (println (process-requirements packages requirements options)))))

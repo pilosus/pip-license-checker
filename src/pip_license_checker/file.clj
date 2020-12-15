@@ -26,7 +26,8 @@
 ;;
 
 (defn path->lines
-  "Return a vector of file lines"
+  "Return a vector of file lines
+  Vector used instead of lazy seq to handle open/close file using with-open"
   [path]
   (with-open [rdr (io/reader path)]
     (vec (for [line (line-seq rdr)] line))))
@@ -74,6 +75,8 @@
 ;;
 
 
+
+
 (defn print-file-exception-message
   "Print error message for file path"
   [path]
@@ -92,3 +95,13 @@
           deps (map line->dep filtered)]
       (doseq [[name version] deps]
         (println (action name version))))))
+
+
+;;
+;;
+;;
+
+(defn get-requirement-lines
+  "Get a sequence of lines from all requirement files"
+  [requirements]
+  (apply concat (for [path requirements] (path->lines path))))
