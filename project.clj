@@ -8,6 +8,7 @@
                  [org.clojure/tools.cli "1.0.194"]
                  [clj-http "3.11.0"]
                  [cheshire "5.10.0"]]
+  :plugins [[lein-cljfmt "0.7.0"]]
   :main pip-license-checker.core
   :aot [pip-license-checker.core]
   :target-path "target/%s"
