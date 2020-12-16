@@ -1,10 +1,11 @@
-(defproject pip-license-checker "0.3.0"
+(defproject pip-license-checker "0.4.0"
   :description "Check Python PyPI package license"
   :url "https://github.com/pilosus/pip-license-checker"
   :license {:name "The MIT License (MIT)"
             :url "https://github.com/pilosus/pip-license-checker/blob/main/LICENSE"}
   :dependencies [
                  [org.clojure/clojure "1.10.1"]
+                 [org.clojure/tools.cli "1.0.194"]
                  [clj-http "3.11.0"]
                  [cheshire "5.10.0"]]
   :main pip-license-checker.core

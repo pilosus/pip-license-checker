@@ -23,7 +23,7 @@ Option 1. Run the code with ``lein``:
 lein run
 
 ### check a single package
-lein run piny 0.6.0
+lein run piny==0.6.0
 lein run aiostream
 
 ### scan all packages in requirements file
@@ -55,3 +55,12 @@ lein uberjar
 cd target/uberjar
 java -jar pip-license-checker-[version]-standalone.jar [args]
 ```
+
+
+## Disclaimer
+
+``pip-license-checker`` is provided on an "as-is" basis and makes no
+warranties regarding any information provided through it, and
+disclaims liability for damages resulting from using it. Using
+``pip-license-checker`` does not constitute legal advice nor does it
+create an attorney-client relationship.
