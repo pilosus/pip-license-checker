@@ -8,7 +8,6 @@
    [pip-license-checker.filters :as filters]
    [pip-license-checker.pypi :as pypi]))
 
-
 (defn format-license
   "Print requirement and its license"
   [license-data]
@@ -30,11 +29,11 @@
   [packages requirements options]
   (let [exclude-pattern (:exclude options)
         licenses (->> (get-all-requirements packages requirements)
-                    (filters/remove-requirements-internal-rules)
-                    (filters/remove-requirements-user-rules exclude-pattern)
-                    (map filters/sanitize-requirement)
-                    (map filters/requirement->map)
-                    (map pypi/requirement->license))]
+                      (filters/remove-requirements-internal-rules)
+                      (filters/remove-requirements-user-rules exclude-pattern)
+                      (map filters/sanitize-requirement)
+                      (map filters/requirement->map)
+                      (map pypi/requirement->license))]
     (doseq [line licenses]
       (println (format-license line)))))
 
@@ -62,8 +61,7 @@
        (str/join \newline errors)))
 
 (def cli-options
-  [
-   ;; FIXME update with :multi true update-fn: conj once clojure.tools.cli 1.0.195 (?) released
+  [;; FIXME update with :multi true update-fn: conj once clojure.tools.cli 1.0.195 (?) released
    ["-r" "--requirements NAME" "Requirement file name to read"
     :default []
     :assoc-fn #(update %1 %2 conj %3)

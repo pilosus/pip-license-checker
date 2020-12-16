@@ -7,7 +7,6 @@
    [clojure.string :as str]
    [pip-license-checker.filters :as filters]))
 
-
 (def settings-http-client
   {:socket-timeout 3000
    :connection-timeout 3000
@@ -36,8 +35,7 @@
 ;; https://en.wikipedia.org/wiki/Comparison_of_free_and_open-source_software_licences
 (def licenses-copyleft
   "Free software licenses (Copyleft)"
-  [
-   #"^Affero"
+  [#"^Affero"
    #"^EUPL"
    #"European Union Public Licence"
    #"^FDL"
@@ -53,8 +51,7 @@
 
 (def licenses-permissive
   "Permissive licenses"
-  [
-   #"CeCILL-B Free Software License Agreement"
+  [#"CeCILL-B Free Software License Agreement"
    #"^CeCILL-B"
    #"License :: CeCILL-C Free Software License Agreement"
    #"^CeCILL-C"
@@ -84,10 +81,10 @@
    #"W3C"
    #"zlib/libpng License"
    #"zlib/libpng"
-   #"Public Domain"
-   ])
+   #"Public Domain"])
 
 ;; Get API response, parse it
+
 
 (defn get-requirement-response
   "Return respone of GET request to PyPI API for requirement"
@@ -116,7 +113,7 @@
   "Get first license name from PyPI trove classifiers list"
   [classifiers]
   (let [classifier
-        (some #(if (re-matches regex-match-classifier % ) %) classifiers)
+        (some #(if (re-matches regex-match-classifier %) %) classifiers)
         name
         (if classifier (last (str/split classifier regex-split-classifier)) nil)]
     name))

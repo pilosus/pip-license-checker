@@ -11,10 +11,8 @@
    [clojure.test :refer :all]
    [pip-license-checker.core :as core]))
 
-
 (def params-validate-args
-  [
-   [["--requirements"
+  [[["--requirements"
      "resources/requirements.txt"
      "django"
      "aiohttp==3.7.1"
@@ -23,8 +21,7 @@
     {:requirements ["resources/requirements.txt" "README.md"]
      :packages ["django" "aiohttp==3.7.1"]
      :options {}}
-    "Normal run"]
-   ])
+    "Normal run"]])
 
 (deftest test-validate-args
   (testing "Validating CLI args"

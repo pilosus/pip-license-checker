@@ -6,8 +6,7 @@
 ;; filters/remove-requirements-internal-rules
 
 (def params-remove-requirements-internal-rules
-  [
-   [[] [] "No requirements"]
+  [[[] [] "No requirements"]
    [nil [] "Requirements is nil"]
    [["  # this is a comment" "django"] ["django"] "Comments"]
    [["-r resources/requirements.txt" "django"] ["django"] "Option 1"]
@@ -15,8 +14,7 @@
    [["" "django"] ["django"] "Blank line 1"]
    [[" \n" "django"] ["django"] "Blank line 2"]
    [["http://example.com/package.whl" "django"] ["django"] "Url 1"]
-   [[" https://example.com/package.whl" "django"] ["django"] "Url 2"]
-   ])
+   [[" https://example.com/package.whl" "django"] ["django"] "Url 2"]])
 
 (deftest test-remove-requirements-internal-rules
   (testing "Removing lines from requirements with internal rules"
@@ -30,12 +28,10 @@
 ;; filters/remove-requirements-user-rules
 
 (def params-remove-requirements-user-rules
-  [
-   [[] #"test" [] "No requirements"]
+  [[[] #"test" [] "No requirements"]
    [nil #"test" [] "Requirements is nil"]
    [["aiohttp==3.7.2" "django"] #"aio.*" ["django"] "Pattern 1"]
-   [["aiohttp==3.7.2" "django"] #".*" [] "Pattern 2"]
-   ])
+   [["aiohttp==3.7.2" "django"] #".*" [] "Pattern 2"]])
 
 (deftest test-remove-requirements-user-rules
   (testing "Removing lines from requirements with user-defined rules"
@@ -49,12 +45,10 @@
 ;; filters/sanitize-requirement
 
 (def params-sanitize-requirement
-  [
-   ["  hello == 1.2.3" "hello==1.2.3" "Whitespaces"]
+  [["  hello == 1.2.3" "hello==1.2.3" "Whitespaces"]
    ["  hello == 1.2.3  #comment" "hello==1.2.3" "Comment"]
    ["  hello == 1.2.3 ; python_version > '3.6'" "hello==1.2.3" "Modifiers"]
-   ["  hello>1.2.3,<=1.5.0" "hello>1.2.3<=1.5.0" "Comma"]
-   ])
+   ["  hello>1.2.3,<=1.5.0" "hello>1.2.3<=1.5.0" "Comma"]])
 
 (deftest test-sanitize-requirement
   (testing "Sanitizing requirement string"
@@ -65,16 +59,15 @@
 
 ;; filters/requirement->map
 
+
 (def params-requirement->map
-  [
-   ["aiohttp==3.7.2" {:name "aiohttp" :version "3.7.2"} "Equal =="]
+  [["aiohttp==3.7.2" {:name "aiohttp" :version "3.7.2"} "Equal =="]
    ["aiohttp===3.7.2" {:name "aiohttp" :version "3.7.2"} "Equal ==="]
    ["aiohttp>3.7.2" {:name "aiohttp" :version filters/version-latest} "FIXME >"]
    ["aiohttp>=3.7.2" {:name "aiohttp" :version filters/version-latest} "FIXME >="]
    ["aiohttp<3.7.2" {:name "aiohttp" :version filters/version-latest} "FIXME <"]
    ["aiohttp<=3.7.2" {:name "aiohttp" :version filters/version-latest} "FIXME <="]
-   ["aiohttp=~3.7.2" {:name "aiohttp" :version filters/version-latest} "FIXME =~"]
-   ])
+   ["aiohttp=~3.7.2" {:name "aiohttp" :version filters/version-latest} "FIXME =~"]])
 
 (deftest test-requirement->map
   (testing ""

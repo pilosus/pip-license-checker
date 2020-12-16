@@ -19,7 +19,6 @@
 
 (def version-latest :latest)
 
-
 (defn remove-requirements-internal-rules
   "Exclude requirements from sequence according to app's internal rules"
   [requirements]

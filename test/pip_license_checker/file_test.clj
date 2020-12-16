@@ -6,10 +6,8 @@
 ;; file/exists?
 
 (def params-exists?
-  [
-   ["resources/requirements.txt" true "File exists"]
-   ["no_such_file_here" false "No such file"]
-   ])
+  [["resources/requirements.txt" true "File exists"]
+   ["no_such_file_here" false "No such file"]])
 
 (deftest test-exists?
   (testing "Check if file exists"
@@ -20,11 +18,12 @@
 
 ;; file/get-requirement-lines
 
+
 (def mock-path-lines ["a" "b"])
 
 (deftest test-get-requirement-lines
   (testing "Concat of requirement file lines"
     (with-redefs
-      [file/path->lines (constantly mock-path-lines)]
+     [file/path->lines (constantly mock-path-lines)]
       (is (= ["a" "b" "a" "b"]
              (file/get-requirement-lines ["f1.txt" "f2.txt"]))))))
