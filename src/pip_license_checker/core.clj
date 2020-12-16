@@ -75,7 +75,7 @@
 (defn validate-args
   "Parse and validate CLI arguments for entrypoint"
   [args]
-  (let [{:keys [options arguments errors summary] :as parsed-args} (parse-opts args cli-options)]
+  (let [{:keys [options arguments errors summary]} (parse-opts args cli-options)]
     (cond
       (:help options) {:exit-message (usage summary) :ok? true}
       errors {:exit-message (error-msg errors)}

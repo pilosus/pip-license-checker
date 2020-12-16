@@ -15,7 +15,7 @@
 (def regex-remove-wildcard #"\.\*")
 
 (def regex-split-specifier-equal #"(===|==)")
-(def regex-split-specifier-other #"(>=|<=|~=|!=|<|>)")
+(def regex-split-specifier-other #"(=~|>=|<=|~=|!=|<|>)")
 
 (def version-latest :latest)
 

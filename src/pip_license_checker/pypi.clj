@@ -147,8 +147,10 @@
   (let [info (get data "info")
         {:strs [license classifiers]} info
         classifiers-license (classifiers->license classifiers)
+        ;; TODO add GitHub API check here
         license-name (or classifiers-license license)
-        license-desc (license-name->desc license-name)] ;; TODO GitHub API check
+        license-desc
+        (license-name->desc (or license-name license-name-error))]
     (if license-name
       {:name license-name :desc license-desc}
       license-data-error)))
@@ -170,7 +172,7 @@
 ;; Entrypoint
 
 (defn requirement->license
-  ""
+  "Return license hash-map for requirement"
   [requirement]
   (let [resp (get-requirement-response requirement)
         data (requirement-response->data resp)
