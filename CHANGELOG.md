@@ -1,9 +1,29 @@
 # Change Log
-All notable changes to this project will be documented in this file. This change log follows the conventions of [keepachangelog.com](http://keepachangelog.com/).
+
+All notable changes to this project will be documented in this file.
+This change log follows the conventions of [keepachangelog.com](http://keepachangelog.com/).
 
 ## [Unreleased]
 ### Changed
 - Nothing yet
+
+## [0.4.0] - 2020-12-16
+### Added
+- Multiple -r options support
+- Exit status codes
+- Usage examples in docs
+
+### Fixed
+- Massive code refactoring
+- CLI args parsing rebuilt
+
+## [0.3.0] - 2020-12-06
+### Added
+- Permissive license detection
+
+## [0.2.0] - 2020-12-05
+### Added
+- Scan requirements files with option -r/--requirement
 
 ## [0.1.1] - 2020-11-22
 ### Changed
@@ -21,5 +41,8 @@ All notable changes to this project will be documented in this file. This change
 ### Added
 - Structure for Leiningen app project
 
-[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.1.1...HEAD
+[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.4.0...HEAD
+[0.4.0]: https://github.com/pilosus/pip-license-checker/compare/0.3.0...0.4.0
+[0.3.0]: https://github.com/pilosus/pip-license-checker/compare/0.2.0...0.3.0
+[0.2.0]: https://github.com/pilosus/pip-license-checker/compare/0.1.1...0.2.0
 [0.1.1]: https://github.com/pilosus/pip-license-checker/compare/0.1.0...0.1.1

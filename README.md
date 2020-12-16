@@ -23,7 +23,7 @@ Option 1. Run the code with ``lein``:
 lein run
 
 ### check a single package
-lein run piny 0.6.0
+lein run piny==0.6.0
 lein run aiostream
 
 ### scan all packages in requirements file

@@ -53,5 +53,5 @@
   (let [equal-split (str/split requirement regex-split-specifier-equal)
         other-split (str/split requirement regex-split-specifier-other)]
     (if (= (count equal-split) 2)
-      {:package (first equal-split) :version (second equal-split)}
-      {:package (first other-split) :version version-latest})))
+      {:name (first equal-split) :version (second equal-split)}
+      {:name (first other-split) :version version-latest})))
