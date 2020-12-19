@@ -24,7 +24,7 @@
   (let [file-packages (file/get-requirement-lines requirements)]
     (concat packages file-packages)))
 
-(defn process-requirements
+(defn get-parsed-requiements
   "Apply filters and get verdicts for all requirements"
   [packages requirements options]
   (let [exclude-pattern (:exclude options)
@@ -34,6 +34,12 @@
                       (map filters/sanitize-requirement)
                       (map filters/requirement->map)
                       (map pypi/requirement->license))]
+    licenses))
+
+(defn process-requirements
+  "Print parsed requirements pretty"
+  [packages requirements options]
+  (let [licenses (get-parsed-requiements packages requirements options)]
     (doseq [line licenses]
       (println (format-license line)))))
 

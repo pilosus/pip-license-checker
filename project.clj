@@ -8,9 +8,12 @@
                  [org.clojure/tools.cli "1.0.194"]
                  [clj-http "3.11.0"]
                  [cheshire "5.10.0"]]
-  :plugins [[lein-cljfmt "0.7.0"]]
+  :plugins [[lein-cljfmt "0.7.0"]
+            [lein-cloverage "1.2.1"]]
   :main pip-license-checker.core
   :aot [pip-license-checker.core]
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all
-                       :jvm-opts ["-Dclojure.compiler.direct-linking=true"]}})
+                       :jvm-opts ["-Dclojure.compiler.direct-linking=true"]}}
+  :test-selectors {:integration :integration
+                   :cli :cli})

@@ -2,9 +2,12 @@ name: Clojure CI
 
 on:
   push:
-    branches: [ $default-branch ]
+    branches: [ "main" ]
   pull_request:
     branches: [ "*" ]
+
+env:
+  CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
 jobs:
   build:
@@ -18,4 +21,6 @@ jobs:
     - name: Code formatting check
       run: lein cljfmt check
     - name: Run tests
-      run: lein test
+      run: lein cloverage --codecov
+    - name: Update code coverage report
+      run: bash <(curl -s https://codecov.io/bash) -f target/coverage/codecov.json
