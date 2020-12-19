@@ -1,5 +1,7 @@
 # pip-license-checker
 
+[![codecov](https://codecov.io/gh/pilosus/pip-license-checker/branch/main/graph/badge.svg?token=MXN6PDETET)](https://codecov.io/gh/pilosus/pip-license-checker)
+
 Check Python PyPI package license
 
 

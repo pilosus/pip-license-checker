@@ -9,10 +9,6 @@
 ;; pypi/get-requirement-response
 
 
-(defn mock-http-get
-  [url & params]
-  {:body url})
-
 (def params-get-requirement-response
   [[{:name "aiohttp" :version "3.7.2"}
     {:ok? true
@@ -31,7 +27,7 @@
             params-get-requirement-response]
       (testing description
         (with-redefs
-         [http/get mock-http-get]
+         [http/get (fn [url & params] {:body url})]
           (is (= expected (pypi/get-requirement-response requirement))))))))
 
 ;; pypi/classifiers->license
