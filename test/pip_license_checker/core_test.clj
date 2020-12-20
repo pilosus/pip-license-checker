@@ -1,6 +1,6 @@
 (ns pip-license-checker.core-test
   (:require
-   [clojure.test :refer :all]
+   [clojure.test :refer [deftest is testing]]
    [clj-http.client :as http]
    [pip-license-checker.file :as file]
    [pip-license-checker.core :as core]))
@@ -54,7 +54,7 @@
       (testing description
         (with-redefs
          [http/get (constantly {:body mock-body})
-          file/get-requirement-lines (fn [reqs] requirements)]
+          file/get-requirement-lines (fn [_] requirements)]
           (is
            (= expected
               (vec (core/get-parsed-requiements

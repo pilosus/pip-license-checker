@@ -1,6 +1,6 @@
 (ns pip-license-checker.file-test
   (:require
-   [clojure.test :refer :all]
+   [clojure.test :refer [deftest is testing]]
    [pip-license-checker.file :as file]))
 
 ;; file/exists?

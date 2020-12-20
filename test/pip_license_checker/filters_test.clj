@@ -1,6 +1,6 @@
 (ns pip-license-checker.filters-test
   (:require
-   [clojure.test :refer :all]
+   [clojure.test :refer [deftest is testing]]
    [pip-license-checker.filters :as filters]))
 
 ;; filters/remove-requirements-internal-rules
