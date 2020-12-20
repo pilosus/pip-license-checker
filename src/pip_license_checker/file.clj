@@ -2,7 +2,6 @@
   "Reading and parsing requirements.txt files"
   (:gen-class)
   (:require
-   [clojure.string :as str]
    [clojure.java.io :as io]))
 
 (defn exists?
