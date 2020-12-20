@@ -7,6 +7,13 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 ### Changed
 - Nothing yet
 
+## [0.5.0] - 2020-12-20
+### Added
+- Check license name using GitHub API as a fallback when no license found on the PyPI
+
+### Fixed
+- Code formatting (after introduction of [clj-kondo](https://github.com/borkdude/clj-kondo) and [cljfmt](https://github.com/weavejester/cljfmt))
+
 ## [0.4.0] - 2020-12-16
 ### Added
 - Multiple -r options support
@@ -41,7 +48,8 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 ### Added
 - Structure for Leiningen app project
 
-[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.4.0...HEAD
+[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.5.0...HEAD
+[0.5.0]: https://github.com/pilosus/pip-license-checker/compare/0.4.0...0.5.0
 [0.4.0]: https://github.com/pilosus/pip-license-checker/compare/0.3.0...0.4.0
 [0.3.0]: https://github.com/pilosus/pip-license-checker/compare/0.2.0...0.3.0
 [0.2.0]: https://github.com/pilosus/pip-license-checker/compare/0.1.1...0.2.0

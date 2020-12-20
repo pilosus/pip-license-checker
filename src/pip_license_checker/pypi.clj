@@ -5,7 +5,8 @@
    [cheshire.core :as json]
    [clj-http.client :as http]
    [clojure.string :as str]
-   [pip-license-checker.filters :as filters]))
+   [pip-license-checker.filters :as filters]
+   [pip-license-checker.github :as github]))
 
 (def settings-http-client
   {:socket-timeout 3000
@@ -138,14 +139,16 @@
       :else license-desc-other)))
 
 (defn data->license-map
-  "Get license name from info.classifiers or info.license field of PyPI API data
-  TODO extend with GitHub API response if no license found"
+  "Get license name from info.classifiers or info.license field of PyPI API data"
   [data]
   (let [info (get data "info")
-        {:strs [license classifiers]} info
+        {:strs [license classifiers home_page]} info
+        license-license (if (= "" license) nil license)
         classifiers-license (classifiers->license classifiers)
-        ;; TODO add GitHub API check here
-        license-name (or classifiers-license license)
+        license-name (or
+                      classifiers-license
+                      license-license
+                      (github/homepage->license-name home_page))
         license-desc
         (license-name->desc (or license-name license-name-error))]
     (if license-name
