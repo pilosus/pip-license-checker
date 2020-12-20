@@ -94,7 +94,7 @@
         (if (= version filters/version-latest)
           (str/join "/" [url-pypi-base name "json"])
           (str/join "/" [url-pypi-base name version "json"]))
-        response (try (http/get url settings-http-client) (catch Exception e nil))]
+        response (try (http/get url settings-http-client) (catch Exception _ nil))]
     (if response
       {:ok? true :requirement origin :response (:body response)}
       {:ok? false :requirement origin})))
@@ -113,7 +113,7 @@
   "Get first license name from PyPI trove classifiers list"
   [classifiers]
   (let [classifier
-        (some #(if (re-matches regex-match-classifier %) %) classifiers)
+        (some #(re-matches regex-match-classifier %) classifiers)
         name
         (if classifier (last (str/split classifier regex-split-classifier)) nil)]
     name))
@@ -157,7 +157,7 @@
 (defn data->license
   "Return hash-map with license data"
   [json-data]
-  (let [{:keys [ok? requirement data] :as origin} json-data]
+  (let [{:keys [ok? requirement data]} json-data]
     (if ok?
       {:ok? true
        :requirement requirement

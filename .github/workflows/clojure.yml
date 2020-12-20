@@ -20,6 +20,11 @@ jobs:
       run: lein deps
     - name: Code formatting check
       run: lein cljfmt check
+    - name: Code linting
+      uses: DeLaGuardo/clojure-lint-action@v1
+      with:
+        clj-kondo-args: --lint src test
+        github_token: ${{ secrets.GITHUB_TOKEN }}
     - name: Run tests
       run: lein cloverage --codecov
     - name: Update code coverage report
