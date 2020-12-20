@@ -1,6 +1,6 @@
 (ns pip-license-checker.pypi-test
   (:require
-   [clojure.test :refer :all]
+   [clojure.test :refer [deftest is testing]]
    [clj-http.client :as http]
    [pip-license-checker.pypi :as pypi]
    [pip-license-checker.filters :as filters]))
@@ -27,7 +27,7 @@
             params-get-requirement-response]
       (testing description
         (with-redefs
-         [http/get (fn [url & params] {:body url})]
+         [http/get (fn [url & _] {:body url})]
           (is (= expected (pypi/get-requirement-response requirement))))))))
 
 ;; pypi/classifiers->license
