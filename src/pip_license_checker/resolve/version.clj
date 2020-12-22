@@ -25,7 +25,7 @@
     {:letter validated-letter :number number}))
 
 (defn parse-local-version
-  "Parse strings like abc.1.twelve into [\"abc\" 1 \"twelve\"]"
+  "Parse strings into vec with string parsed into ints if possible"
   [local]
   (let [lowered (if local (str/lower-case local) nil)
         splitted (if lowered (str/split lowered #"[\._-]") nil)
@@ -83,11 +83,46 @@
 ;; https://clojure.org/guides/comparators
 
 
-(defn canonicalize-release
-  "Return"
+(defn truncate-release
+  "Return release vector with trailing zero parts dropped"
   [release]
-  (let [release-vec (str/split release #"\.")]
-    (reverse (drop-while #(= % 0) (reverse (map #(Integer/parseInt %) release-vec))))))
+  (let [release-truncated
+        (vec (reverse (drop-while #(= % 0) (reverse release))))]
+    release-truncated))
+
+(defn get-comparable-version
+  "Get parsed version map formatted to be comparable
+  See more details in pypa/packaging:
+  https://github.com/pypa/packaging/blob/20.8/packaging/version.py#L505"
+  [version-map]
+  (let [{:keys [epoch release pre post dev local]} version-map
+        release (truncate-release release)
+        pre
+        (cond
+          (and (not pre) (not post) dev) (Double/NEGATIVE_INFINITY)
+          (not pre) (Double/POSITIVE_INFINITY)
+          :else pre)
+        post
+        (cond
+          (not post) (Double/NEGATIVE_INFINITY)
+          :else post)
+        dev
+        (cond
+          (not dev) (Double/POSITIVE_INFINITY)
+          :else dev)
+        local
+        (cond
+          (not local) [{:letter "" :number (Double/NEGATIVE_INFINITY)}]
+          :else
+          (vec (map #(if (integer? %)
+                       {:letter "" :number %}
+                       {:letter % :number (Double/NEGATIVE_INFINITY)}) local)))]
+    {:epoch epoch
+     :release release
+     :pre pre
+     :post post
+     :dev dev
+     :local local}))
 
 ;; TODO
 (defn compare-version
