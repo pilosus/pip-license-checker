@@ -3,10 +3,10 @@
    [clojure.test :refer [deftest is testing]]
    [pip-license-checker.resolve.version :as resolve-version]))
 
-(def params-versions
+(def params-version
   "This list must be in the correct sorting order"
   [;; Implicit epoch of 0
-   "1.0.dev456",
+   ["1.0.dev456"]
    "1.0a1",
    "1.0a2.dev456",
    "1.0a12.dev456",
@@ -64,10 +64,10 @@
 
 (def params-parse-version
   [["1.0.dev456"
-    {:epoch 0 :release [1 0] :pre {:letter nil, :number 0} :post {:letter nil, :number 0} :dev {:letter "dev" :number 456} :local []}
+    {:epoch 0 :release [1 0] :pre nil :post nil :dev ["dev" 456] :local nil}
     "Release and dev version"]
    ["1!1.0b2.post345.dev456"
-    {:epoch 1 :release [1 0] :pre {:letter "b" :number 2} :post {:letter "post" :number 345} :dev {:letter "dev" :number 456} :local []}
+    {:epoch 1 :release [1 0] :pre ["b" 2] :post ["post" 345] :dev ["dev" 456] :local nil}
     "Release, pre, post and dev version"]])
 
 (deftest test-parse-version

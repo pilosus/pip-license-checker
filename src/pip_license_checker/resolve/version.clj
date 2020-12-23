@@ -4,25 +4,37 @@
   (:require
    [clojure.string :as str]))
 
+;; Version parsing
+
 (def regex-version #"v?(?:(?:(?<epoch>[0-9]+)!)?(?<release>[0-9]+(?:\.[0-9]+)*)(?<pre>[-_\.]?(?<prel>(a|b|c|rc|alpha|beta|pre|preview))[-_\.]?(?<pren>[0-9]+)?)?(?<post>(?:-(?<postn1>[0-9]+))|(?:[-_\.]?(?<postl>post|rev|r)[-_\.]?(?<postn2>[0-9]+)?))?(?<dev>[-_\.]?(?<devl>dev)[-_\.]?(?<devn>[0-9]+)?)?)(?:\+(?<local>[a-z0-9]+(?:[-_\.][a-z0-9]+)*))?")
+
+(defn parse-number
+  "Parse number string into integer or return 0"
+  [number]
+  (if (not number) 0 (Integer/parseInt number)))
 
 (defn parse-letter-version
   "Parse letter part of version"
   [letter number]
-  (let [letter
+  (let [result
         (cond
-          (and number (not letter)) "post"
-          (not letter) nil
-          :else (str/lower-case letter))
-        number (if (not number) 0 (Integer/parseInt number))
-        validated-letter
-        (cond
-          (= letter "alpha") "a"
-          (= letter "beta") "b"
-          (contains? #{"c" "pre" "preview"} letter) "rc"
-          (contains? #{"rev" "r"} letter) "post"
-          :else letter)]
-    {:letter validated-letter :number number}))
+          letter
+          (let [sanitized-letter (str/lower-case letter)
+                canonical-letter
+                (cond
+                  (= sanitized-letter "alpha") "a"
+                  (= sanitized-letter "beta") "b"
+                  (contains? #{"c" "pre" "preview"} sanitized-letter) "rc"
+                  (contains? #{"rev" "r"} sanitized-letter) "post"
+                  :else sanitized-letter)
+                canonical-number (parse-number number)]
+            [canonical-letter canonical-number])
+          (and (not letter) number)
+          (let [canonical-letter "post"
+                canonical-number (parse-number number)]
+            [canonical-letter canonical-number])
+          :else nil)]
+    result))
 
 (defn parse-local-version
   "Parse strings into vec with string parsed into ints if possible"
@@ -35,7 +47,7 @@
                  (Integer/parseInt %)
                  (catch NumberFormatException _ %))
               splitted))]
-    parsed))
+    (if (= parsed []) nil parsed)))
 
 (defn validate-version
   [version-map]
@@ -78,7 +90,7 @@
     (validate-version version-map)))
 
 
-;; TODO
+;; Comparison
 ;; https://clojuredocs.org/clojure.core/compare
 ;; https://clojure.org/guides/comparators
 
@@ -112,11 +124,11 @@
           :else dev)
         local
         (cond
-          (not local) [{:letter "" :number (Double/NEGATIVE_INFINITY)}]
+          (not local) [["" (Double/NEGATIVE_INFINITY)]]
           :else
           (vec (map #(if (integer? %)
-                       {:letter "" :number %}
-                       {:letter % :number (Double/NEGATIVE_INFINITY)}) local)))]
+                       ["" %]
+                       [% (Double/NEGATIVE_INFINITY)]) local)))]
     {:epoch epoch
      :release release
      :pre pre
@@ -124,10 +136,60 @@
      :dev dev
      :local local}))
 
-;; TODO
 (defn compare-version
-  "Compare version hash-maps"
+  "Compare version maps"
   [a b]
-  (let [{release-a :release} a
-        {release-b :release} b]
-    (constantly 1)))
+  (let [a (get-comparable-version a)
+        b (get-comparable-version b)]
+    (compare [(:epoch a) (:release a) (:pre a) (:post a) (:dev a) (:local a)]
+             [(:epoch b) (:release b) (:pre b) (:post b) (:dev b) (:local b)])))
+
+(defn eq
+  "Return true if versions a and b are equal"
+  [a b]
+  (let [comparator (compare-version a b)]
+    (= comparator 0)))
+
+(defn neq
+  "Return true if versions a and b are not equal"
+  [a b]
+  (let [comparator (compare-version a b)]
+    (not= comparator 0)))
+
+(defn lt
+  "Return true if version a less than b"
+  [a b]
+  (let [comparator (compare-version a b)]
+    (neg? comparator)))
+
+(defn le
+  "Return true if version a less than or equal to b"
+  [a b]
+  (let [comparator (compare-version a b)]
+    (<= comparator 0)))
+
+(defn gt
+  "Return true if version a greater than b"
+  [a b]
+  (let [comparator (compare-version a b)]
+    (pos? comparator)))
+
+(defn ge
+  "Return true if version a greater than or equal to b"
+  [a b]
+  (let [comparator (compare-version a b)]
+    (>= comparator 0)))
+
+;; FIXME
+(defn compatible
+  "Return true if version a is compatible with b
+   Compatible releases have an equivalent combination of >= and ==.
+   That is that ~=2.2 is equivalent to >=2.2,==2.*."
+  [a b]
+  (let [a-release-trunc (vec (take (- (count (:release a)) 1) (:release a)))
+        b-release-trunc (vec (take (- (count (:release b)) 1) (:release b)))
+        a-trunc (update a :release (constantly a-release-trunc))
+        b-trunc (update b :release (constantly b-release-trunc))]
+    (println a-trunc)
+    (println b-trunc)
+    (and (ge a b) (eq a-trunc b-trunc))))
