@@ -52,14 +52,16 @@
 (defn validate-version
   [version-map]
   (let [{:keys
-         [epoch
+         [orig
+          epoch
           release
           prel pren
           postn1 postl postn2
           devl devn
           local]} version-map
         result
-        {:epoch (if epoch (Integer/parseInt epoch) 0)
+        {:orig orig
+         :epoch (if epoch (Integer/parseInt epoch) 0)
          :release (vec (map #(Integer/parseInt %) (str/split release #"\.")))
          :pre (parse-letter-version prel pren)
          :post (parse-letter-version postl (or postn1 postn2))
@@ -73,7 +75,8 @@
   (let [matcher (re-matcher regex-version version-str)
         version-map
         (if (.matches matcher)
-          {:epoch (.group matcher "epoch")
+          {:orig version-str
+           :epoch (.group matcher "epoch")
            :release (.group matcher "release")
            :pre (.group matcher "pre")
            :prel (.group matcher "prel")
@@ -107,7 +110,7 @@
   See more details in pypa/packaging:
   https://github.com/pypa/packaging/blob/20.8/packaging/version.py#L505"
   [version-map]
-  (let [{:keys [epoch release pre post dev local]} version-map
+  (let [{:keys [orig epoch release pre post dev local]} version-map
         release (truncate-release release)
         pre
         (cond
@@ -129,20 +132,71 @@
           (vec (map #(if (integer? %)
                        ["" %]
                        [% (Double/NEGATIVE_INFINITY)]) local)))]
-    {:epoch epoch
+    {:orig orig
+     :epoch epoch
      :release release
      :pre pre
      :post post
      :dev dev
      :local local}))
 
+(defn pad-vector
+  "Append padding values to a given vector to make it of the specified len
+  Used to compare vectors of numbers"
+  [vec-val len pad-val]
+  (let [size (count vec-val)
+        left (- len size)
+        prepend (vec (repeat left pad-val))]
+    (vec (concat vec-val prepend))))
+
+(defn compare-letter-version
+  "Compare vectors of [name version] shape with possible fallbacks to +/- Inf
+  NB! Comparator will break if assumed shape of vectors is violated"
+  [a b]
+  (cond
+    (or
+     (and (vector? a) (vector? b))
+     (and (number? a) (number? b))) (compare a b)
+    (and (number? a) (not (number? b))) (compare a 0)
+    (and (not (number? a)) (number? b)) (compare 0 b)
+    :else
+    (throw
+     (ex-info
+      (format "Cannot compare letter-version vectors")
+      {:a a :b b}))))
+
 (defn compare-version
   "Compare version maps"
   [a b]
   (let [a (get-comparable-version a)
-        b (get-comparable-version b)]
-    (compare [(:epoch a) (:release a) (:pre a) (:post a) (:dev a) (:local a)]
-             [(:epoch b) (:release b) (:pre b) (:post b) (:dev b) (:local b)])))
+        b (get-comparable-version b)
+        c (compare (:epoch a) (:epoch b))]
+    (if (not= c 0)
+      c
+      (let [release-a (:release a)
+            release-b (:release b)
+            max-release-len (max (count release-a) (count release-b))
+            release-a-padded (pad-vector release-a max-release-len 0)
+            release-b-padded (pad-vector release-b max-release-len 0)
+            c (compare release-a-padded release-b-padded)]
+        (if (not= c 0)
+          c
+          (let [c (compare-letter-version (:pre a) (:pre b))]
+            (if (not= c 0)
+              c
+              (let [c (compare-letter-version (:post a) (:post b))]
+                (if (not= c 0)
+                  c
+                  (let [c (compare-letter-version (:dev a) (:dev b))]
+                    (if (not= c 0)
+                      c
+                      (let [local-a (:local a)
+                            local-b (:local b)
+                            max-local-len (max (count local-a) (count local-b))
+                            local-a-padded (pad-vector local-a max-local-len ["" 0])
+                            local-b-padded (pad-vector local-b max-local-len ["" 0])
+                            c (compare local-a-padded local-b-padded)]
+                        c))))))))))))
 
 (defn eq
   "Return true if versions a and b are equal"
@@ -180,16 +234,52 @@
   (let [comparator (compare-version a b)]
     (>= comparator 0)))
 
-;; FIXME
 (defn compatible
   "Return true if version a is compatible with b
-   Compatible releases have an equivalent combination of >= and ==.
-   That is that ~=2.2 is equivalent to >=2.2,==2.*."
+  Compatible releases have an equivalent combination of >= and ==.
+  That is that ~=2.2 is equivalent to >=2.2,==2.*.
+  See more:
+  https://www.python.org/dev/peps/pep-0440/#compatible-release"
   [a b]
-  (let [a-release-trunc (vec (take (- (count (:release a)) 1) (:release a)))
-        b-release-trunc (vec (take (- (count (:release b)) 1) (:release b)))
-        a-trunc (update a :release (constantly a-release-trunc))
-        b-trunc (update b :release (constantly b-release-trunc))]
-    (println a-trunc)
-    (println b-trunc)
-    (and (ge a b) (eq a-trunc b-trunc))))
+  (let [b-release-trunc (vec (take (- (count (:release b)) 1) (:release b)))
+        a-release-trunc (vec (take (count b-release-trunc) (:release a)))]
+    (and (ge a b) (= a-release-trunc b-release-trunc))))
+
+(defn arbitrary-eq
+  "Return true if string representation of version a equal to b
+  See more:
+  https://www.python.org/dev/peps/pep-0440/#arbitrary-equality"
+  [a b]
+  (let [a-str (:orig a)
+        b-str (:orig b)]
+    (= a-str b-str)))
+
+(defn get-comparison-op
+  "Get comparison function for operator string"
+  [op]
+  (case op
+    "===" arbitrary-eq
+    "==" eq
+    "~=" compatible
+    "!=" neq
+    "<=" le
+    ">=" ge
+    "<" lt
+    ">" gt))
+
+;; Specifiers
+
+(defn version-ok?
+  "Return true if a version satisfies each specifier
+  Specifiers is a collection of vec [op version]"
+  [specifiers version]
+  (every?
+   true?
+   (map
+    (fn [[spec-op spec-version]] (spec-op version spec-version))
+    specifiers)))
+
+(defn filter-versions
+  "Return lazy seq of versions that satisfy specifiers"
+  [specifiers versions]
+  (filter #(version-ok? specifiers %) versions))

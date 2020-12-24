@@ -64,10 +64,22 @@
 
 (def params-parse-version
   [["1.0.dev456"
-    {:epoch 0 :release [1 0] :pre nil :post nil :dev ["dev" 456] :local nil}
+    {:orig "1.0.dev456"
+     :epoch 0
+     :release [1 0]
+     :pre nil
+     :post nil
+     :dev ["dev" 456]
+     :local nil}
     "Release and dev version"]
    ["1!1.0b2.post345.dev456"
-    {:epoch 1 :release [1 0] :pre ["b" 2] :post ["post" 345] :dev ["dev" 456] :local nil}
+    {:orig "1!1.0b2.post345.dev456"
+     :epoch 1
+     :release [1 0]
+     :pre ["b" 2]
+     :post ["post" 345]
+     :dev ["dev" 456]
+     :local nil}
     "Release, pre, post and dev version"]])
 
 (deftest test-parse-version
