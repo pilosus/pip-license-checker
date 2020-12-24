@@ -67,7 +67,7 @@
    ["aiohttp>=3.7.2" {:name "aiohttp" :version filters/version-latest} "FIXME >="]
    ["aiohttp<3.7.2" {:name "aiohttp" :version filters/version-latest} "FIXME <"]
    ["aiohttp<=3.7.2" {:name "aiohttp" :version filters/version-latest} "FIXME <="]
-   ["aiohttp=~3.7.2" {:name "aiohttp" :version filters/version-latest} "FIXME =~"]])
+   ["aiohttp~=3.7.2" {:name "aiohttp" :version filters/version-latest} "FIXME ~="]])
 
 (deftest test-requirement->map
   (testing ""

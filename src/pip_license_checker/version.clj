@@ -1,4 +1,4 @@
-(ns pip-license-checker.resolve.version
+(ns pip-license-checker.version
   "Version parsing and comparing"
   (:gen-class)
   (:require
@@ -165,8 +165,9 @@
       (format "Cannot compare letter-version vectors")
       {:a a :b b}))))
 
-(defn compare-version
-  "Compare version maps"
+(defn compare-version-optimized
+  "Compare version maps
+  Optimized with early result return"
   [a b]
   (let [a (get-comparable-version a)
         b (get-comparable-version b)
@@ -197,6 +198,36 @@
                             local-b-padded (pad-vector local-b max-local-len ["" 0])
                             c (compare local-a-padded local-b-padded)]
                         c))))))))))))
+
+(defn compare-version
+  "Compare version maps"
+  [a b]
+  (let [;; compare epochs
+        a (get-comparable-version a)
+        b (get-comparable-version b)
+        c-epoch (compare (:epoch a) (:epoch b))
+        ;; compare releases
+        release-a (:release a)
+        release-b (:release b)
+        max-release-len (max (count release-a) (count release-b))
+        release-a-padded (pad-vector release-a max-release-len 0)
+        release-b-padded (pad-vector release-b max-release-len 0)
+        c-release (compare release-a-padded release-b-padded)
+        ;; compare pre, post, dev parts
+        c-pre (compare-letter-version (:pre a) (:pre b))
+        c-post (compare-letter-version (:post a) (:post b))
+        c-dev (compare-letter-version (:dev a) (:dev b))
+        ;; compare local
+        local-a (:local a)
+        local-b (:local b)
+        max-local-len (max (count local-a) (count local-b))
+        local-a-padded (pad-vector local-a max-local-len ["" 0])
+        local-b-padded (pad-vector local-b max-local-len ["" 0])
+        c-local (compare local-a-padded local-b-padded)
+        ;; get all comparators
+        c-all [c-epoch c-release c-pre c-post c-dev c-local]
+        result (some #(if (not= % 0) % nil) c-all)]
+    (or result 0)))
 
 (defn eq
   "Return true if versions a and b are equal"
@@ -271,7 +302,7 @@
 
 (defn version-ok?
   "Return true if a version satisfies each specifier
-  Specifiers is a collection of vec [op version]"
+  Specifiers is a collection of vec [specifier-op specifier-version]"
   [specifiers version]
   (every?
    true?

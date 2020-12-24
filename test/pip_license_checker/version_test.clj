@@ -1,12 +1,17 @@
-(ns pip-license-checker.resolve.version-test
+(ns pip-license-checker.version-test
   (:require
    [clojure.test :refer [deftest is testing]]
-   [pip-license-checker.resolve.version :as resolve-version]))
+   [pip-license-checker.version :as v]))
+
+(defn enum
+  "Enumerate sequence ([idx1 elem1] [id2 elem2] ...)"
+  [s]
+  (map vector (range) s))
 
 (def params-version
   "This list must be in the correct sorting order"
   [;; Implicit epoch of 0
-   ["1.0.dev456"]
+   "1.0.dev456",
    "1.0a1",
    "1.0a2.dev456",
    "1.0a12.dev456",
@@ -86,4 +91,4 @@
   (testing "Version parsing"
     (doseq [[version expected description] params-parse-version]
       (testing description
-        (is (= expected (resolve-version/parse-version version)))))))
+        (is (= expected (v/parse-version version)))))))
