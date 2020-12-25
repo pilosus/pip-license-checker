@@ -92,3 +92,32 @@
     (doseq [[version expected description] params-parse-version]
       (testing description
         (is (= expected (v/parse-version version)))))))
+
+(def params-compare-version
+  [[(for [[v1-idx v1-val] (enum params-version)
+          [v2-idx v2-val] (enum params-version)
+          :when (< v1-idx v2-idx)]
+      [v1-val v2-val])
+    v/lt
+    "v1 is less than v2"]
+   [(for [[v1-idx v1-val] (enum params-version)
+          [v2-idx v2-val] (enum params-version)
+          :when (= v1-idx v2-idx)]
+      [v1-val v2-val])
+    v/eq
+    "v1 is equal to v2"]
+   [(for [[v1-idx v1-val] (enum params-version)
+          [v2-idx v2-val] (enum params-version)
+          :when (> v1-idx v2-idx)]
+      [v1-val v2-val])
+    v/gt
+    "v1 is greater than v2"]])
+
+(def test-compare-version
+  (testing ""
+    (doseq [[versions op description] params-compare-version]
+      (doseq [[v1 v2] versions]
+        (testing (format "desc: %s, v1: %s v2: %s" description v1 v2)
+          (let [v1-parsed (v/parse-version v1)
+                v2-parsed (v/parse-version v2)]
+            (is (true? (op v1-parsed v2-parsed)))))))))

@@ -127,11 +127,11 @@
           :else dev)
         local
         (cond
-          (not local) [["" (Double/NEGATIVE_INFINITY)]]
+          (not local) [[(Double/NEGATIVE_INFINITY) ""]]
           :else
           (vec (map #(if (integer? %)
-                       ["" %]
-                       [% (Double/NEGATIVE_INFINITY)]) local)))]
+                       [% ""]
+                       [(Double/NEGATIVE_INFINITY) %]) local)))]
     {:orig orig
      :epoch epoch
      :release release
@@ -194,8 +194,8 @@
                       (let [local-a (:local a)
                             local-b (:local b)
                             max-local-len (max (count local-a) (count local-b))
-                            local-a-padded (pad-vector local-a max-local-len ["" 0])
-                            local-b-padded (pad-vector local-b max-local-len ["" 0])
+                            local-a-padded (pad-vector local-a max-local-len [0 ""])
+                            local-b-padded (pad-vector local-b max-local-len [0 ""])
                             c (compare local-a-padded local-b-padded)]
                         c))))))))))))
 
@@ -221,8 +221,8 @@
         local-a (:local a)
         local-b (:local b)
         max-local-len (max (count local-a) (count local-b))
-        local-a-padded (pad-vector local-a max-local-len ["" 0])
-        local-b-padded (pad-vector local-b max-local-len ["" 0])
+        local-a-padded (pad-vector local-a max-local-len [0 ""])
+        local-b-padded (pad-vector local-b max-local-len [0 ""])
         c-local (compare local-a-padded local-b-padded)
         ;; get all comparators
         c-all [c-epoch c-release c-pre c-post c-dev c-local]
