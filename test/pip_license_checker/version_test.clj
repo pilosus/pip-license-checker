@@ -3,6 +3,16 @@
    [clojure.test :refer [deftest is testing]]
    [pip-license-checker.version :as v]))
 
+(def params-parse-number
+  [["1" 1 "Ok"]
+   [nil 0 "Null -> 0"]])
+
+(deftest test-parse-number
+  (testing "Number parsing"
+    (doseq [[number expected description] params-parse-number]
+      (testing description
+        (is (= expected (v/parse-number number)))))))
+
 (defn enum
   "Enumerate sequence ([idx1 elem1] [id2 elem2] ...)"
   [s]
@@ -98,26 +108,115 @@
           [v2-idx v2-val] (enum params-version)
           :when (< v1-idx v2-idx)]
       [v1-val v2-val])
-    v/lt
+    "<"
     "v1 is less than v2"]
+   [(for [[v1-idx v1-val] (enum params-version)
+          [v2-idx v2-val] (enum params-version)
+          :when (<= v1-idx v2-idx)]
+      [v1-val v2-val])
+    "<="
+    "v1 is less than or equal to v2"]
    [(for [[v1-idx v1-val] (enum params-version)
           [v2-idx v2-val] (enum params-version)
           :when (= v1-idx v2-idx)]
       [v1-val v2-val])
-    v/eq
+    "=="
     "v1 is equal to v2"]
+   [(for [[v1-idx v1-val] (enum params-version)
+          [v2-idx v2-val] (enum params-version)
+          :when (= v1-idx v2-idx)]
+      [v1-val v2-val])
+    "==="
+    "v1 is === to v2"]
+   [(for [[v1-idx v1-val] (enum params-version)
+          [v2-idx v2-val] (enum params-version)
+          :when (not= v1-idx v2-idx)]
+      [v1-val v2-val])
+    "!="
+    "v1 is not equal to v2"]
    [(for [[v1-idx v1-val] (enum params-version)
           [v2-idx v2-val] (enum params-version)
           :when (> v1-idx v2-idx)]
       [v1-val v2-val])
-    v/gt
-    "v1 is greater than v2"]])
+    ">"
+    "v1 is greater than v2"]
+   [(for [[v1-idx v1-val] (enum params-version)
+          [v2-idx v2-val] (enum params-version)
+          :when (>= v1-idx v2-idx)]
+      [v1-val v2-val])
+    ">="
+    "v1 is greater or equal to v2"]])
 
-(def test-compare-version
-  (testing ""
-    (doseq [[versions op description] params-compare-version]
+(deftest test-compare-version
+  (testing "Compare unparsed versions"
+    (doseq [[versions op-str description] params-compare-version]
       (doseq [[v1 v2] versions]
         (testing (format "desc: %s, v1: %s v2: %s" description v1 v2)
           (let [v1-parsed (v/parse-version v1)
-                v2-parsed (v/parse-version v2)]
+                v2-parsed (v/parse-version v2)
+                op (v/get-comparison-op op-str)]
             (is (true? (op v1-parsed v2-parsed)))))))))
+
+(def params-compatible
+  [["2.2" "2.5" true "Ok"]
+   ["2.2" "3" false "Too high"]
+   ["2.2" "1.3" false "Too low"]
+   ["1.4.5" "1.4.99" true "Ok"]
+   ["1.4.5" "1.5.3" false "Too high"]
+   ["1.4.5" "1.2.3" false "Too low"]])
+
+(deftest test-compatible
+  (testing "Compatible operator"
+    (doseq [[v1 v2 expected description] params-compatible]
+      (testing description
+        (let [v1-parsed (v/parse-version v1)
+              v2-parsed (v/parse-version v2)
+              op (v/get-comparison-op "~=")]
+          (is (= expected (op v2-parsed v1-parsed))))))))
+
+(def params-specifiers
+  [[[[">=" "1.2.3"] ["<" "2"] ["!=" "1.5.0"]] "1.9.8" true "Ok"]
+   [[[">=" "1.2.3"] ["<" "2"] ["!=" "1.5.0"]] "2.0.8" false "Too high"]
+   [[[">=" "1.2.3"] ["<" "2"] ["!=" "1.5.0"]] "1.2.2" false "Too low"]
+   [[[">=" "1.2.3"] ["<" "2"] ["!=" "1.5.0"]] "1.5.0" false "Explicit !="]])
+
+(deftest test-version-ok?
+  (testing "Check is version ok?"
+    (doseq [[specs version expected description] params-specifiers]
+      (testing description
+        (let [specs-parsed
+              (vec (map (fn [[op ver]]
+                          [(v/get-comparison-op op) (v/parse-version ver)]) specs))
+              version-parsed (v/parse-version version)]
+          (is (= expected (v/version-ok? specs-parsed version-parsed))))))))
+
+(def params-specifiers-with-versions
+  [[[["~=" "1.2.3"]]
+    ["0.1.2" "1.2.4" "1.2.99" "1.5.0" "1.9.8" "2" "2.0.1"]
+    ["1.2.4" "1.2.99"]
+    "Single specifier"]
+   [[[">=" "1.2.3"] ["<" "2"] ["!=" "1.5.0"]]
+    ["0.1.2" "1.2.3" "1.5.0" "1.9.8" "2" "2.0.1"]
+    ["1.2.3" "1.9.8"]
+    "Multiple specifiers"]
+   [[[">=" "1.2.3"] ["<" "2"] ["!=" "1.5.0"]]
+    ["2" "2.0.1"]
+    []
+    "Empty result"]
+   [[]
+    ["0.1.2" "1.2.3" "1.5.0" "1.9.8" "2" "2.0.1"]
+    ["0.1.2" "1.2.3" "1.5.0" "1.9.8" "2" "2.0.1"]
+    "Empty specifiers"]])
+
+(deftest test-filter-versions
+  (testing "Check versions filtering"
+    (doseq [[specs versions expected description] params-specifiers-with-versions]
+      (testing description
+        (let [specs-parsed
+              (vec (map (fn [[op ver]]
+                          [(v/get-comparison-op op) (v/parse-version ver)]) specs))
+              versions-parsed (vec (map #(v/parse-version %) versions))
+              result (vec (map
+                           #(:orig %)
+                           (v/filter-versions specs-parsed versions-parsed)))]
+          (is (= expected result)))))))
