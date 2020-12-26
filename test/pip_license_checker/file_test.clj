@@ -27,3 +27,14 @@
      [file/path->lines (constantly mock-path-lines)]
       (is (= ["a" "b" "a" "b"]
              (file/get-requirement-lines ["f1.txt" "f2.txt"]))))))
+
+
+;; file/path->lines
+
+
+(def params-simple-txt-file ["1" "2" "3"])
+
+(deftest test-path->lines
+  (testing "Path to lines vec"
+    (is (= params-simple-txt-file
+           (file/path->lines "resources/simple.txt")))))

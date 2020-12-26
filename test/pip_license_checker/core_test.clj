@@ -2,8 +2,10 @@
   (:require
    [clojure.test :refer [deftest is testing]]
    [clj-http.client :as http]
+   [pip-license-checker.core :as core]
    [pip-license-checker.file :as file]
-   [pip-license-checker.core :as core]))
+   [pip-license-checker.pypi :as pypi]
+   [pip-license-checker.version :as version]))
 
 (def params-validate-args
   [[["--requirements"
@@ -27,26 +29,26 @@
 (def params-get-parsed-requirements
   [[[] [] {} "{}" [] "No input"]
    [["aiohttp==3.7.2"]
-    ["test==0.1.2"]
+    ["test==3.7.2"]
     {}
     "{\"info\": {\"license\": \"MIT License\"}}"
     [{:ok? true,
       :requirement {:name "aiohttp", :version "3.7.2"},
       :license {:name "MIT License", :desc "Permissive"}}
      {:ok? true,
-      :requirement {:name "test", :version "0.1.2"},
+      :requirement {:name "test", :version "3.7.2"},
       :license {:name "MIT License", :desc "Permissive"}}]
     "Packages and requirements"]
    [["aiohttp==3.7.2"]
-    ["test==0.1.2"]
+    ["test==3.7.2"]
     {:exclude #"aio.*"}
     "{\"info\": {\"license\": \"MIT License\"}}"
     [{:ok? true,
-      :requirement {:name "test", :version "0.1.2"},
+      :requirement {:name "test", :version "3.7.2"},
       :license {:name "MIT License", :desc "Permissive"}}]
     "Exclude pattern"]])
 
-(deftest ^:integration
+(deftest ^:integration ^:request
   test-get-parsed-requirements
   (testing "Integration testing of requirements parsing"
     (doseq [[packages requirements options mock-body expected description]
@@ -54,6 +56,8 @@
       (testing description
         (with-redefs
          [http/get (constantly {:body mock-body})
+          pypi/get-releases (constantly [])
+          version/get-version (constantly "3.7.2")
           file/get-requirement-lines (fn [_] requirements)]
           (is
            (= expected

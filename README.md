@@ -36,7 +36,7 @@ piny:0.6                       MIT License                    Permissive
 aiostream                      GPLv3                          Copyleft
 aiocache:0.11.1                                               Other
 aiokafka:0.6                   Apache Software License        Permissive
-aiopg:2.3.5                    Error                          ???
+aiopg:122.3.5                  Error                          ???
 workflow-tools:0.5.0           Apache Software License        Permissive
 Synx                           Other/Proprietary License      Other
 
