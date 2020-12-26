@@ -14,7 +14,7 @@
   (let [{:keys [requirement license]} license-data
         {req-name :name req-version :version} requirement
         package
-        (if (= req-version filters/version-latest) req-name (str req-name ":" req-version))
+        (str req-name ":" req-version)
         {lic-name :name lic-desc :desc} license]
     (format "%-35s %-55s %-30s" package lic-name lic-desc)))
 

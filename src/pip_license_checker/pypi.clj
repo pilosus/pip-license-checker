@@ -5,8 +5,8 @@
    [cheshire.core :as json]
    [clj-http.client :as http]
    [clojure.string :as str]
-   [pip-license-checker.filters :as filters]
-   [pip-license-checker.github :as github]))
+   [pip-license-checker.github :as github]
+   [pip-license-checker.version :as version]))
 
 (def settings-http-client
   {:socket-timeout 3000
@@ -86,17 +86,34 @@
 
 ;; Get API response, parse it
 
+(defn get-releases
+  "Get seq of versions available for a package
+  NB! versions are not sorted!"
+  [package-name]
+  (let [url (str/join "/" [url-pypi-base package-name "json"])
+        response (try (http/get url settings-http-client)
+                      (catch Exception _ nil))
+        body (:body response)
+        data (json/parse-string body)
+        releases (get data "releases")
+        versions (keys releases)
+        versions-parsed (map #(version/parse-version %) versions)]
+    versions-parsed))
 
-(defn get-requirement-response
+(defn get-requirement-version
   "Return respone of GET request to PyPI API for requirement"
   [requirement]
-  (let [{:keys [name version] :as origin} requirement
+  (let [{:keys [name specifiers]} requirement
+        versions (get-releases name)
+        version (version/get-version specifiers versions)
         url
-        (if (= version filters/version-latest)
+        (if (= version nil)
           (str/join "/" [url-pypi-base name "json"])
           (str/join "/" [url-pypi-base name version "json"]))
-        response (try (http/get url settings-http-client) (catch Exception _ nil))]
-    (if response
+        response (try (http/get url settings-http-client) (catch Exception _ nil))
+        origin {:name name
+                :version (or version (:orig (last (first specifiers))))}]
+    (if (and response version)
       {:ok? true :requirement origin :response (:body response)}
       {:ok? false :requirement origin})))
 
@@ -174,7 +191,7 @@
 (defn requirement->license
   "Return license hash-map for requirement"
   [requirement]
-  (let [resp (get-requirement-response requirement)
+  (let [resp (get-requirement-version requirement)
         data (requirement-response->data resp)
         license (data->license data)]
     license))

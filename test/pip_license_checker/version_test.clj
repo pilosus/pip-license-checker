@@ -236,3 +236,29 @@
             sorted-desc (v/sort-versions versions-shuffled :order :desc)]
         (is (= versions-parsed sorted-asc))
         (is (= orig-reversed sorted-desc))))))
+
+;; version/compare-letter-version
+
+(def params-compare-letter-version-ok
+  [[[1 2] [1 3] -1 "Two vectors"]
+   [2 1 1 "Two numbers"]
+   [2 [1 2] 1 "Number and vec"]
+   [[1 2] 1 -1  "Vec and number"]])
+
+(deftest test-compare-letter-version-ok
+  (testing "Compare letter part"
+    (doseq [[a b expected description] params-compare-letter-version-ok]
+      (testing description
+        (is (= expected (v/compare-letter-version a b)))))))
+
+(def params-compare-letter-version-exc
+  [["str 1" "str 2" #"Cannot compare" "Two strings"]
+   [#{1 2 3} #"regex" #"Cannot compare" "Set and regex"]])
+
+(deftest test-compare-letter-version-exc
+  (testing "Compare letter part is throwing exception"
+    (doseq [[a b expected-msg description] params-compare-letter-version-exc]
+      (testing description
+        (is (thrown-with-msg?
+             Exception
+             expected-msg (v/compare-letter-version a b)))))))

@@ -2,6 +2,7 @@
   "Filters for requirements"
   (:gen-class)
   (:require
+   [pip-license-checker.version :as version]
    [clojure.string :as str]))
 
 ;; Skip line with -r /--requirement/-e etc, URLs, blank lines, comments
@@ -11,13 +12,8 @@
 (def regex-remove-comment #"#.*")
 (def regex-remove-modifiers #"(;|@).*")
 (def regex-remove-extra #"\[.*\]")
-(def regex-remove-comma #",")
 (def regex-remove-wildcard #"\.\*")
-
-(def regex-split-specifier-equal #"(===|==)")
-(def regex-split-specifier-other #"(~=|!=|>=|<=|<|>)")
-
-(def version-latest :latest)
+(def regex-split-specifier-ops #"(===|==|~=|!=|>=|<=|<|>)")
 
 (defn remove-requirements-internal-rules
   "Exclude requirements from sequence according to app's internal rules"
@@ -40,17 +36,14 @@
    (str/replace regex-remove-comment "")
    (str/replace regex-remove-modifiers "")
    (str/replace regex-remove-extra "")
-   (str/replace regex-remove-comma "")
    (str/replace regex-remove-wildcard "")))
 
 (defn requirement->map
-  "Parse requirement string into hash-map
-
-  FIXME add REAL version resolving for specifiers other than `==`
-  Use `releases` field in PyPI API response and PEP-440"
+  "Parse requirement string into a {:name ... :specifiers ..} map"
   [requirement]
-  (let [equal-split (str/split requirement regex-split-specifier-equal)
-        other-split (str/split requirement regex-split-specifier-other)]
-    (if (= (count equal-split) 2)
-      {:name (first equal-split) :version (second equal-split)}
-      {:name (first other-split) :version version-latest})))
+  (let [package-name (first (str/split requirement regex-split-specifier-ops))
+        specifiers-str (subs requirement (count package-name))
+        specifiers-vec (version/parse-specifiers specifiers-str)
+        specifiers (if (= specifiers-vec [nil]) nil specifiers-vec)
+        result {:name package-name :specifiers specifiers}]
+    result))

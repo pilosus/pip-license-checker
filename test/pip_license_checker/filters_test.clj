@@ -1,7 +1,8 @@
 (ns pip-license-checker.filters-test
   (:require
    [clojure.test :refer [deftest is testing]]
-   [pip-license-checker.filters :as filters]))
+   [pip-license-checker.filters :as filters]
+   [pip-license-checker.version :as version]))
 
 ;; filters/remove-requirements-internal-rules
 
@@ -47,8 +48,7 @@
 (def params-sanitize-requirement
   [["  hello == 1.2.3" "hello==1.2.3" "Whitespaces"]
    ["  hello == 1.2.3  #comment" "hello==1.2.3" "Comment"]
-   ["  hello == 1.2.3 ; python_version > '3.6'" "hello==1.2.3" "Modifiers"]
-   ["  hello>1.2.3,<=1.5.0" "hello>1.2.3<=1.5.0" "Comma"]])
+   ["  hello == 1.2.3 ; python_version > '3.6'" "hello==1.2.3" "Modifiers"]])
 
 (deftest test-sanitize-requirement
   (testing "Sanitizing requirement string"
@@ -61,13 +61,49 @@
 
 
 (def params-requirement->map
-  [["aiohttp==3.7.2" {:name "aiohttp" :version "3.7.2"} "Equal =="]
-   ["aiohttp===3.7.2" {:name "aiohttp" :version "3.7.2"} "Equal ==="]
-   ["aiohttp>3.7.2" {:name "aiohttp" :version filters/version-latest} "FIXME >"]
-   ["aiohttp>=3.7.2" {:name "aiohttp" :version filters/version-latest} "FIXME >="]
-   ["aiohttp<3.7.2" {:name "aiohttp" :version filters/version-latest} "FIXME <"]
-   ["aiohttp<=3.7.2" {:name "aiohttp" :version filters/version-latest} "FIXME <="]
-   ["aiohttp~=3.7.2" {:name "aiohttp" :version filters/version-latest} "FIXME ~="]])
+  [["aiohttp==3.7.2"
+    {:name "aiohttp"
+     :specifiers [[version/eq (version/parse-version "3.7.2")]]}
+    "Equal =="]
+   ["aiohttp===3.7.2"
+    {:name "aiohttp"
+     :specifiers [[version/arbitrary-eq (version/parse-version "3.7.2")]]}
+    "Equal ==="]
+   ["aiohttp!=3.7.2"
+    {:name "aiohttp"
+     :specifiers [[version/neq (version/parse-version "3.7.2")]]}
+    "Not equal to !="]
+   ["aiohttp~=3.7.2"
+    {:name "aiohttp"
+     :specifiers [[version/compatible (version/parse-version "3.7.2")]]}
+    "Compatible ~="]
+   ["aiohttp>3.7.2"
+    {:name "aiohttp"
+     :specifiers [[version/gt (version/parse-version "3.7.2")]]}
+    "Greater than >"]
+   ["aiohttp>=3.7.2"
+    {:name "aiohttp"
+     :specifiers [[version/ge (version/parse-version "3.7.2")]]}
+    "Greater or equal to >="]
+   ["aiohttp<3.7.2"
+    {:name "aiohttp"
+     :specifiers [[version/lt (version/parse-version "3.7.2")]]}
+    "Less than <"]
+   ["aiohttp<=3.7.2"
+    {:name "aiohttp"
+     :specifiers [[version/le (version/parse-version "3.7.2")]]}
+    "Less than equal to <="]
+   ["aiohttp>=3.7,<4,!=3.7.2"
+    {:name "aiohttp"
+     :specifiers
+     [[version/ge (version/parse-version "3.7")]
+      [version/lt (version/parse-version "4")]
+      [version/neq (version/parse-version "3.7.2")]]}
+    "Multiple specifiers"]
+   ["aiohttp"
+    {:name "aiohttp"
+     :specifiers nil}
+    "No specifiers"]])
 
 (deftest test-requirement->map
   (testing ""

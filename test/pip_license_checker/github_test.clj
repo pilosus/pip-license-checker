@@ -6,19 +6,23 @@
 
 (def params-get-license-name
   [[["" "owner" "repo"]
-    "{\"license\": {\"name\": \"MIT License\"}}"
+    (constantly {:body "{\"license\": {\"name\": \"MIT License\"}}"})
     "MIT License"
     "Ok"]
    [["" "owner" "repo"]
-    "{\"errors\": {\"message\": \"No License Found\"}}"
+    (constantly {:body "{\"errors\": {\"message\": \"No License Found\"}}"})
     nil
-    "Fallback"]])
+    "Fallback"]
+   [["" "owner" "repo"]
+    (fn [& _] (throw (Exception. "Boom!")))
+    nil
+    "Expcetion"]])
 
 (deftest test-get-license-name
   (testing "Get license name from GitHub API"
-    (doseq [[path-parts response expected description] params-get-license-name]
+    (doseq [[path-parts body-mock expected description] params-get-license-name]
       (testing description
-        (with-redefs [http/get (constantly {:body response})]
+        (with-redefs [http/get body-mock]
           (is (= expected (github/get-license-name path-parts))))))))
 
 (def params-homepage->license-name
@@ -33,7 +37,11 @@
    ["https://github.com/pilosus/piny/"
     "{\"license\": {\"name\": \"MIT License\"}}"
     "MIT License"
-    "Ok GitHub URL"]])
+    "Ok GitHub URL"]
+   [nil
+    "{\"license\": {\"name\": \"MIT License\"}}"
+    nil
+    "nil URL"]])
 
 (deftest test-homepage->license-name
   (testing "Get license name from project url if it is GitHub"

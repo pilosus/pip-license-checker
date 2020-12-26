@@ -6,6 +6,9 @@
 
 ;; Parse version
 
+(def regex-split-comma #",")
+(def regex-specifier #"(?<op>(===|==|~=|!=|>=|<=|<|>))(?<version>(.*))")
+
 (def regex-version #"v?(?:(?:(?<epoch>[0-9]+)!)?(?<release>[0-9]+(?:\.[0-9]+)*)(?<pre>[-_\.]?(?<prel>(a|b|c|rc|alpha|beta|pre|preview))[-_\.]?(?<pren>[0-9]+)?)?(?<post>(?:-(?<postn1>[0-9]+))|(?:[-_\.]?(?<postl>post|rev|r)[-_\.]?(?<postn2>[0-9]+)?))?(?<dev>[-_\.]?(?<devl>dev)[-_\.]?(?<devn>[0-9]+)?)?)(?:\+(?<local>[a-z0-9]+(?:[-_\.][a-z0-9]+)*))?")
 
 (defn parse-number
@@ -251,6 +254,8 @@
         b-str (:orig b)]
     (= a-str b-str)))
 
+;; Parse specifier string
+
 (defn get-comparison-op
   "Get comparison function for operator string"
   [op]
@@ -264,7 +269,27 @@
     "<" lt
     ">" gt))
 
-;; Specifiers for parsed versions
+(defn parse-specifier
+  "Parse single specifier string into a vec of operator function and version map.
+  E.g. '>=1.2.3 parsed into [parsed-op parsed-version]"
+  [specifier-str]
+  (let [matcher (re-matcher regex-specifier specifier-str)
+        specifier-pair
+        (if (.matches matcher)
+          [(get-comparison-op (.group matcher "op"))
+           (parse-version (.group matcher "version"))]
+          nil)]
+    specifier-pair))
+
+(defn parse-specifiers
+  "Parse a string of specifiers into a vec of parsed specifier vecs/
+  E.g. '>=1.2.3,<2' parsed into [[>=' 1.2.3'] [<' 2']]"
+  [specifiers-str]
+  (let [specifiers-vec (str/split specifiers-str regex-split-comma)
+        result (vec (map parse-specifier specifiers-vec))]
+    result))
+
+;; Check version against specifiers
 
 (defn version-ok?
   "Return true if a parsed version satisfies each specifier
@@ -290,3 +315,12 @@
           #(compare-version %1 %2)
           #(compare-version %2 %1))]
     (sort comparator-fn versions)))
+
+(defn get-version
+  "Get the most recent version from given versions that satisfies specifiers"
+  [specifiers versions]
+  (let [versions-ok (filter-versions specifiers versions)
+        versions-sorted (sort-versions versions-ok)
+        version-latest (last versions-sorted)
+        version (:orig version-latest)]
+    version))
