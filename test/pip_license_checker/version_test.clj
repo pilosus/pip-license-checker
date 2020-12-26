@@ -220,3 +220,19 @@
                            #(:orig %)
                            (v/filter-versions specs-parsed versions-parsed)))]
           (is (= expected result)))))))
+
+(def params-sort-versions
+  (for [_ (range 10)
+        :let [versions-parsed (vec (map #(v/parse-version %) params-version))
+              versions-shuffled (shuffle versions-parsed)]
+        :when (not= versions-shuffled versions-parsed)]
+    [versions-parsed versions-shuffled]))
+
+(deftest test-sort-versions
+  (testing "Sorting versions"
+    (doseq [[versions-parsed versions-shuffled] params-sort-versions]
+      (let [orig-reversed (reverse versions-parsed)
+            sorted-asc (v/sort-versions versions-shuffled)
+            sorted-desc (v/sort-versions versions-shuffled :order :desc)]
+        (is (= versions-parsed sorted-asc))
+        (is (= orig-reversed sorted-desc))))))

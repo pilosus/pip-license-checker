@@ -4,7 +4,7 @@
   (:require
    [clojure.string :as str]))
 
-;; Version parsing
+;; Parse version
 
 (def regex-version #"v?(?:(?:(?<epoch>[0-9]+)!)?(?<release>[0-9]+(?:\.[0-9]+)*)(?<pre>[-_\.]?(?<prel>(a|b|c|rc|alpha|beta|pre|preview))[-_\.]?(?<pren>[0-9]+)?)?(?<post>(?:-(?<postn1>[0-9]+))|(?:[-_\.]?(?<postl>post|rev|r)[-_\.]?(?<postn2>[0-9]+)?))?(?<dev>[-_\.]?(?<devl>dev)[-_\.]?(?<devn>[0-9]+)?)?)(?:\+(?<local>[a-z0-9]+(?:[-_\.][a-z0-9]+)*))?")
 
@@ -93,7 +93,7 @@
     (validate-version version-map)))
 
 
-;; Comparison
+;; Comparison of parsed versions
 ;; https://clojuredocs.org/clojure.core/compare
 ;; https://clojure.org/guides/comparators
 
@@ -264,10 +264,10 @@
     "<" lt
     ">" gt))
 
-;; Specifiers
+;; Specifiers for parsed versions
 
 (defn version-ok?
-  "Return true if a version satisfies each specifier
+  "Return true if a parsed version satisfies each specifier
   Specifiers is a collection of vec [specifier-op specifier-version]"
   [specifiers version]
   (every?
@@ -277,6 +277,16 @@
     specifiers)))
 
 (defn filter-versions
-  "Return lazy seq of versions that satisfy specifiers"
+  "Return lazy seq of parsed versions that satisfy specifiers"
   [specifiers versions]
   (filter #(version-ok? specifiers %) versions))
+
+(defn sort-versions
+  "Sort a vector of parsed versions.
+  Ascending sort order is used by default."
+  [versions & {:keys [order] :or {order :asc}}]
+  (let [comparator-fn
+        (if (= order :asc)
+          #(compare-version %1 %2)
+          #(compare-version %2 %1))]
+    (sort comparator-fn versions)))
