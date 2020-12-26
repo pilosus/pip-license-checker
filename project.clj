@@ -1,4 +1,4 @@
-(defproject pip-license-checker "0.4.0"
+(defproject pip-license-checker "0.6.0"
   :description "Check Python PyPI package license"
   :url "https://github.com/pilosus/pip-license-checker"
   :license {:name "The MIT License (MIT)"
