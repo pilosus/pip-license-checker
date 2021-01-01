@@ -4,8 +4,8 @@ All notable changes to this project will be documented in this file.
 This change log follows the conventions of [keepachangelog.com](http://keepachangelog.com/).
 
 ## [Unreleased]
-### Changed
-- Nothing yet
+### Fixed
+- NullPointerException for invalid versions; skip those
 
 ## [0.6.1] - 2021-01-01
 ### Added
