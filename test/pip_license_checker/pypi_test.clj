@@ -15,9 +15,19 @@
 (def params-get-releases
   [["aiohttp"
     (constantly
-     {:body "{\"releases\": {\"1.0.0\": [], \"2.1.3\": [], \"3.0.a12\": []}}"})
-    (map #(version/parse-version %) ["1.0.0" "2.1.3" "3.0.a12"])
+     {:body "{\"releases\": {\"1.0.0\": [], \"2.1.3\": []}}"})
+    (map #(version/parse-version %) ["1.0.0" "2.1.3"])
     "Ok"]
+   ["ipython"
+    (constantly
+     {:body "{\"releases\": {\"1.0.0\": [], \"0.7.4.svn.r2010\": []}}"})
+    (map #(version/parse-version %) ["1.0.0"])
+    "Skip invalid versions"]
+   ["ipython"
+    (constantly
+     {:body "{\"releases\": {\"1.0.0\": [], \"2.0.0.a12\": []}}"})
+    (map #(version/parse-version %) ["1.0.0"])
+    "Skip prereleases"]
    ["no-such-package"
     (constantly {:body "{\"releases\": {}}"})
     (map #(version/parse-version %) [])
