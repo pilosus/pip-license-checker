@@ -58,6 +58,27 @@ cd target/uberjar
 java -jar pip-license-checker-[version]-standalone.jar [args]
 ```
 
+## Docker
+
+App can also be run in docker container.
+
+1. Build docker image
+
+```bash
+cd pip-license-checker
+docker build -t pip-license-checker .
+```
+
+2. Run app in docker container, mount current host directory with
+``requirements.txt`` file to container predefined volume directory
+``/volume``
+
+```bash
+docker run -v `pwd`:/volume \
+              -it --rm --name pip-check pip-license-checker \
+              java -jar app.jar 'aiohttp>=3.6.1,<3.8' \
+              -r /volume/requirements.txt
+```
 
 ## Disclaimer
 

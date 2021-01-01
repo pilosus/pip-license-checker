@@ -7,6 +7,10 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 ### Changed
 - Nothing yet
 
+## [0.6.1] - 2021-01-01
+### Added
+- Docker image to run app inside container
+
 ## [0.6.0] - 2020-12-26
 ### Fixed
 - Version resolution for all specifiers
@@ -52,7 +56,8 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 ### Added
 - Structure for Leiningen app project
 
-[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.6.0...HEAD
+[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.6.1...HEAD
+[0.6.1]: https://github.com/pilosus/pip-license-checker/compare/0.6.0...0.6.1
 [0.6.0]: https://github.com/pilosus/pip-license-checker/compare/0.5.0...0.6.0
 [0.5.0]: https://github.com/pilosus/pip-license-checker/compare/0.4.0...0.5.0
 [0.4.0]: https://github.com/pilosus/pip-license-checker/compare/0.3.0...0.4.0
