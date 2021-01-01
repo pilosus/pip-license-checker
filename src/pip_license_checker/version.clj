@@ -303,6 +303,18 @@
     (fn [[spec-op spec-version]] (spec-op version spec-version))
     specifiers)))
 
+(defn version-dev-or-pre?
+  "Return true if version is prerelease or dev version"
+  [version]
+  (let [{:keys [dev pre]} version
+        result (not (nil? (or dev pre)))]
+    result))
+
+(defn remove-prereleases
+  "Filter out pre and dev versions from the list"
+  [versions]
+  (remove version-dev-or-pre? versions))
+
 (defn filter-versions
   "Return lazy seq of parsed versions that satisfy specifiers"
   [specifiers versions]

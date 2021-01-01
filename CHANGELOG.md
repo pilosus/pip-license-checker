@@ -5,6 +5,11 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 
 ## [Unreleased]
 ### Fixed
+- Nothing here yet
+
+## [0.7.0] - 2021-01-01
+### Fixed
+- When resolving version exclude prereleases (i.e. dev, rc, alpha, beta versions)
 - NullPointerException for invalid versions; skip those
 
 ## [0.6.1] - 2021-01-01
@@ -56,7 +61,8 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 ### Added
 - Structure for Leiningen app project
 
-[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.6.1...HEAD
+[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.7.0...HEAD
+[0.7.0]: https://github.com/pilosus/pip-license-checker/compare/0.6.1...0.7.0
 [0.6.1]: https://github.com/pilosus/pip-license-checker/compare/0.6.0...0.6.1
 [0.6.0]: https://github.com/pilosus/pip-license-checker/compare/0.5.0...0.6.0
 [0.5.0]: https://github.com/pilosus/pip-license-checker/compare/0.4.0...0.5.0

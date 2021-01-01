@@ -262,3 +262,46 @@
         (is (thrown-with-msg?
              Exception
              expected-msg (v/compare-letter-version a b)))))))
+
+;; version/version-dev-or-pre?
+
+(def params-version-dev-or-pre?
+  [
+   [(v/parse-version "1.0.0") false "Normal release"]
+   [(v/parse-version "1!1.2.rev33+123456") false "Release with local version"]
+   [(v/parse-version "1!1.2.rev33+123456") false "Release with local version"]
+   [(v/parse-version "1.0.0.post1") false "Post release"]
+   [(v/parse-version "1.0.0.a1") true "Prerelease: alpha version"]
+   [(v/parse-version "1.0.0.b1") true "Prerelease: beta version"]
+   [(v/parse-version "1.0.0.rc12") true "Prerelease: release candidate"]
+   [(v/parse-version "1.0.0.alpha12") true "Prerelease: alpha version explicit"]
+   [(v/parse-version "1.0.0.beta34") true "Prerelease: beta version explicit"]
+   [(v/parse-version "1.0.0.pre1") true "Prerelease: pre explicit"]
+   [(v/parse-version "1.0.0.preview5") true "Prerelease: preview explicit"]
+
+])
+
+(deftest test-version-dev-or-pre?
+  (testing "Is version a prerelease?"
+    (doseq [[version expected description] params-version-dev-or-pre?]
+      (testing description
+        (is (= expected (v/version-dev-or-pre? version)))))))
+
+;; version/remove-prereleases
+
+(def params-remove-prereleases
+  [
+   [["0.9.12.dev12" "0.9.13.a2" "1.0.0" "1.0.0.a1"]
+    ["1.0.0"]
+    "Filter out prereleases"]
+   [["1.0.0" "2.0.1"] ["1.0.0" "2.0.1"] "Nothing to remove"]
+   [[] [] "Empty seq"]
+])
+
+(deftest test-remove-prereleases
+  (testing "Remove pre/dev versions from sequence of versions"
+    (doseq [[versions expected description] params-remove-prereleases]
+      (testing description
+        (let [versions* (vec (map v/parse-version versions))
+              expected* (vec (map v/parse-version expected))]
+          (is (= expected* (v/remove-prereleases versions*))))))))
