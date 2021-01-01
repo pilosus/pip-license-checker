@@ -54,23 +54,25 @@
 
 (defn validate-version
   [version-map]
-  (let [{:keys
-         [orig
-          epoch
-          release
-          prel pren
-          postn1 postl postn2
-          devl devn
-          local]} version-map
-        result
-        {:orig orig
-         :epoch (if epoch (Integer/parseInt epoch) 0)
-         :release (vec (map #(Integer/parseInt %) (str/split release #"\.")))
-         :pre (parse-letter-version prel pren)
-         :post (parse-letter-version postl (or postn1 postn2))
-         :dev (parse-letter-version devl devn)
-         :local (parse-local-version local)}]
-    result))
+  (if version-map
+    (let [{:keys
+           [orig
+            epoch
+            release
+            prel pren
+            postn1 postl postn2
+            devl devn
+            local]} version-map
+          result
+          {:orig orig
+           :epoch (if epoch (Integer/parseInt epoch) 0)
+           :release (vec (map #(Integer/parseInt %) (str/split release #"\.")))
+           :pre (parse-letter-version prel pren)
+           :post (parse-letter-version postl (or postn1 postn2))
+           :dev (parse-letter-version devl devn)
+           :local (parse-local-version local)}]
+      result)
+    nil))
 
 (defn parse-version
   "Return a hash-map of regex groups"

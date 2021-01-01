@@ -97,8 +97,9 @@
         data (json/parse-string body)
         releases (get data "releases")
         versions (keys releases)
-        versions-parsed (map #(version/parse-version %) versions)]
-    versions-parsed))
+        versions-parsed (map #(version/parse-version %) versions)
+        versions-valid (filter #(not (nil? %)) versions-parsed)]
+    versions-valid))
 
 (defn get-requirement-version
   "Return respone of GET request to PyPI API for requirement"
