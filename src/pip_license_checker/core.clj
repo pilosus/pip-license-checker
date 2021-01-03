@@ -28,12 +28,13 @@
   "Apply filters and get verdicts for all requirements"
   [packages requirements options]
   (let [exclude-pattern (:exclude options)
+        pre (:pre options)
         licenses (->> (get-all-requirements packages requirements)
                       (filters/remove-requirements-internal-rules)
                       (filters/remove-requirements-user-rules exclude-pattern)
                       (map filters/sanitize-requirement)
                       (map filters/requirement->map)
-                      (map pypi/requirement->license))]
+                      (map #(pypi/requirement->license % :pre pre)))]
     licenses))
 
 (defn process-requirements
@@ -57,6 +58,7 @@
         "Examples:"
         "pip-license-checker django"
         "pip-license-checker aiohttp==3.7.2 piny==0.6.0 django"
+        "pip-license-checker --pre 'aiohttp<4'"
         "pip-license-checker --requirements resources/requirements.txt"
         "pip-license-checker -r file1.txt -r file2.txt -r file3.txt"
         "pip-license-checker -r resources/requirements.txt django aiohttp==3.7.1 --exclude 'aio.*'"]
@@ -74,7 +76,9 @@
     :validate [file/exists? "Requirement file does not exist"]]
    ["-e" "--exclude REGEX" "PCRE to exclude matching packages. Used only if [package]... or requirement files specified"
     :parse-fn #(re-pattern %)]
-   ["-h" "--help"]])
+   ["-p" "--[no-]pre" "Include pre-release and development versions. By default, use only stable versions"
+    :default false]
+   ["-h" "--help" "Print this help message"]])
 
 (defn validate-args
   "Parse and validate CLI arguments for entrypoint"

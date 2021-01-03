@@ -16,7 +16,7 @@
      "README.md"]
     {:requirements ["resources/requirements.txt" "README.md"]
      :packages ["django" "aiohttp==3.7.1"]
-     :options {}}
+     :options {:pre false}}
     "Normal run"]])
 
 (deftest ^:cli ^:default

@@ -7,6 +7,12 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 ### Fixed
 - Nothing here yet
 
+## [0.9.0] - 2021-01-03
+### Added
+- ``--pre`` option to include pre-release and development versions in version resolution
+### Changed
+- By default exclude pre-release and development versions from version resolution. Use such versions if and only if explicitly asked with ``--pre`` option, or no other versions available to satisfy specifiers
+
 ## [0.8.0] - 2021-01-03
 ### Fixed
 - Fix version resolution for exclusive order comparison, i.e. ``>`` and ``<``
@@ -65,7 +71,8 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 ### Added
 - Structure for Leiningen app project
 
-[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.8.0...HEAD
+[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.9.0...HEAD
+[0.9.0]: https://github.com/pilosus/pip-license-checker/compare/0.8.0...0.9.0
 [0.8.0]: https://github.com/pilosus/pip-license-checker/compare/0.7.0...0.8.0
 [0.7.0]: https://github.com/pilosus/pip-license-checker/compare/0.6.1...0.7.0
 [0.6.1]: https://github.com/pilosus/pip-license-checker/compare/0.6.0...0.6.1
