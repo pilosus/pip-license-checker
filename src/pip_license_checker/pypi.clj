@@ -98,9 +98,8 @@
         releases (get data "releases")
         versions (keys releases)
         versions-parsed (map #(version/parse-version %) versions)
-        versions-valid (filter #(not (nil? %)) versions-parsed)
-        versions-releases-only (version/remove-prereleases versions-valid)]
-    versions-releases-only))
+        versions-valid (filter #(not (nil? %)) versions-parsed)]
+    versions-valid))
 
 (defn get-requirement-version
   "Return respone of GET request to PyPI API for requirement"

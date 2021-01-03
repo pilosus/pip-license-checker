@@ -7,6 +7,10 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 ### Fixed
 - Nothing here yet
 
+## [0.8.0] - 2021-01-03
+### Fixed
+- Fix version resolution for exclusive order comparison, i.e. ``>`` and ``<``
+
 ## [0.7.0] - 2021-01-01
 ### Fixed
 - When resolving version exclude prereleases (i.e. dev, rc, alpha, beta versions)
@@ -61,7 +65,8 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 ### Added
 - Structure for Leiningen app project
 
-[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.7.0...HEAD
+[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.8.0...HEAD
+[0.8.0]: https://github.com/pilosus/pip-license-checker/compare/0.7.0...0.8.0
 [0.7.0]: https://github.com/pilosus/pip-license-checker/compare/0.6.1...0.7.0
 [0.6.1]: https://github.com/pilosus/pip-license-checker/compare/0.6.0...0.6.1
 [0.6.0]: https://github.com/pilosus/pip-license-checker/compare/0.5.0...0.6.0
