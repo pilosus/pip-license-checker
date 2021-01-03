@@ -291,6 +291,56 @@
         result (vec (map parse-specifier specifiers-vec))]
     result))
 
+;; Versions filtering helpers
+
+(defn same-release-with-post-or-local?
+  "Check if version to be excluded from >V comparison as per
+  https://www.python.org/dev/peps/pep-0440/#exclusive-ordered-comparison"
+  [a b]
+  (let [a-post? (not (nil? (:post a)))
+        a-local? (not (nil? (:local a)))
+        a-release (:release a)
+
+        b-post? (not (nil? (:post b)))
+        b-local? (not (nil? (:local b)))
+        b-release (:release b)
+
+        max-release-len
+        (max (count a-release) (count b-release))
+        a-release* (pad-vector a-release max-release-len 0)
+        b-release* (pad-vector b-release max-release-len 0)
+
+        result
+        (and
+         (= a-release* b-release*)
+         (or a-post? a-local?)
+         (not (or b-post? b-local?)))]
+    result))
+
+(defn same-release-with-pre-or-local?
+  "Check if version to be excluded from <V comparison as per
+  https://www.python.org/dev/peps/pep-0440/#exclusive-ordered-comparison"
+  [a b]
+  (let [a-pre? (not (nil? (:pre a)))
+        a-local? (not (nil? (:local a)))
+        a-release (:release a)
+
+        b-pre? (not (nil? (:pre b)))
+        b-local? (not (nil? (:local b)))
+        b-release (:release b)
+
+        max-release-len
+        (max (count b-release) (count a-release))
+        a-release* (pad-vector a-release max-release-len 0)
+        b-release* (pad-vector b-release max-release-len 0)
+
+        result
+        (and
+         (= a-release* b-release*)
+         (or a-pre? a-local?)
+         (not (or b-pre? b-local?)))]
+    result))
+
 ;; Check version against specifiers
 
 (defn version-ok?
@@ -300,20 +350,15 @@
   (every?
    true?
    (map
-    (fn [[spec-op spec-version]] (spec-op version spec-version))
+    (fn [[spec-op spec-version]]
+      (and (spec-op version spec-version)
+           (not
+            (and (= spec-op gt)
+                 (same-release-with-post-or-local? version spec-version)))
+           (not
+            (and (= spec-op lt)
+                 (same-release-with-pre-or-local? version spec-version)))))
     specifiers)))
-
-(defn version-dev-or-pre?
-  "Return true if version is prerelease or dev version"
-  [version]
-  (let [{:keys [dev pre]} version
-        result (not (nil? (or dev pre)))]
-    result))
-
-(defn remove-prereleases
-  "Filter out pre and dev versions from the list"
-  [versions]
-  (remove version-dev-or-pre? versions))
 
 (defn filter-versions
   "Return lazy seq of parsed versions that satisfy specifiers"

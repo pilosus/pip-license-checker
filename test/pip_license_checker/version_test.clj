@@ -175,10 +175,23 @@
           (is (= expected (op v2-parsed v1-parsed))))))))
 
 (def params-specifiers
-  [[[[">=" "1.2.3"] ["<" "2"] ["!=" "1.5.0"]] "1.9.8" true "Ok"]
+  [;; Basic cases
+   [[[">=" "1.2.3"] ["<" "2"] ["!=" "1.5.0"]] "1.9.8" true "Ok"]
    [[[">=" "1.2.3"] ["<" "2"] ["!=" "1.5.0"]] "2.0.8" false "Too high"]
    [[[">=" "1.2.3"] ["<" "2"] ["!=" "1.5.0"]] "1.2.2" false "Too low"]
-   [[[">=" "1.2.3"] ["<" "2"] ["!=" "1.5.0"]] "1.5.0" false "Explicit !="]])
+   [[[">=" "1.2.3"] ["<" "2"] ["!=" "1.5.0"]] "1.5.0" false "Explicit !="]
+   ;; Exlcude order comparison for >
+   [[[">" "1.7"]] "1.7.post2" false ">: Exclude post version"]
+   [[[">" "1.7"]] "1.7+rev.123" false ">: Exclude local version"]
+   [[[">=" "1.7"]] "1.7.post2" true "Do not exclude for >="]
+   [[[">" "1.7.post1"]] "1.7.post2" true ">: Both versions have post"]
+   [[[">" "1.7.post1"]] "1.7.1" true ">: Normal comparison"]
+   ;; Exlcude order comparison for <
+   [[["<" "4"]] "4.0.0.pre12" false "<: Exclude pre-release"]
+   [[["<" "4"]] "4.0.0+rev.33" false "<: Exclude local"]
+   [[["<=" "4"]] "4.0.0.a12" true "Do not exclude for <="]
+   [[["<" "4.a13"]] "4.0.0.a12" true "<:  Both have pre-releases"]
+   [[["<" "4+ubuntu.12"]] "4.0.0+ubuntu.11" true "<: Both have local versions"]])
 
 (deftest test-version-ok?
   (testing "Check is version ok?"
@@ -199,6 +212,14 @@
     ["0.1.2" "1.2.3" "1.5.0" "1.9.8" "2" "2.0.1"]
     ["1.2.3" "1.9.8"]
     "Multiple specifiers"]
+   [[["<" "2"]]
+    ["1.9.8" "1.9.9" "2.0.0.a1" "2.0.0.a2"]
+    ["1.9.8" "1.9.9"]
+    "Pre-releases"]
+   [[[">" "1.7"]]
+    ["1.7.0" "1.7.0.post1" "1.7.0.post2" "1.7.1" "1.7.2"]
+    ["1.7.1" "1.7.2"]
+    "Post-releases"]
    [[[">=" "1.2.3"] ["<" "2"] ["!=" "1.5.0"]]
     ["2" "2.0.1"]
     []
@@ -263,40 +284,5 @@
              Exception
              expected-msg (v/compare-letter-version a b)))))))
 
-;; version/version-dev-or-pre?
 
-(def params-version-dev-or-pre?
-  [[(v/parse-version "1.0.0") false "Normal release"]
-   [(v/parse-version "1!1.2.rev33+123456") false "Release with local version"]
-   [(v/parse-version "1!1.2.rev33+123456") false "Release with local version"]
-   [(v/parse-version "1.0.0.post1") false "Post release"]
-   [(v/parse-version "1.0.0.a1") true "Prerelease: alpha version"]
-   [(v/parse-version "1.0.0.b1") true "Prerelease: beta version"]
-   [(v/parse-version "1.0.0.rc12") true "Prerelease: release candidate"]
-   [(v/parse-version "1.0.0.alpha12") true "Prerelease: alpha version explicit"]
-   [(v/parse-version "1.0.0.beta34") true "Prerelease: beta version explicit"]
-   [(v/parse-version "1.0.0.pre1") true "Prerelease: pre explicit"]
-   [(v/parse-version "1.0.0.preview5") true "Prerelease: preview explicit"]])
-
-(deftest test-version-dev-or-pre?
-  (testing "Is version a prerelease?"
-    (doseq [[version expected description] params-version-dev-or-pre?]
-      (testing description
-        (is (= expected (v/version-dev-or-pre? version)))))))
-
-;; version/remove-prereleases
-
-(def params-remove-prereleases
-  [[["0.9.12.dev12" "0.9.13.a2" "1.0.0" "1.0.0.a1"]
-    ["1.0.0"]
-    "Filter out prereleases"]
-   [["1.0.0" "2.0.1"] ["1.0.0" "2.0.1"] "Nothing to remove"]
-   [[] [] "Empty seq"]])
-
-(deftest test-remove-prereleases
-  (testing "Remove pre/dev versions from sequence of versions"
-    (doseq [[versions expected description] params-remove-prereleases]
-      (testing description
-        (let [versions* (vec (map v/parse-version versions))
-              expected* (vec (map v/parse-version expected))]
-          (is (= expected* (v/remove-prereleases versions*))))))))
+;;
