@@ -206,40 +206,57 @@
 (def params-specifiers-with-versions
   [[[["~=" "1.2.3"]]
     ["0.1.2" "1.2.4" "1.2.99" "1.5.0" "1.9.8" "2" "2.0.1"]
+    true
     ["1.2.4" "1.2.99"]
     "Single specifier"]
    [[[">=" "1.2.3"] ["<" "2"] ["!=" "1.5.0"]]
     ["0.1.2" "1.2.3" "1.5.0" "1.9.8" "2" "2.0.1"]
+    true
     ["1.2.3" "1.9.8"]
     "Multiple specifiers"]
    [[["<" "2"]]
     ["1.9.8" "1.9.9" "2.0.0.a1" "2.0.0.a2"]
+    true
     ["1.9.8" "1.9.9"]
     "Pre-releases"]
    [[[">" "1.7"]]
     ["1.7.0" "1.7.0.post1" "1.7.0.post2" "1.7.1" "1.7.2"]
+    true
     ["1.7.1" "1.7.2"]
     "Post-releases"]
+   [[["<=" "2"]]
+    ["1.9.8" "1.9.9" "2.0.0.a1" "2.0.0.a2"]
+    false
+    ["1.9.8" "1.9.9"]
+    "Do not use pre-releases"]
+   [[[">=" "1.9"]]
+    ["2.0.0.a1" "2.0.0.a2"]
+    false
+    ["2.0.0.a1" "2.0.0.a2"]
+    "Do not use pre-releases, but only pre-releases available"]
    [[[">=" "1.2.3"] ["<" "2"] ["!=" "1.5.0"]]
     ["2" "2.0.1"]
+    true
     []
     "Empty result"]
    [[]
     ["0.1.2" "1.2.3" "1.5.0" "1.9.8" "2" "2.0.1"]
+    true
     ["0.1.2" "1.2.3" "1.5.0" "1.9.8" "2" "2.0.1"]
     "Empty specifiers"]])
 
 (deftest test-filter-versions
   (testing "Check versions filtering"
-    (doseq [[specs versions expected description] params-specifiers-with-versions]
+    (doseq [[specs versions pre expected description] params-specifiers-with-versions]
       (testing description
         (let [specs-parsed
               (vec (map (fn [[op ver]]
                           [(v/get-comparison-op op) (v/parse-version ver)]) specs))
               versions-parsed (vec (map #(v/parse-version %) versions))
-              result (vec (map
-                           #(:orig %)
-                           (v/filter-versions specs-parsed versions-parsed)))]
+              result
+              (vec (map
+                    #(:orig %)
+                    (v/filter-versions specs-parsed versions-parsed :pre pre)))]
           (is (= expected result)))))))
 
 (def params-sort-versions
@@ -264,7 +281,9 @@
   [[[1 2] [1 3] -1 "Two vectors"]
    [2 1 1 "Two numbers"]
    [2 [1 2] 1 "Number and vec"]
-   [[1 2] 1 -1  "Vec and number"]])
+   [[1 2] 1 -1  "Vec and number"]
+   ["string" 1 -1  "String and number, less"]
+   ["string" 0 0  "String and number, eq"]])
 
 (deftest test-compare-letter-version-ok
   (testing "Compare letter part"
@@ -285,4 +304,18 @@
              expected-msg (v/compare-letter-version a b)))))))
 
 
-;;
+;; version/version-stable?
+
+
+(def params-version-stable?
+  [["1.7.0" true "Release only"]
+   ["1.7.0.post1" true "Post release"]
+   ["1.7.0.a1" false "Pre release"]
+   ["1.7.0.dev12" false "Dev version"]])
+
+(deftest test-version-stable?
+  (testing "Is version stable?"
+    (doseq [[version-str expected description] params-version-stable?]
+      (testing description
+        (let [version (v/parse-version version-str)]
+          (is (= expected (v/version-stable? version))))))))

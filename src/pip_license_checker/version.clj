@@ -360,10 +360,26 @@
                  (same-release-with-pre-or-local? version spec-version)))))
     specifiers)))
 
+(defn version-stable?
+  "Return true if version is neither pre-release or development version"
+  [version]
+  (let [version-not-pre? (nil? (:pre version))
+        version-not-dev? (nil? (:dev version))
+        result (and version-not-pre? version-not-dev?)]
+    result))
+
 (defn filter-versions
   "Return lazy seq of parsed versions that satisfy specifiers"
-  [specifiers versions]
-  (filter #(version-ok? specifiers %) versions))
+  [specifiers versions & {:keys [pre] :or {pre true}}]
+  (let [exclude-pre-releases (false? pre)
+        versions-with-pre (filter #(version-ok? specifiers %) versions)
+        versions-stable (filter version-stable? versions-with-pre)
+        result
+        (cond
+          pre versions-with-pre
+          (and exclude-pre-releases (seq versions-stable)) versions-stable
+          :else versions-with-pre)]
+    result))
 
 (defn sort-versions
   "Sort a vector of parsed versions.
@@ -377,8 +393,8 @@
 
 (defn get-version
   "Get the most recent version from given versions that satisfies specifiers"
-  [specifiers versions]
-  (let [versions-ok (filter-versions specifiers versions)
+  [specifiers versions & {:keys [pre] :or {pre true}}]
+  (let [versions-ok (filter-versions specifiers versions :pre pre)
         versions-sorted (sort-versions versions-ok)
         version-latest (last versions-sorted)
         version (:orig version-latest)]

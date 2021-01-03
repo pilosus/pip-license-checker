@@ -103,10 +103,10 @@
 
 (defn get-requirement-version
   "Return respone of GET request to PyPI API for requirement"
-  [requirement]
+  [requirement & {:keys [pre]}]
   (let [{:keys [name specifiers]} requirement
         versions (get-releases name)
-        version (version/get-version specifiers versions)
+        version (version/get-version specifiers versions :pre pre)
         url
         (if (= version nil)
           (str/join "/" [url-pypi-base name "json"])
@@ -191,8 +191,8 @@
 
 (defn requirement->license
   "Return license hash-map for requirement"
-  [requirement]
-  (let [resp (get-requirement-version requirement)
+  [requirement & {:keys [pre]}]
+  (let [resp (get-requirement-version requirement :pre pre)
         data (requirement-response->data resp)
         license (data->license data)]
     license))

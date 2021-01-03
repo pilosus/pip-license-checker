@@ -28,6 +28,9 @@ lein run
 lein run piny==0.6.0
 lein run aiostream
 
+### include pre-release and development versions
+lein run --pre aiohttp
+
 ### scan all packages in requirements file
 lein run -r resources/requirements.txt
 
