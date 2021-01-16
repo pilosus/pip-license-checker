@@ -103,7 +103,7 @@
 
 (defn get-requirement-version
   "Return respone of GET request to PyPI API for requirement"
-  [requirement & {:keys [pre]}]
+  [requirement & {:keys [pre] :or {pre true}}]
   (let [{:keys [name specifiers]} requirement
         versions (get-releases name)
         version (version/get-version specifiers versions :pre pre)

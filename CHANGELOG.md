@@ -7,6 +7,12 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 ### Fixed
 - Nothing here yet
 
+## [0.10.0] - 2021-01-17
+### Added
+- [Spec](https://clojure.org/guides/spec) and [Test.check](https://clojure.github.io/test.check/index.html) used for generative testing and functions instrumenting.
+### Fixed
+- Fixed bug with version resolution for specifier with upper-case characters (thank specs!)
+
 ## [0.9.0] - 2021-01-03
 ### Added
 - ``--pre`` option to include pre-release and development versions in version resolution
@@ -71,7 +77,8 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 ### Added
 - Structure for Leiningen app project
 
-[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.9.0...HEAD
+[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.10.0...HEAD
+[0.10.0]: https://github.com/pilosus/pip-license-checker/compare/0.9.0...0.10.0
 [0.9.0]: https://github.com/pilosus/pip-license-checker/compare/0.8.0...0.9.0
 [0.8.0]: https://github.com/pilosus/pip-license-checker/compare/0.7.0...0.8.0
 [0.7.0]: https://github.com/pilosus/pip-license-checker/compare/0.6.1...0.7.0

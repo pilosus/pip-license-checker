@@ -2,11 +2,14 @@
   "License fetcher for Python PyPI packages"
   (:gen-class)
   (:require
+   [clojure.spec.alpha :as s]
+   ;;[clojure.spec.test.alpha :refer [instrument]]
    [clojure.string :as str]
    [clojure.tools.cli :refer [parse-opts]]
    [pip-license-checker.file :as file]
    [pip-license-checker.filters :as filters]
-   [pip-license-checker.pypi :as pypi]))
+   [pip-license-checker.pypi :as pypi]
+   [pip-license-checker.spec :as sp]))
 
 (defn format-license
   "Print requirement and its license"
@@ -17,6 +20,10 @@
         (str req-name ":" req-version)
         {lic-name :name lic-desc :desc} license]
     (format "%-35s %-55s %-30s" package lic-name lic-desc)))
+
+(s/fdef get-all-requirements
+  :args (s/cat :packages ::sp/requirements :requirements ::sp/requirements)
+  :ret ::sp/requirements)
 
 (defn get-all-requirements
   "Get a sequence of all requirements"
@@ -109,3 +116,10 @@
     (if exit-message
       (exit (if ok? 0 1) exit-message)
       (process-requirements packages requirements options))))
+
+
+;;
+;; Instrumented functions - uncomment only while testing
+;;
+
+;;(instrument `get-all-requirements)
