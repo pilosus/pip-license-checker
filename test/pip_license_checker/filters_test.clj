@@ -1,6 +1,8 @@
 (ns pip-license-checker.filters-test
   (:require
+   [clojure.spec.gen.alpha :as gen]
    [clojure.test :refer [deftest is testing]]
+   [pip-license-checker.spec :as sp]
    [pip-license-checker.filters :as filters]
    [pip-license-checker.version :as version]))
 
@@ -26,7 +28,19 @@
        (= expected
           (filters/remove-requirements-internal-rules requirements))))))
 
+(def params-generators-requirements (gen/sample sp/requirements-str-gen 100))
+(def params-generators-pattern (map re-pattern (gen/sample sp/non-empty-str-gen 100)))
+
+(deftest test-generators-remove-requirements-internal-rules
+  (testing "Generative test using test.check for internal requirements filtering"
+    (doseq [requirements params-generators-requirements]
+      (testing requirements
+        (let [result (filters/remove-requirements-internal-rules requirements)]
+          (is (seq? result)))))))
+
+
 ;; filters/remove-requirements-user-rules
+
 
 (def params-remove-requirements-user-rules
   [[[] #"test" [] "No requirements"]
@@ -43,7 +57,21 @@
        (= expected
           (filters/remove-requirements-user-rules pattern requirements))))))
 
+(deftest test-generators-remove-requirements-user-rules
+  (testing "Generative test using test.check for user requirements filtering"
+    (doseq [[pattern requirements]
+            (map
+             list
+             params-generators-pattern
+             params-generators-requirements)]
+      (testing (str pattern requirements)
+        (let [result
+              (filters/remove-requirements-user-rules pattern requirements)]
+          (is (seq? result)))))))
+
+
 ;; filters/sanitize-requirement
+
 
 (def params-sanitize-requirement
   [["  hello == 1.2.3" "hello==1.2.3" "Whitespaces"]
@@ -106,7 +134,19 @@
     "No specifiers"]])
 
 (deftest test-requirement->map
-  (testing ""
+  (testing "Requirement string to a map of name and specifiers"
     (doseq [[requirement expected description] params-requirement->map]
       (testing description
         (is (= expected (filters/requirement->map requirement)))))))
+
+(def params-generators-requirement->map (gen/sample sp/requirement-str-gen 1000))
+
+(deftest test-generators-requirement->map
+  (testing "Use test.check for generative testing"
+    (doseq [requirement params-generators-requirement->map]
+      (testing requirement
+        (let [requirement-parsed (filters/requirement->map requirement)]
+          (is (and
+               (map? requirement-parsed)
+               (not (nil? (:name requirement-parsed)))
+               (not (nil? (:specifiers requirement-parsed))))))))))

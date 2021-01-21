@@ -76,6 +76,7 @@
   (s/nilable (s/coll-of ::version)))
 
 ;; specifiers
+
 (s/def ::specifier-str string?)
 (s/def ::op
   (s/fspec :args (s/cat :a ::version :b ::version)
@@ -93,6 +94,10 @@
 ;; https://clojure.github.io/test.check/clojure.test.check.generators.html
 ;;
 
+
+(def non-empty-str-gen
+  "Generator for strings of length between 3 and 20 chars"
+  (g/fmap #(apply str %) (g/vector g/char-alpha 3 20)))
 
 (def version-str-gen
   "Generator for PyPI version in string format"
@@ -119,3 +124,28 @@
      (if use-release-micro (str "." release-micro) "")
      (if use-postfix (str "." postfix-letter postfix-number) "")
      (if use-local (str "+" local-first "." local-second) ""))))
+
+(def operators #{"<" "<=" ">" ">=" "==" "~=" "!="})
+
+(def specifier-str-gen
+  "Generator for PyPI package specifier in string format"
+  (g/let
+   [op-first (g/elements operators)
+    version-first version-str-gen
+    use-second-specifier g/boolean
+    op-second (g/elements operators)
+    version-second version-str-gen]
+    (str
+     op-first
+     version-first
+     (if use-second-specifier (str "," op-second version-second) ""))))
+
+(def requirement-str-gen
+  "Generator for PyPI package name with specifiers in string format"
+  (g/let [package non-empty-str-gen
+          spec specifier-str-gen]
+    (str package spec)))
+
+(def requirements-str-gen
+  "Generator for a collection of requirement strings"
+  (g/vector requirement-str-gen))

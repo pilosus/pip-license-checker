@@ -49,8 +49,12 @@
    (str/replace regex-remove-extra "")
    (str/replace regex-remove-wildcard "")))
 
+(s/fdef requirement->map
+  :args (s/cat :requirement ::sp/requirement)
+  :ret (s/cat :name ::sp/requirement :specifiers ::sp/specifiers))
+
 (defn requirement->map
-  "Parse requirement string into a {:name ... :specifiers ..} map"
+  "Parse requirement string into map with package name and its specifiers parsed"
   [requirement]
   (let [package-name (first (str/split requirement regex-split-specifier-ops))
         specifiers-str (subs requirement (count package-name))
