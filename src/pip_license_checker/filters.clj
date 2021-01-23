@@ -51,7 +51,7 @@
 
 (s/fdef requirement->map
   :args (s/cat :requirement ::sp/requirement)
-  :ret (s/cat :name ::sp/requirement :specifiers ::sp/specifiers))
+  :ret ::sp/requirement-map)
 
 (defn requirement->map
   "Parse requirement string into map with package name and its specifiers parsed"
@@ -69,3 +69,4 @@
 
 ;; (instrument `remove-requirements-internal-rules)
 ;; (instrument `remove-requirements-user-rules)
+;; (instrument `requirement->map)

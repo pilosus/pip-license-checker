@@ -2,8 +2,8 @@
   "Version parsing and comparing"
   (:gen-class)
   (:require
-   [clojure.spec.alpha :as s]
    ;;[clojure.spec.test.alpha :refer [instrument]]
+   [clojure.spec.alpha :as s]
    [clojure.string :as str]
    [pip-license-checker.spec :as sp]))
 
@@ -443,7 +443,7 @@
                :versions ::sp/versions
                :pre (s/? keyword?)
                :value (s/? boolean?))
-  :ret string?)
+  :ret ::sp/version-str)
 
 (defn get-version
   "Get the most recent version from given versions that satisfies specifiers"

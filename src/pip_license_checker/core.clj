@@ -2,8 +2,8 @@
   "License fetcher for Python PyPI packages"
   (:gen-class)
   (:require
-   [clojure.spec.alpha :as s]
    ;;[clojure.spec.test.alpha :refer [instrument]]
+   [clojure.spec.alpha :as s]
    [clojure.string :as str]
    [clojure.tools.cli :refer [parse-opts]]
    [pip-license-checker.file :as file]
@@ -31,6 +31,13 @@
   (let [file-packages (file/get-requirement-lines requirements)]
     (concat packages file-packages)))
 
+(s/fdef get-parsed-requiements
+  :args (s/cat
+         :requirements ::sp/requirements-cli-arg
+         :packages ::sp/packages-cli-arg
+         :options ::sp/options-cli-arg)
+  :ret (s/coll-of ::sp/requirement-response-license))
+
 (defn get-parsed-requiements
   "Apply filters and get verdicts for all requirements"
   [packages requirements options]
@@ -43,6 +50,12 @@
                       (map filters/requirement->map)
                       (map #(pypi/requirement->license % :pre pre)))]
     licenses))
+
+(s/fdef process-requirements
+  :args (s/cat
+         :requirements ::sp/requirements-cli-arg
+         :packages ::sp/packages-cli-arg
+         :options ::sp/options-cli-arg))
 
 (defn process-requirements
   "Print parsed requirements pretty"
@@ -87,6 +100,15 @@
     :default false]
    ["-h" "--help" "Print this help message"]])
 
+(s/fdef validate-args
+  :args (s/cat :args (s/coll-of string?))
+  :ret (s/cat
+        :exit-message (s/? string?)
+        :ok? (s/? boolean?)
+        :requirements (s/? ::sp/requirements-cli-arg)
+        :packages (s/? ::sp/packages-cli-arg)
+        :options (s/? ::sp/options-cli-arg)))
+
 (defn validate-args
   "Parse and validate CLI arguments for entrypoint"
   [args]
@@ -122,4 +144,7 @@
 ;; Instrumented functions - uncomment only while testing
 ;;
 
-;;(instrument `get-all-requirements)
+;; (instrument `get-all-requirements)
+;; (instrument `get-parsed-requiements)
+;; (instrument `process-requirements)
+;; (instrument `validate-args)

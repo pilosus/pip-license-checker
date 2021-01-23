@@ -7,11 +7,11 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 ### Fixed
 - Nothing here yet
 
-## [0.10.0] - 2021-01-17
+## [0.10.0] - 2021-01-23
 ### Added
 - [Spec](https://clojure.org/guides/spec) and [Test.check](https://clojure.github.io/test.check/index.html) used for generative testing and functions instrumenting.
 ### Fixed
-- Fixed bug with version resolution for specifier with upper-case characters (thank specs!)
+- Fixed bug with version resolution for specifier with upper-case characters (thanks specs!)
 
 ## [0.9.0] - 2021-01-03
 ### Added

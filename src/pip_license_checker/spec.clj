@@ -88,6 +88,49 @@
 (s/def ::specifiers
   (s/nilable (s/coll-of ::specifier)))
 
+;; License
+
+(s/def ::requirement-map
+  (s/cat :name ::requirement :specifiers ::specifiers))
+
+(s/def ::license-str string?)
+
+;; HTTP response
+
+(s/def ::requirement-response
+  (s/cat
+   :ok? boolean?
+   :requirement (s/cat
+                 :name ::requirement
+                 :version ::version-str)
+   :response (s/?
+              (s/map-of string? string?))))
+
+(s/def ::requirement-response-data
+  (s/cat
+   :ok? boolean?
+   :requirement (s/cat
+                 :name ::requirement
+                 :version ::version-str)
+   :data (s/?
+          (s/map-of string? any?))))
+
+(s/def ::requirement-response-license
+  (s/cat
+   :ok? boolean?
+   :requirement (s/cat
+                 :name ::requirement
+                 :version ::version-str)
+   :license string?))
+
+
+;; CLI
+
+
+(s/def ::requirements-cli-arg (s/nilable (s/coll-of string?)))
+(s/def ::packages-cli-arg (s/nilable (s/coll-of string?)))
+(s/def ::options-cli-arg (s/nilable (s/map-of string? string?)))
+
 
 ;;
 ;; Generators
