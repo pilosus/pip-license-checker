@@ -2,10 +2,13 @@
   "Python PyPI API functions"
   (:gen-class)
   (:require
+   ;;[clojure.spec.test.alpha :refer [instrument]]
    [cheshire.core :as json]
    [clj-http.client :as http]
+   [clojure.spec.alpha :as s]
    [clojure.string :as str]
    [pip-license-checker.github :as github]
+   [pip-license-checker.spec :as sp]
    [pip-license-checker.version :as version]))
 
 (def settings-http-client
@@ -101,9 +104,16 @@
         versions-valid (filter #(not (nil? %)) versions-parsed)]
     versions-valid))
 
+(s/fdef get-requirement-version
+  :args (s/cat
+         :requirement ::sp/requirement
+         :pre (s/? keyword?)
+         :value (s/? boolean?))
+  :ret ::sp/requirement-response)
+
 (defn get-requirement-version
   "Return respone of GET request to PyPI API for requirement"
-  [requirement & {:keys [pre]}]
+  [requirement & {:keys [pre] :or {pre true}}]
   (let [{:keys [name specifiers]} requirement
         versions (get-releases name)
         version (version/get-version specifiers versions :pre pre)
@@ -117,6 +127,10 @@
     (if (and response version)
       {:ok? true :requirement origin :response (:body response)}
       {:ok? false :requirement origin})))
+
+(s/fdef requirement-response->data
+  :args ::sp/requirement-response
+  :ret ::sp/requirement-response-data)
 
 (defn requirement-response->data
   "Return hash-map from PyPI API JSON response"
@@ -175,6 +189,10 @@
 
 ;; Get license data from API JSON
 
+(s/fdef data->license
+  :args ::sp/requirement-response-data
+  :ret ::sp/requirement-response-license)
+
 (defn data->license
   "Return hash-map with license data"
   [json-data]
@@ -189,6 +207,13 @@
 
 ;; Entrypoint
 
+(s/fdef requirement->license
+  :args (s/cat
+         :requirement ::sp/requirement
+         :pre (s/? keyword?)
+         :value (s/? boolean?))
+  :ret ::sp/requirement-response-license)
+
 (defn requirement->license
   "Return license hash-map for requirement"
   [requirement & {:keys [pre]}]
@@ -196,3 +221,12 @@
         data (requirement-response->data resp)
         license (data->license data)]
     license))
+
+;;
+;; Instrumented functions - uncomment only while testing
+;;
+
+;; (instrument `get-requirement-version)
+;; (instrument `requirement-response->data)
+;; (instrument `data->license)
+;; (instrument `requirement->license)

@@ -2,7 +2,10 @@
   "Version parsing and comparing"
   (:gen-class)
   (:require
-   [clojure.string :as str]))
+   ;;[clojure.spec.test.alpha :refer [instrument]]
+   [clojure.spec.alpha :as s]
+   [clojure.string :as str]
+   [pip-license-checker.spec :as sp]))
 
 ;; Parse version
 
@@ -15,6 +18,11 @@
   "Parse number string into integer or return 0"
   [number]
   (if (not number) 0 (Integer/parseInt number)))
+
+(s/fdef parse-letter-version
+  :args (s/cat :letter ::sp/matched-version-part
+               :number ::sp/matched-version-part)
+  :ret ::sp/opt-version-letter)
 
 (defn parse-letter-version
   "Parse letter part of version"
@@ -38,6 +46,10 @@
             [canonical-letter canonical-number])
           :else nil)]
     result))
+
+(s/fdef parse-local-version
+  :args (s/cat :local ::sp/matched-version-part)
+  :ret ::sp/opt-version-local)
 
 (defn parse-local-version
   "Parse strings into vec with string parsed into ints if possible"
@@ -74,10 +86,15 @@
       result)
     nil))
 
+(s/fdef parse-version
+  :args (s/cat :version-str ::sp/version-str)
+  :ret ::sp/version)
+
 (defn parse-version
   "Return a hash-map of regex groups"
   [version-str]
-  (let [matcher (re-matcher regex-version version-str)
+  (let [sanitized-version (str/lower-case version-str)
+        matcher (re-matcher regex-version sanitized-version)
         version-map
         (if (.matches matcher)
           {:orig version-str
@@ -271,6 +288,10 @@
     "<" lt
     ">" gt))
 
+(s/fdef parse-specifier
+  :args (s/cat :specifier-str ::sp/specifier-str)
+  :ret ::sp/specifier)
+
 (defn parse-specifier
   "Parse single specifier string into a vec of operator function and version map.
   E.g. '>=1.2.3 parsed into [parsed-op parsed-version]"
@@ -282,6 +303,10 @@
            (parse-version (.group matcher "version"))]
           nil)]
     specifier-pair))
+
+(s/fdef parse-specifiers
+  :args (s/cat :specifiers-str string?)
+  :ret ::sp/specifiers)
 
 (defn parse-specifiers
   "Parse a string of specifiers into a vec of parsed specifier vecs/
@@ -343,6 +368,10 @@
 
 ;; Check version against specifiers
 
+(s/fdef version-ok?
+  :args (s/cat :specifiers ::sp/specifiers :version ::sp/version)
+  :ret boolean?)
+
 (defn version-ok?
   "Return true if a parsed version satisfies each specifier
   Specifiers is a collection of vec [specifier-op specifier-version]"
@@ -360,6 +389,10 @@
                  (same-release-with-pre-or-local? version spec-version)))))
     specifiers)))
 
+(s/fdef version-stable?
+  :args (s/cat :version ::sp/version)
+  :ret boolean?)
+
 (defn version-stable?
   "Return true if version is neither pre-release or development version"
   [version]
@@ -367,6 +400,14 @@
         version-not-dev? (nil? (:dev version))
         result (and version-not-pre? version-not-dev?)]
     result))
+
+(s/def ::pre boolean?)
+(s/fdef filter-versions
+  :args (s/cat :specifiers ::sp/specifiers
+               :versions ::sp/versions
+               :pre (s/? keyword?)
+               :value (s/? boolean?))
+  :ret ::sp/versions)
 
 (defn filter-versions
   "Return lazy seq of parsed versions that satisfy specifiers"
@@ -381,6 +422,12 @@
           :else versions-with-pre)]
     result))
 
+(s/fdef sort-versions
+  :args (s/cat :versions ::sp/versions
+               :order (s/? keyword?)
+               :value (s/? keyword?))
+  :ret ::sp/versions)
+
 (defn sort-versions
   "Sort a vector of parsed versions.
   Ascending sort order is used by default."
@@ -391,6 +438,13 @@
           #(compare-version %2 %1))]
     (sort comparator-fn versions)))
 
+(s/fdef get-version
+  :args (s/cat :specifiers ::sp/specifiers
+               :versions ::sp/versions
+               :pre (s/? keyword?)
+               :value (s/? boolean?))
+  :ret ::sp/version-str)
+
 (defn get-version
   "Get the most recent version from given versions that satisfies specifiers"
   [specifiers versions & {:keys [pre] :or {pre true}}]
@@ -399,3 +453,18 @@
         version-latest (last versions-sorted)
         version (:orig version-latest)]
     version))
+
+;;
+;; Instrumented functions - uncomment only while testing
+;;
+
+;; (instrument `parse-letter-version)
+;; (instrument `parse-local-version)
+;; (instrument `parse-version)
+;; (instrument `parse-specifier)
+;; (instrument `parse-specifiers)
+;; (instrument `version-ok?)
+;; (instrument `version-stable?)
+;; (instrument `filter-versions)
+;; (instrument `sort-versions)
+;; (instrument `get-version)
