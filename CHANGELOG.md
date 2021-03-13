@@ -7,6 +7,12 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 ### Fixed
 - Nothing here yet
 
+## [0.11.0] - 2021-03-13
+### Added
+- CLI option `-t` or `--[no-]with-totals` to print totals for license types
+- CLI option `-o` or `--[no-]totals-only` to print only totals for license types, skipping table of requirements
+- CLI option `-d` or `--[no-]table-headers` to print table headers
+
 ## [0.10.0] - 2021-01-23
 ### Added
 - [Spec](https://clojure.org/guides/spec) and [Test.check](https://clojure.github.io/test.check/index.html) used for generative testing and functions instrumenting.
@@ -77,7 +83,8 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 ### Added
 - Structure for Leiningen app project
 
-[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.10.0...HEAD
+[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.11.0...HEAD
+[0.11.0]: https://github.com/pilosus/pip-license-checker/compare/0.10.0...0.11.0
 [0.10.0]: https://github.com/pilosus/pip-license-checker/compare/0.9.0...0.10.0
 [0.9.0]: https://github.com/pilosus/pip-license-checker/compare/0.8.0...0.9.0
 [0.8.0]: https://github.com/pilosus/pip-license-checker/compare/0.7.0...0.8.0

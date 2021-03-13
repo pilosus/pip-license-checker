@@ -39,7 +39,7 @@
 
 (s/def ::opt-pattern (s/nilable regex?))
 
-;; versions
+;; Versions
 
 (s/def ::version-str string?)
 (s/def ::matched-version-part (s/nilable string?))
@@ -75,7 +75,7 @@
 (s/def ::versions
   (s/nilable (s/coll-of ::version)))
 
-;; specifiers
+;; Specifiers
 
 (s/def ::specifier-str string?)
 (s/def ::op
@@ -130,6 +130,12 @@
 (s/def ::requirements-cli-arg (s/nilable (s/coll-of string?)))
 (s/def ::packages-cli-arg (s/nilable (s/coll-of string?)))
 (s/def ::options-cli-arg (s/nilable (s/map-of string? string?)))
+
+
+;; Core
+
+
+(s/def ::license-type-totals (s/map-of string? int?))
 
 
 ;;
