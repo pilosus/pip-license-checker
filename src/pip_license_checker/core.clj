@@ -11,6 +11,14 @@
    [pip-license-checker.pypi :as pypi]
    [pip-license-checker.spec :as sp]))
 
+(def formatter-license "%-35s %-55s %-30s")
+(def formatter-totals "%-35s %-55s")
+
+(defn print-license-header
+  []
+  (println
+   (format formatter-license "Requirement" "License Name" "License Type")))
+
 (defn format-license
   "Print requirement and its license"
   [license-data]
@@ -19,7 +27,7 @@
         package
         (str req-name ":" req-version)
         {lic-name :name lic-desc :desc} license]
-    (format "%-35s %-55s %-30s" package lic-name lic-desc)))
+    (format formatter-license package lic-name lic-desc)))
 
 (s/fdef get-all-requirements
   :args (s/cat :packages ::sp/requirements :requirements ::sp/requirements)
@@ -51,6 +59,26 @@
                       (map #(pypi/requirement->license % :pre pre)))]
     licenses))
 
+(s/fdef get-license-type-totals
+  :args (s/coll-of ::sp/requirement-response-license)
+  :ret ::sp/license-type-totals)
+
+(defn get-license-type-totals
+  "Return a frequency map of license types as keys and license types as values"
+  [licenses]
+  (let [freqs (frequencies (map #(:desc (:license %)) licenses))
+        ordered-freqs (into (sorted-map) freqs)]
+    ordered-freqs))
+
+(defn format-total
+  "Print lincese type  totals line"
+  [license-type freq]
+  (format formatter-totals license-type freq))
+
+(defn print-totals-header
+  []
+  (println (format formatter-totals "License Type" "Found")))
+
 (s/fdef process-requirements
   :args (s/cat
          :requirements ::sp/requirements-cli-arg
@@ -60,9 +88,30 @@
 (defn process-requirements
   "Print parsed requirements pretty"
   [packages requirements options]
-  (let [licenses (get-parsed-requiements packages requirements options)]
-    (doseq [line licenses]
-      (println (format-license line)))))
+  (let [with-totals-opt (:with-totals options)
+        totals-only-opt (:totals-only options)
+        show-totals (or with-totals-opt totals-only-opt)
+        table-headers (:table-headers options)
+        licenses (get-parsed-requiements packages requirements options)
+        totals
+        (if show-totals (get-license-type-totals licenses) nil)]
+
+    (when (not totals-only-opt)
+      (when table-headers
+        (print-license-header))
+
+      (doseq [line licenses]
+        (println (format-license line))))
+
+    (when with-totals-opt
+      (println))
+
+    (when show-totals
+      (when table-headers
+        (print-totals-header))
+
+      (doseq [[license-type freq] totals]
+        (println (format-total license-type freq))))))
 
 (defn usage [options-summary]
   (->> ["pip-license-checker - check Python PyPI package license"
@@ -79,8 +128,8 @@
         "pip-license-checker django"
         "pip-license-checker aiohttp==3.7.2 piny==0.6.0 django"
         "pip-license-checker --pre 'aiohttp<4'"
-        "pip-license-checker --requirements resources/requirements.txt"
-        "pip-license-checker -r file1.txt -r file2.txt -r file3.txt"
+        "pip-license-checker --with-totals --table-headers --requirements resources/requirements.txt"
+        "pip-license-checker --totals-only -r file1.txt -r file2.txt -r file3.txt"
         "pip-license-checker -r resources/requirements.txt django aiohttp==3.7.1 --exclude 'aio.*'"]
        (str/join \newline)))
 
@@ -98,6 +147,9 @@
     :parse-fn #(re-pattern %)]
    ["-p" "--[no-]pre" "Include pre-release and development versions. By default, use only stable versions"
     :default false]
+   ["-t" "--[no-]with-totals" "Print totals for license types" :default false]
+   ["-o" "--[no-]totals-only" "Print only totals for license types" :default false]
+   ["-d" "--[no-]table-headers" "Print table headers" :default false]
    ["-h" "--help" "Print this help message"]])
 
 (s/fdef validate-args
