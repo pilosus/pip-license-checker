@@ -1,5 +1,6 @@
 (ns pip-license-checker.core-test
   (:require
+   [clojure.string :as str]
    [clojure.test :refer [deftest is testing]]
    [clj-http.client :as http]
    [pip-license-checker.core :as core]
@@ -16,7 +17,8 @@
      "README.md"]
     {:requirements ["resources/requirements.txt" "README.md"]
      :packages ["django" "aiohttp==3.7.1"]
-     :options {:pre false
+     :options {:fail #{}
+               :pre false
                :with-totals false
                :totals-only false
                :table-headers false}}
@@ -97,3 +99,108 @@
       (testing description
         (is
          (= expected (core/get-license-type-totals licenses)))))))
+
+(deftest test-print-license-header
+  (testing "Printing license table header"
+    (let [actual (with-out-str (core/print-license-header))
+          expected (str/join
+                    [(format core/formatter-license
+                             "Requirement"
+                             "License Name"
+                             "License Type")
+                     "\n"])]
+      (is (= expected actual)))))
+
+(def params-format-license
+  [["test"
+    "1.12.3"
+    "GPLv3"
+    "Copyleft"
+    (format core/formatter-license "test:1.12.3" "GPLv3" "Copyleft")
+    "Example 1"]
+   ["aiohttp"
+    "3.7.4.post0"
+    "MIT"
+    "Permissive"
+    (format core/formatter-license "aiohttp:3.7.4.post0" "MIT" "Permissive")
+    "Example 2"]])
+
+(deftest test-format-license
+  (testing "Printing a line of license table"
+    (doseq [[package version license-name license-type expected description] params-format-license]
+      (testing description
+        (let [license-data
+              {:requirement {:name package :version version}
+               :license {:name license-name :desc license-type}}
+              actual (core/format-license license-data)]
+          (is (= expected actual)))))))
+
+(deftest test-format-total
+  (testing "Formatting total table line"
+    (let [expected (format core/formatter-totals "Permissive" 7)
+          actual (core/format-total "Permissive" 7)]
+      (is (= expected actual)))))
+
+(deftest test-print-totals-header
+  (testing "Printing totals table header"
+    (let [actual (with-out-str (core/print-totals-header))
+          expected (str/join
+                    [(format core/formatter-totals "License Type" "Found")
+                     "\n"])]
+      (is (= expected actual)))))
+
+(def params-process-requirements
+  [[[]
+    {:fail #{} :with-totals false :totals-only false :table-headers false}
+    ""
+    "No licenses"]
+   [[{:ok? true,
+      :requirement {:name "test", :version "3.7.2"},
+      :license {:name "MIT License", :desc "Permissive"}}]
+    {:fail #{} :with-totals false :totals-only false :table-headers false}
+    (str (format core/formatter-license "test:3.7.2" "MIT License" "Permissive") "\n")
+    "No headers"]
+   [[{:ok? true,
+      :requirement {:name "test", :version "3.7.2"},
+      :license {:name "MIT License", :desc "Permissive"}}]
+    {:fail #{} :with-totals false :totals-only false :table-headers true}
+    (str/join
+     [(str (format core/formatter-license "Requirement" "License Name" "License Type") "\n")
+      (str (format core/formatter-license "test:3.7.2" "MIT License" "Permissive") "\n")])
+    "With headers"]
+   [[{:ok? true,
+      :requirement {:name "test", :version "3.7.2"},
+      :license {:name "MIT License", :desc "Permissive"}}]
+    {:fail #{} :with-totals true :totals-only false :table-headers true}
+    (str/join
+     [(str (format core/formatter-license "Requirement" "License Name" "License Type") "\n")
+      (str (format core/formatter-license "test:3.7.2" "MIT License" "Permissive") "\n")
+      "\n"
+      (str (format core/formatter-totals "License Type" "Found") "\n")
+      (str (format core/formatter-totals "Permissive" 1) "\n")])
+    "With totals"]
+   [[{:ok? true,
+      :requirement {:name "test", :version "3.7.2"},
+      :license {:name "MIT License", :desc "Permissive"}}]
+    {:fail #{} :with-totals false :totals-only true :table-headers false}
+    (str/join
+     [(str (format core/formatter-totals "Permissive" 1) "\n")])
+    "Totals only"]
+   [[{:ok? true,
+      :requirement {:name "test", :version "3.7.2"},
+      :license {:name "MIT License", :desc "Permissive"}}]
+    {:fail #{"Permissive"} :with-totals false :totals-only true :table-headers false}
+    (str/join
+     [(str (format core/formatter-totals "Permissive" 1) "\n")
+      "Exit code: 1\n"])
+    "License matched, exit with non-zero status code"]])
+
+(deftest test-process-requirements
+  (testing "Print results"
+    (doseq [[mock options expected description] params-process-requirements]
+      (testing description
+        (with-redefs
+         [core/get-parsed-requiements (constantly mock)
+          core/exit #(println (format "Exit code: %s" %))]
+          (let [actual (with-out-str (core/process-requirements [] [] options))]
+            (is (= expected actual))))))))

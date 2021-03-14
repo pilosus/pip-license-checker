@@ -7,6 +7,11 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 ### Fixed
 - Nothing here yet
 
+## [0.12.0] - 2021-03-14
+### Added
+- CLI option `-f` or `--fail LICENSE_TYPE` to return non-zero exit code (1) if specified license type is found. More that one option `-f` may be specified.
+
+
 ## [0.11.0] - 2021-03-13
 ### Added
 - CLI option `-t` or `--[no-]with-totals` to print totals for license types
@@ -83,7 +88,8 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 ### Added
 - Structure for Leiningen app project
 
-[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.11.0...HEAD
+[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.12.0...HEAD
+[0.12.0]: https://github.com/pilosus/pip-license-checker/compare/0.11.0...0.12.0
 [0.11.0]: https://github.com/pilosus/pip-license-checker/compare/0.10.0...0.11.0
 [0.10.0]: https://github.com/pilosus/pip-license-checker/compare/0.9.0...0.10.0
 [0.9.0]: https://github.com/pilosus/pip-license-checker/compare/0.8.0...0.9.0

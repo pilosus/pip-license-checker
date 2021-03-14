@@ -19,11 +19,21 @@
 (def url-pypi-base "https://pypi.org/pypi")
 
 (def license-name-error "Error")
-(def license-desc-error "???")
 
+(def license-desc-error "Error")
 (def license-desc-copyleft "Copyleft")
 (def license-desc-permissive "Permissive")
 (def license-desc-other "Other")
+
+(def license-types
+  (sorted-set license-desc-error
+              license-desc-copyleft
+              license-desc-permissive
+              license-desc-other))
+
+(def invalid-license-type
+  (format "Invalid license type. Use one of: %s"
+          (str/join ", " license-types)))
 
 (def license-data-error {:name license-name-error :desc license-desc-error})
 
@@ -86,6 +96,13 @@
    #"zlib/libpng License"
    #"zlib/libpng"
    #"Public Domain"])
+
+;; Helpers
+
+(defn is-license-type-valid?
+  "Return true if license-type string is valid, false otherwise"
+  [license-type]
+  (contains? license-types license-type))
 
 ;; Get API response, parse it
 
