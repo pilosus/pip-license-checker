@@ -3,6 +3,7 @@
   (:gen-class)
   (:require
    ;;[clojure.spec.test.alpha :refer [instrument]]
+   [clojure.set :refer [intersection]]
    [clojure.spec.alpha :as s]
    [clojure.string :as str]
    [clojure.tools.cli :refer [parse-opts]]
@@ -13,6 +14,14 @@
 
 (def formatter-license "%-35s %-55s %-30s")
 (def formatter-totals "%-35s %-55s")
+
+(defn exit
+  "Exit from the app with exit status"
+  ([status]
+   (System/exit status))
+  ([status msg]
+   (println msg)
+   (exit status)))
 
 (defn print-license-header
   []
@@ -88,13 +97,20 @@
 (defn process-requirements
   "Print parsed requirements pretty"
   [packages requirements options]
-  (let [with-totals-opt (:with-totals options)
+  (let [fail-opt (:fail options)
+        with-fail (seq fail-opt)
+        with-totals-opt (:with-totals options)
         totals-only-opt (:totals-only options)
         show-totals (or with-totals-opt totals-only-opt)
         table-headers (:table-headers options)
         licenses (get-parsed-requiements packages requirements options)
         totals
-        (if show-totals (get-license-type-totals licenses) nil)]
+        (if (or show-totals with-fail)
+          (get-license-type-totals licenses)
+          nil)
+        totals-keys (into (sorted-set) (keys totals))
+        fail-types-found (intersection totals-keys fail-opt)
+        fail? (seq fail-types-found)]
 
     (when (not totals-only-opt)
       (when table-headers
@@ -111,7 +127,10 @@
         (print-totals-header))
 
       (doseq [[license-type freq] totals]
-        (println (format-total license-type freq))))))
+        (println (format-total license-type freq))))
+
+    (when fail?
+      (exit 1))))
 
 (defn usage [options-summary]
   (->> ["pip-license-checker - check Python PyPI package license"
@@ -120,7 +139,7 @@
         "pip-license-checker [options]... [package]..."
         ""
         "Description:"
-        "  package                      List of package names in format `name[==version]`"
+        "  package\tList of package names in format `name[specifier][version]`"
         ""
         options-summary
         ""
@@ -139,10 +158,14 @@
 
 (def cli-options
   [;; FIXME update with :multi true update-fn: conj once clojure.tools.cli 1.0.195 (?) released
-   ["-r" "--requirements NAME" "Requirement file name to read"
+   ["-r" "--requirements REQUIREMENT_NAME" "Requirement file name to read"
     :default []
     :assoc-fn #(update %1 %2 conj %3)
     :validate [file/exists? "Requirement file does not exist"]]
+   ["-f" "--fail LICENSE_TYPE" "Return non-zero exit code if license type is found"
+    :default (sorted-set)
+    :assoc-fn #(update %1 %2 conj %3)
+    :validate [pypi/is-license-type-valid? pypi/invalid-license-type]]
    ["-e" "--exclude REGEX" "PCRE to exclude matching packages. Used only if [package]... or requirement files specified"
     :parse-fn #(re-pattern %)]
    ["-p" "--[no-]pre" "Include pre-release and development versions. By default, use only stable versions"
@@ -176,12 +199,6 @@
        :options (dissoc options :requirements)}
       :else
       {:exit-message (usage summary)})))
-
-(defn exit
-  "Exit from the app with exit status"
-  [status msg]
-  (println msg)
-  (System/exit status))
 
 (defn -main
   "App entry point"

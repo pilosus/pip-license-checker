@@ -61,6 +61,40 @@ cd target/uberjar
 java -jar pip-license-checker-[version]-standalone.jar [args]
 ```
 
+## Help
+
+Run application with `lein run` or use `--help` option with standalone
+jar for more details.
+
+```
+$ lein run
+
+pip-license-checker - check Python PyPI package license
+
+Usage:
+pip-license-checker [options]... [package]...
+
+Description:
+  package	List of package names in format `name[specifier][version]`
+
+  -r, --requirements REQUIREMENT_NAME  []   Requirement file name to read
+  -f, --fail LICENSE_TYPE              #{}  Return non-zero exit code if license type is found
+  -e, --exclude REGEX                       PCRE to exclude matching packages. Used only if [package]... or requirement files specified
+  -p, --[no-]pre                            Include pre-release and development versions. By default, use only stable versions
+  -t, --[no-]with-totals                    Print totals for license types
+  -o, --[no-]totals-only                    Print only totals for license types
+  -d, --[no-]table-headers                  Print table headers
+  -h, --help                                Print this help message
+
+Examples:
+pip-license-checker django
+pip-license-checker aiohttp==3.7.2 piny==0.6.0 django
+pip-license-checker --pre 'aiohttp<4'
+pip-license-checker --with-totals --table-headers --requirements resources/requirements.txt
+pip-license-checker --totals-only -r file1.txt -r file2.txt -r file3.txt
+pip-license-checker -r resources/requirements.txt django aiohttp==3.7.1 --exclude 'aio.*'
+```
+
 ## Docker
 
 App can also be run in docker container.
