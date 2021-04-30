@@ -7,6 +7,11 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 ### Fixed
 - Nothing here yet
 
+## [0.13.0] - 2021-04-30
+### Added
+- HTTP requests concurrency added
+
+
 ## [0.12.0] - 2021-03-14
 ### Added
 - CLI option `-f` or `--fail LICENSE_TYPE` to return non-zero exit code (1) if specified license type is found. More that one option `-f` may be specified.
@@ -88,7 +93,8 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 ### Added
 - Structure for Leiningen app project
 
-[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.12.0...HEAD
+[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.13.0...HEAD
+[0.13.0]: https://github.com/pilosus/pip-license-checker/compare/0.12.0...0.13.0
 [0.12.0]: https://github.com/pilosus/pip-license-checker/compare/0.11.0...0.12.0
 [0.11.0]: https://github.com/pilosus/pip-license-checker/compare/0.10.0...0.11.0
 [0.10.0]: https://github.com/pilosus/pip-license-checker/compare/0.9.0...0.10.0
