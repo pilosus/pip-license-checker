@@ -65,7 +65,7 @@
                       (filters/remove-requirements-user-rules exclude-pattern)
                       (map filters/sanitize-requirement)
                       (map filters/requirement->map)
-                      (map #(pypi/requirement->license % :pre pre)))]
+                      (pmap #(pypi/requirement->license % :pre pre)))]
     licenses))
 
 (s/fdef get-license-type-totals
@@ -128,6 +128,9 @@
 
       (doseq [[license-type freq] totals]
         (println (format-total license-type freq))))
+
+    ;; shutdown a thread pool used by pmap to allow JVM shutdown
+    (shutdown-agents)
 
     (when fail?
       (exit 1))))
