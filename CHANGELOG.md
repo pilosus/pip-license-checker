@@ -7,6 +7,10 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 ### Fixed
 - Nothing here yet
 
+## [0.13.2] - 2021-06-29
+### Fixed
+- Do not use PGP when pushing artifacts to Clojars in GHA
+
 ## [0.13.1] - 2021-06-29
 ### Added
 - Clojars fully qualified group name added
@@ -97,7 +101,8 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 ### Added
 - Structure for Leiningen app project
 
-[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.13.1...HEAD
+[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.13.2...HEAD
+[0.13.2]: https://github.com/pilosus/pip-license-checker/compare/0.13.1...0.13.2
 [0.13.1]: https://github.com/pilosus/pip-license-checker/compare/0.13.0...0.13.1
 [0.13.0]: https://github.com/pilosus/pip-license-checker/compare/0.12.0...0.13.0
 [0.12.0]: https://github.com/pilosus/pip-license-checker/compare/0.11.0...0.12.0
