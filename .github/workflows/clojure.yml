@@ -23,7 +23,7 @@ jobs:
     - name: Code formatting check
       run: lein cljfmt check
     - name: Code linting
-      uses: DeLaGuardo/clojure-lint-action@v1
+      uses: DeLaGuardo/clojure-lint-action@06fdc0816fabc27f1e05208b68c7a59d9ab2d5d1  # master 21-05-2021
       with:
         clj-kondo-args: --lint src test
         github_token: ${{ secrets.GITHUB_TOKEN }}
