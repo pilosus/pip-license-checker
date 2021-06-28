@@ -1,4 +1,4 @@
-(defproject pip-license-checker "0.13.0"
+(defproject org.clojars.vrs/pip-license-checker "0.13.1"
   :description "Check Python PyPI package license"
   :url "https://github.com/pilosus/pip-license-checker"
   :license {:name "The MIT License (MIT)"
@@ -17,4 +17,8 @@
   :profiles {:uberjar {:aot :all
                        :jvm-opts ["-Dclojure.compiler.direct-linking=true"]}}
   :test-selectors {:integration :integration
-                   :cli :cli})
+                   :cli :cli}
+  :repositories [["releases" {:url "https://repo.clojars.org"
+                              :username :env/clojars_username
+                              :password :env/clojars_password}]]
+  )
