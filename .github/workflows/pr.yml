@@ -1,0 +1,29 @@
+name: pull_request
+
+on:
+  pull_request:
+    branches: [ "*" ]
+
+env:
+  CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install dependencies
+      run: lein deps
+    - name: Code formatting check
+      run: lein cljfmt check
+    - name: Code linting
+      uses: DeLaGuardo/clojure-lint-action@06fdc0816fabc27f1e05208b68c7a59d9ab2d5d1  # master 21-05-2021
+      with:
+        clj-kondo-args: --lint src test
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Run tests
+      run: lein cloverage --codecov
+    - name: Update code coverage report
+      run: bash <(curl -s https://codecov.io/bash) -f target/coverage/codecov.json
