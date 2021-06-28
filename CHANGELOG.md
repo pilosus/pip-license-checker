@@ -7,6 +7,10 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 ### Fixed
 - Nothing here yet
 
+## [0.13.1] - 2021-06-29
+### Added
+- Clojars fully qualified group name added
+
 ## [0.13.0] - 2021-04-30
 ### Added
 - HTTP requests concurrency added
@@ -93,7 +97,8 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 ### Added
 - Structure for Leiningen app project
 
-[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.13.0...HEAD
+[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.13.1...HEAD
+[0.13.1]: https://github.com/pilosus/pip-license-checker/compare/0.13.0...0.13.1
 [0.13.0]: https://github.com/pilosus/pip-license-checker/compare/0.12.0...0.13.0
 [0.12.0]: https://github.com/pilosus/pip-license-checker/compare/0.11.0...0.12.0
 [0.11.0]: https://github.com/pilosus/pip-license-checker/compare/0.10.0...0.11.0
