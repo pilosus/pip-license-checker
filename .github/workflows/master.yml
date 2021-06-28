@@ -1,10 +1,8 @@
-name: Clojure CI
+name: master
 
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "*" ]
 
 env:
   CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
