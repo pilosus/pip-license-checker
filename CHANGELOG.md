@@ -7,6 +7,10 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 ### Fixed
 - Nothing here yet
 
+## [0.14.0] - 2021-07-10
+### Fixed
+- Used multi-stage Dockerfile to reduce docker image size from 390Mb to ~230Mb
+
 ## [0.13.3] - 2021-06-29
 ### Fixed
 - Separate GHA workflows for master push and pull requests
@@ -105,7 +109,8 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 ### Added
 - Structure for Leiningen app project
 
-[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.13.3...HEAD
+[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.14.0...HEAD
+[0.13.3]: https://github.com/pilosus/pip-license-checker/compare/0.13.3...0.14.0
 [0.13.3]: https://github.com/pilosus/pip-license-checker/compare/0.13.2...0.13.3
 [0.13.2]: https://github.com/pilosus/pip-license-checker/compare/0.13.1...0.13.2
 [0.13.1]: https://github.com/pilosus/pip-license-checker/compare/0.13.0...0.13.1
