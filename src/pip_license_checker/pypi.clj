@@ -37,6 +37,8 @@
 
 (def license-data-error {:name license-name-error :desc license-desc-error})
 
+(def license-undefined #{"" "UNKNOWN" [] ["UNKNOWN"]})
+
 (def regex-match-classifier #"License :: .*")
 (def regex-split-classifier #" :: ")
 
@@ -192,7 +194,7 @@
   [data]
   (let [info (get data "info")
         {:strs [license classifiers home_page]} info
-        license-license (if (= "" license) nil license)
+        license-license (if (contains? license-undefined license) nil license)
         classifiers-license (classifiers->license classifiers)
         license-name (or
                       classifiers-license
