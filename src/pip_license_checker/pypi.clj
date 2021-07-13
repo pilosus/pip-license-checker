@@ -164,11 +164,14 @@
 (defn classifiers->license
   "Get first license name from PyPI trove classifiers list"
   [classifiers]
-  (let [classifier
-        (some #(re-matches regex-match-classifier %) classifiers)
-        name
-        (if classifier (last (str/split classifier regex-split-classifier)) nil)]
-    name))
+  (let [license-classifiers
+        (filter #(re-matches regex-match-classifier %) classifiers)
+        splitted-classifiers
+        (map #(str/split % regex-split-classifier) license-classifiers)
+        most-detailed-splitted-classifier
+        (last (sort-by count splitted-classifiers))
+        classifier (last most-detailed-splitted-classifier)]
+    classifier))
 
 (defn strings->pattern
   "Get regex pattern from sequence of strings"

@@ -118,8 +118,19 @@
    [["Operating System :: Unix"
      "License :: OSI Approved :: BSD License"
      "License :: OSI Approved :: MIT License"]
-    "BSD License"
-    "Get first license"]])
+    "MIT License"
+    "Get last license"]
+   [["Operating System :: Unix"
+     "License :: OSI Approved :: MIT License"
+     "License :: OSI Approved"]
+    "MIT License"
+    "Get most detailed license"]
+   [["License :: OSI Approved"
+     "License :: "
+     "License :: OSI Approved :: MIT License :: MIT with details"
+     "License :: OSI Approved :: MIT License"]
+    "MIT with details"
+    "Get most detailed license - 2"]])
 
 (deftest test-classifiers->license
   (testing "Get license from trove classifiers"
