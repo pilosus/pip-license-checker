@@ -176,6 +176,24 @@
     "BSD"
     {:name "BSD", :desc "Permissive"}
     "Get from GitHub API"]
+   [{"info"
+     {"license" "UNKNOWN"
+      "classifiers" []}}
+    "MIT"
+    {:name "MIT", :desc "Permissive"}
+    "Get from GitHub API for older metadata format for missing license field - UNKNOWN string"]
+   [{"info"
+     {"license" []
+      "classifiers" []}}
+    "MIT"
+    {:name "MIT", :desc "Permissive"}
+    "Get from GitHub API for older metadata format for missing license field - empty list"]
+   [{"info"
+     {"license" ["UNKNOWN"]
+      "classifiers" []}}
+    "MIT"
+    {:name "MIT", :desc "Permissive"}
+    "Get from GitHub API for older metadata format for missing license field - list with UNKNOWN"]
    [{"wut" 123}
     nil
     pypi/license-data-error
