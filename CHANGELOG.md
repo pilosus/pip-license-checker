@@ -5,7 +5,7 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 
 ## [Unreleased]
 ### Fixed
-- Nothing here yet
+- Support legacy default values for missing license field in package metadata ([#47](https://github.com/pilosus/pip-license-checker/issues/47))
 
 ## [0.14.0] - 2021-07-10
 ### Fixed
