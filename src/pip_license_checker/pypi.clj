@@ -161,14 +161,26 @@
 
 ;; Helpers to get license name and description
 
+(defn get-first-longest-vector
+  "Get the first vector in collection with the greatest count"
+  [vecs-coll]
+  (let [groupped-by-count (group-by count vecs-coll)
+        max-count-key (if (seq vecs-coll) (apply max (keys groupped-by-count)) nil)
+        max-count-group (get groupped-by-count max-count-key)
+        result (first max-count-group)]
+    result))
+
 (defn classifiers->license
-  "Get first license name from PyPI trove classifiers list"
+  "Get first most detailed license name from PyPI trove classifiers list"
   [classifiers]
-  (let [classifier
-        (some #(re-matches regex-match-classifier %) classifiers)
-        name
-        (if classifier (last (str/split classifier regex-split-classifier)) nil)]
-    name))
+  (let [license-classifiers
+        (filter #(re-matches regex-match-classifier %) classifiers)
+        splitted-classifiers
+        (map #(str/split % regex-split-classifier) license-classifiers)
+        most-detailed-splitted-classifier
+        (get-first-longest-vector splitted-classifiers)
+        classifier (last most-detailed-splitted-classifier)]
+    classifier))
 
 (defn strings->pattern
   "Get regex pattern from sequence of strings"
