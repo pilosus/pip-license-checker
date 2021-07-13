@@ -107,17 +107,16 @@
 ;; pypi/classifiers->license
 
 (def params-get-first-longest-vector
- [[nil nil "Nil vectors"]
-  [[] nil "Empty vectors collection"]
-  [[[1] [1 2 3] [1 2]] [1 2 3] "Collection of vectors of ints"]
-  [[["a" "b" "c"]  ["a" "b"] ["a"]] ["a" "b" "c"] "Collection of vectors of strings"]])
+  [[nil nil "Nil vectors"]
+   [[] nil "Empty vectors collection"]
+   [[[1] [1 2 3] [1 2]] [1 2 3] "Collection of vectors of ints"]
+   [[["a" "b" "c"]  ["a" "b"] ["a"]] ["a" "b" "c"] "Collection of vectors of strings"]])
 
 (deftest test-get-first-longest-vector
   (testing "Get first longest vector in collection"
     (doseq [[vectors expected description] params-get-first-longest-vector]
       (testing description
         (is (= expected (pypi/get-first-longest-vector vectors)))))))
-
 
 (def params-classifiers->license
   [[nil nil "No classifiers"]
