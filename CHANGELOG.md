@@ -7,6 +7,8 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 ### Fixed
 - Support legacy default values for missing license field in package metadata ([#47](https://github.com/pilosus/pip-license-checker/issues/47))
 - Use most detailed license trove classifier ([#44](https://github.com/pilosus/pip-license-checker/issues/44))
+- Skip unspecific license classifiers ([#43](https://github.com/pilosus/pip-license-checker/issues/43))
+- Improve BSD-family licenses matching
 
 ## [0.14.0] - 2021-07-10
 ### Fixed

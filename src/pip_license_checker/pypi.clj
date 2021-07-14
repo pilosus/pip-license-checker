@@ -38,6 +38,7 @@
 (def license-data-error {:name license-name-error :desc license-desc-error})
 
 (def license-undefined #{"" "UNKNOWN" [] ["UNKNOWN"]})
+(def unspecific-license-classifiers #{"License :: OSI Approved"})
 
 (def regex-match-classifier #"License :: .*")
 (def regex-split-classifier #" :: ")
@@ -77,8 +78,7 @@
    #"^AFL"
    #"Apache Software License"
    #"^Apache"
-   #"BSD License"
-   #"^BSD"
+   #"BSD"
    #"Historical Permission Notice and Disclaimer"
    #"^HPND"
    #"GNU Lesser General Public License"
@@ -175,8 +175,10 @@
   [classifiers]
   (let [license-classifiers
         (filter #(re-matches regex-match-classifier %) classifiers)
+        specifict-classifiers
+        (remove #(contains? unspecific-license-classifiers %) license-classifiers)
         splitted-classifiers
-        (map #(str/split % regex-split-classifier) license-classifiers)
+        (map #(str/split % regex-split-classifier) specifict-classifiers)
         most-detailed-splitted-classifier
         (get-first-longest-vector splitted-classifiers)
         classifier (last most-detailed-splitted-classifier)]
