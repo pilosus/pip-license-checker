@@ -142,7 +142,11 @@
      "License :: OSI Approved :: MIT License :: MIT with details"
      "License :: OSI Approved :: MIT License"]
     "MIT with details"
-    "Get most detailed license - 2"]])
+    "Get most detailed license - 2"]
+   [["Operating System :: Unix"
+     "License :: OSI Approved"]
+    nil
+    "Skip unspecific license classifiers"]])
 
 (deftest test-classifiers->license
   (testing "Get license from trove classifiers"
