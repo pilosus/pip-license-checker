@@ -5,6 +5,7 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 
 ## [Unreleased]
 ### Fixed
+- Show all licenses if more than one classifier specified ([#52](https://github.com/pilosus/pip-license-checker/issues/52))
 
 ## [0.15.0] - 2021-07-14
 ### Fixed
