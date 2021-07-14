@@ -5,6 +5,9 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 
 ## [Unreleased]
 ### Fixed
+
+## [0.15.0] - 2021-07-14
+### Fixed
 - Support legacy default values for missing license field in package metadata ([#47](https://github.com/pilosus/pip-license-checker/issues/47))
 - Use most detailed license trove classifier ([#44](https://github.com/pilosus/pip-license-checker/issues/44))
 - Skip unspecific license classifiers ([#43](https://github.com/pilosus/pip-license-checker/issues/43))
@@ -112,8 +115,9 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 ### Added
 - Structure for Leiningen app project
 
-[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.14.0...HEAD
-[0.13.3]: https://github.com/pilosus/pip-license-checker/compare/0.13.3...0.14.0
+[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.15.0...HEAD
+[0.15.0]: https://github.com/pilosus/pip-license-checker/compare/0.14.0...0.15.0
+[0.14.0]: https://github.com/pilosus/pip-license-checker/compare/0.13.3...0.14.0
 [0.13.3]: https://github.com/pilosus/pip-license-checker/compare/0.13.2...0.13.3
 [0.13.2]: https://github.com/pilosus/pip-license-checker/compare/0.13.1...0.13.2
 [0.13.1]: https://github.com/pilosus/pip-license-checker/compare/0.13.0...0.13.1
