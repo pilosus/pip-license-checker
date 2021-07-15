@@ -157,6 +157,7 @@
 (def params-license-name->desc
   [["MIT License" pypi/license-desc-permissive "Permissive"]
    ["Artistic license" pypi/license-desc-permissive "Permissive"]
+   ["zope public license" pypi/license-desc-permissive "Permissive"]
    ["GPLv3" pypi/license-desc-copyleft "Copyleft"]
    ["EULA" pypi/license-desc-other "Other"]])
 
