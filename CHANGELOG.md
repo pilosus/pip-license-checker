@@ -5,6 +5,9 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 
 ## [Unreleased]
 ### Fixed
+
+## [0.16.0] - 2021-07-15
+### Added
 - Show all licenses if more than one classifier specified ([#52](https://github.com/pilosus/pip-license-checker/issues/52))
 - Support Artistic license ([#45](https://github.com/pilosus/pip-license-checker/issues/45))
 - Support Zope Public License ([#46](https://github.com/pilosus/pip-license-checker/issues/46))
@@ -118,7 +121,8 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 ### Added
 - Structure for Leiningen app project
 
-[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.15.0...HEAD
+[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.16.0...HEAD
+[0.15.0]: https://github.com/pilosus/pip-license-checker/compare/0.15.0...0.16.0
 [0.15.0]: https://github.com/pilosus/pip-license-checker/compare/0.14.0...0.15.0
 [0.14.0]: https://github.com/pilosus/pip-license-checker/compare/0.13.3...0.14.0
 [0.13.3]: https://github.com/pilosus/pip-license-checker/compare/0.13.2...0.13.3
