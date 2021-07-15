@@ -7,6 +7,7 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 ### Fixed
 - Show all licenses if more than one classifier specified ([#52](https://github.com/pilosus/pip-license-checker/issues/52))
 - Support Artistic license ([#45](https://github.com/pilosus/pip-license-checker/issues/45))
+- Support Zope Public License ([#46](https://github.com/pilosus/pip-license-checker/issues/46))
 
 ## [0.15.0] - 2021-07-14
 ### Fixed

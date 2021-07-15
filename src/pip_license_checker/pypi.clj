@@ -95,6 +95,7 @@
    #"UPL"
    #"W3C License"
    #"W3C"
+   #"Zope Public License"
    #"zlib/libpng License"
    #"zlib/libpng"
    #"Public Domain"])
