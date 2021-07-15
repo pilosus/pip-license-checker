@@ -70,7 +70,6 @@
   "Permissive licenses"
   [#"CeCILL-B Free Software License Agreement"
    #"^CeCILL-B"
-   #"License :: CeCILL-C Free Software License Agreement"
    #"^CeCILL-C"
    #"CEA CNRS Inria Logiciel Libre License"
    #"^CeCILL-2.1"  ;; http://cecill.info/index.en.html
@@ -78,6 +77,7 @@
    #"^AFL"
    #"Apache Software License"
    #"^Apache"
+   #"Artistic"
    #"BSD"
    #"Historical Permission Notice and Disclaimer"
    #"^HPND"
