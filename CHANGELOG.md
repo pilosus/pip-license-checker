@@ -8,6 +8,7 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 - Show all licenses if more than one classifier specified ([#52](https://github.com/pilosus/pip-license-checker/issues/52))
 - Support Artistic license ([#45](https://github.com/pilosus/pip-license-checker/issues/45))
 - Support Zope Public License ([#46](https://github.com/pilosus/pip-license-checker/issues/46))
+- Add GPL linking exception to permissive licenses ([#50](https://github.com/pilosus/pip-license-checker/issues/50))
 
 ## [0.15.0] - 2021-07-14
 ### Fixed

@@ -158,14 +158,17 @@
   [["MIT License" pypi/license-desc-permissive "Permissive"]
    ["Artistic license" pypi/license-desc-permissive "Permissive"]
    ["zope public license" pypi/license-desc-permissive "Permissive"]
+   ["GPL with linking exception" pypi/license-desc-permissive "Permissive"]
+   ["GNU General Public License version 2 with linking exception" pypi/license-desc-permissive "Permissive"]
    ["GPLv3" pypi/license-desc-copyleft "Copyleft"]
+   ["GNU General Public License version 2 (GPL v2)" pypi/license-desc-copyleft "Copyleft"]
    ["EULA" pypi/license-desc-other "Other"]])
 
 (deftest test-license-name->desc
   (testing "Get license description by its name"
     (doseq [[license expected description] params-license-name->desc]
       (testing description
-        (is (= expected (pypi/license-name->desc license)))))))
+        (is (= expected (pypi/license-name->desc license)), license)))))
 
 ;; pypi/data->license-map
 
