@@ -88,6 +88,33 @@
   []
   (println (format formatter-totals "License Type" "Found")))
 
+(s/fdef filter-fails-only-requirements
+  :args (s/cat
+         :licenses (s/coll-of ::sp/requirement-response-license)
+         :options ::sp/options-cli-arg)
+  :ret (s/coll-of ::sp/requirement-response-license))
+
+(defn filter-fails-only-licenses
+  "Filter license types specified with --failed flag(s) if needed"
+  [licenses options]
+  (let [{:keys [fail fails-only]} options]
+    (if (or
+         (not fails-only)
+         (not (seq fail)))
+      licenses
+      (filter #(contains? fail (get-in % [:license :desc])) licenses))))
+
+(s/fdef filter-fails-only-requirements
+  :args (s/cat
+         :licenses (s/coll-of ::sp/requirement-response-license)
+         :options ::sp/options-cli-arg)
+  :ret (s/coll-of ::sp/requirement-response-license))
+
+(defn filter-parsed-requirements
+  "Post parsing filtering pipeline"
+  [licenses options]
+  (-> (filter-fails-only-licenses licenses options)))
+
 (s/fdef process-requirements
   :args (s/cat
          :requirements ::sp/requirements-cli-arg
@@ -103,7 +130,8 @@
         totals-only-opt (:totals-only options)
         show-totals (or with-totals-opt totals-only-opt)
         table-headers (:table-headers options)
-        licenses (get-parsed-requiements packages requirements options)
+        parsed-licenses (get-parsed-requiements packages requirements options)
+        licenses (filter-parsed-requirements parsed-licenses options)
         totals
         (if (or show-totals with-fail)
           (get-license-type-totals licenses)
@@ -176,6 +204,7 @@
    ["-t" "--[no-]with-totals" "Print totals for license types" :default false]
    ["-o" "--[no-]totals-only" "Print only totals for license types" :default false]
    ["-d" "--[no-]table-headers" "Print table headers" :default false]
+   ["-m" "--[no-]fails-only" "Print only packages of license types specified with --fail flags" :default false]
    ["-h" "--help" "Print this help message"]])
 
 (s/fdef validate-args

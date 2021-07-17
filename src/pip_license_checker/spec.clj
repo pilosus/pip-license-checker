@@ -121,7 +121,9 @@
    :requirement (s/cat
                  :name ::requirement
                  :version ::version-str)
-   :license string?))
+   :license (s/cat
+             :name string?
+             :desc string?)))
 
 
 ;; CLI
