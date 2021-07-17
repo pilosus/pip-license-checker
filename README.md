@@ -84,6 +84,7 @@ Description:
   -t, --[no-]with-totals                    Print totals for license types
   -o, --[no-]totals-only                    Print only totals for license types
   -d, --[no-]table-headers                  Print table headers
+  -m, --[no-]fails-only                     Print only packages of license types specified with --fail flags
   -h, --help                                Print this help message
 
 Examples:

@@ -6,6 +6,10 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 ## [Unreleased]
 ### Fixed
 
+## [0.17.0] - 2021-07-18
+### Added
+- Flag `--fails-only` to print only licenses found for `--fail` flags ([#57](https://github.com/pilosus/pip-license-checker/issues/57))
+
 ## [0.16.0] - 2021-07-15
 ### Added
 - Show all licenses if more than one classifier specified ([#52](https://github.com/pilosus/pip-license-checker/issues/52))
