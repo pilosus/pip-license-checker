@@ -21,13 +21,19 @@
 (def license-name-error "Error")
 
 (def license-desc-error "Error")
-(def license-desc-copyleft "Copyleft")
+(def license-desc-copyleft-all "Copyleft")
+(def license-desc-copyleft-weak "WeakCopyleft")
+(def license-desc-copyleft-strong "StrongCopyleft")
+(def license-desc-copyleft-network "NetworkCopyleft")
 (def license-desc-permissive "Permissive")
 (def license-desc-other "Other")
 
 (def license-types
   (sorted-set license-desc-error
-              license-desc-copyleft
+              license-desc-copyleft-all
+              license-desc-copyleft-weak
+              license-desc-copyleft-strong
+              license-desc-copyleft-network
               license-desc-permissive
               license-desc-other))
 
@@ -45,45 +51,76 @@
 
 (def regex-ignore-case #"(?i)")
 
-;; Copyleft/Permissive/Other description is based on the assumption
-;; a requirement is used as a library. Conditions for linking a library
-;; to the code licensed under a different license determine it's permissiveness.
-;; See more:
+;;
+;; When discriminating between permissive and copyleft licenses here,
+;; we are mostly concerned with the linking, because this is the most used
+;; aspect of the dependency libraries, and distribution.
+;; See more details here:
 ;; https://en.wikipedia.org/wiki/Comparison_of_free_and_open-source_software_licences
-(def licenses-copyleft
-  "Free software licenses (Copyleft)"
+;;
+
+(def licenses-copyleft-network
+  "Copyleft licenses that consider access over the network as distribution"
   [#"^Affero"
-   #"^EUPL"
-   #"European Union Public Licence"
-   #"^FDL"
-   #"GNU Affero General Public License"
-   #"GNU Free Documentation License"
+   #"GNU Affero General Public License"])
+
+(def licenses-copyleft-strong
+  "Copyleft licenses with wide range of activities considered as derivation"
+  [;; https://www.gnu.org/licenses/gpl-faq.html
    #"GNU General Public License"
    #"^GPL"
-   #"IBM Public License"
+
+   #"IBM Public License"])
+
+(def licenses-copyleft-weak
+  "Weak or partial copyleft that usually not triggered for static/dynamic linking"
+  [#"GNU Lesser General Public License"
+   #"GNU Library or Lesser General Public License"
+   #"^LGPL"
+
+   #"GPL.*linking exception"
+
+   ;; https://www.mozilla.org/en-US/MPL/2.0/FAQ/
    #"^MPL"
    #"Mozilla Public License"
+
+   #"^EUPL"
+   #"European Union Public Licence"
+
    #"^OSL"
-   #"Open Software License"])
+   #"Open Software License"
+
+   #"^CPL"
+   #"Common Public License"
+
+   #"Artistic"
+
+   ;; https://cecill.info/faq.en.html
+   #"^CeCILL-C"
+   #"CEA CNRS Inria Logiciel Libre License"
+   #"^CeCILL-2.1"])
+
+(def licenses-copyleft-all
+  "All copyleft licenses"
+  (into
+   []
+   (concat
+    licenses-copyleft-network
+    licenses-copyleft-strong
+    licenses-copyleft-weak)))
 
 (def licenses-permissive
   "Permissive licenses"
   [#"CeCILL-B Free Software License Agreement"
    #"^CeCILL-B"
-   #"^CeCILL-C"
-   #"CEA CNRS Inria Logiciel Libre License"
-   #"^CeCILL-2.1"  ;; http://cecill.info/index.en.html
    #"Academic Free License"
    #"^AFL"
    #"Apache Software License"
    #"^Apache"
-   #"Artistic"
    #"BSD"
    #"Historical Permission Notice and Disclaimer"
    #"^HPND"
-   #"GNU Lesser General Public License"
-   #"GNU Library or Lesser General Public License"
-   #"^LGPL"
+   #"Microsoft Public License"
    #"MIT License"
    #"^MIT"
    #"ISC License"
@@ -101,6 +138,7 @@
    #"Public Domain"])
 
 ;; Helpers
+
 
 (defn is-license-type-valid?
   "Return true if license-type string is valid, false otherwise"
@@ -185,12 +223,12 @@
 (defn license-name->desc
   "Get license description by its name"
   [name]
-  (let [regex-copyleft (strings->pattern licenses-copyleft)
+  (let [regex-copyleft (strings->pattern licenses-copyleft-all)
         match-copyleft (some? (re-find regex-copyleft name))
         regex-permissive (strings->pattern licenses-permissive)
         match-permissive (some? (re-find regex-permissive name))]
     (cond
-      match-copyleft license-desc-copyleft
+      match-copyleft license-desc-copyleft-all
       match-permissive license-desc-permissive
       :else license-desc-other)))
 

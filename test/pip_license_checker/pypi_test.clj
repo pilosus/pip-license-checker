@@ -156,16 +156,16 @@
 
 (def params-license-name->desc
   [["MIT License" pypi/license-desc-permissive "Permissive"]
-   ["Artistic license" pypi/license-desc-permissive "Permissive"]
+   ["Artistic license" pypi/license-desc-copyleft-all "Copyleft"]
    ["zope public license" pypi/license-desc-permissive "Permissive"]
-   ["GPLv3" pypi/license-desc-copyleft "Copyleft"]
+   ["GPLv3" pypi/license-desc-copyleft-all "Copyleft"]
    ["EULA" pypi/license-desc-other "Other"]])
 
 (deftest test-license-name->desc
   (testing "Get license description by its name"
     (doseq [[license expected description] params-license-name->desc]
       (testing description
-        (is (= expected (pypi/license-name->desc license)))))))
+        (is (= expected (pypi/license-name->desc license)) license)))))
 
 ;; pypi/data->license-map
 
