@@ -105,12 +105,19 @@
 (defn license-name->desc
   "Get license description by its name"
   [name]
-  (let [regex-copyleft (strings->pattern license/regex-list-copyleft-all)
-        match-copyleft (some? (re-find regex-copyleft name))
+  (let [regex-copyleft-network (strings->pattern license/regex-list-copyleft-network)
+        regex-copyleft-strong (strings->pattern license/regex-list-copyleft-strong)
+        regex-copyleft-weak (strings->pattern license/regex-list-copyleft-weak)
+        match-copyleft-network (some? (re-find regex-copyleft-network name))
+        match-copyleft-strong (some? (re-find regex-copyleft-strong name))
+        match-copyleft-weak (some? (re-find regex-copyleft-weak name))
+
         regex-permissive (strings->pattern license/regex-list-permissive)
         match-permissive (some? (re-find regex-permissive name))]
     (cond
-      match-copyleft license/type-copyleft-all
+      match-copyleft-network license/type-copyleft-network
+      match-copyleft-strong license/type-copyleft-strong
+      match-copyleft-weak license/type-copyleft-weak
       match-permissive license/type-permissive
       :else license/type-other)))
 

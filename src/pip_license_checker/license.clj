@@ -120,6 +120,11 @@
 (def type-permissive "Permissive")
 (def type-other "Other")
 
+(def types-copyleft
+  (sorted-set type-copyleft-network
+              type-copyleft-strong
+              type-copyleft-weak))
+
 (def types
   (sorted-set type-error
               type-copyleft-all

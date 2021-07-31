@@ -132,6 +132,7 @@
 (s/def ::requirements-cli-arg (s/nilable (s/coll-of string?)))
 (s/def ::packages-cli-arg (s/nilable (s/coll-of string?)))
 (s/def ::options-cli-arg (s/nilable (s/map-of string? string?)))
+(s/def ::options-fail (s/nilable (s/coll-of set?)))
 
 
 ;; Core

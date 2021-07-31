@@ -1,10 +1,12 @@
 aiohttp[speedups]==3.7.2
 piny>=0.6
 #aiosmtpd > 1.2
-aiostream
+aiostream  # Strong Copyleft
+mo-collections==4.30.21121  # Weak Copyleft
 aiocache~=0.11.1
 aiokafka == 0.6.*
 aiopg == 122.3.5  # no such version, error expected
+telegram-bot-framework==3.15.2  # Network Copyleft
 aio-throttle  # no license on PyPI, look up GitHub
 
 https://example.com/package_3.0.3.dev1820+49a8884-cp34-none-win_amd64.whl
