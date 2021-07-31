@@ -9,7 +9,8 @@
    [clojure.string :as str]
    [pip-license-checker.github :as github]
    [pip-license-checker.spec :as sp]
-   [pip-license-checker.version :as version]))
+   [pip-license-checker.version :as version]
+   [pip-license-checker.license :as license]))
 
 (def settings-http-client
   {:socket-timeout 3000
@@ -18,31 +19,6 @@
 
 (def url-pypi-base "https://pypi.org/pypi")
 
-(def license-name-error "Error")
-
-(def license-desc-error "Error")
-(def license-desc-copyleft-all "Copyleft")
-(def license-desc-copyleft-weak "WeakCopyleft")
-(def license-desc-copyleft-strong "StrongCopyleft")
-(def license-desc-copyleft-network "NetworkCopyleft")
-(def license-desc-permissive "Permissive")
-(def license-desc-other "Other")
-
-(def license-types
-  (sorted-set license-desc-error
-              license-desc-copyleft-all
-              license-desc-copyleft-weak
-              license-desc-copyleft-strong
-              license-desc-copyleft-network
-              license-desc-permissive
-              license-desc-other))
-
-(def invalid-license-type
-  (format "Invalid license type. Use one of: %s"
-          (str/join ", " license-types)))
-
-(def license-data-error {:name license-name-error :desc license-desc-error})
-
 (def license-undefined #{"" "UNKNOWN" [] ["UNKNOWN"]})
 (def unspecific-license-classifiers #{"License :: OSI Approved"})
 
@@ -50,100 +26,6 @@
 (def regex-split-classifier #" :: ")
 
 (def regex-ignore-case #"(?i)")
-
-;;
-;; When discriminating between permissive and copyleft licenses here,
-;; we are mostly concerned with the linking, because this is the most used
-;; aspect of the dependency libraries, and distribution.
-;; See more details here:
-;; https://en.wikipedia.org/wiki/Comparison_of_free_and_open-source_software_licences
-;;
-
-(def licenses-copyleft-network
-  "Copyleft licenses that consider access over the network as distribution"
-  [#"^Affero"
-   #"GNU Affero General Public License"])
-
-(def licenses-copyleft-strong
-  "Copyleft licenses with wide range of activities considered as derivation"
-  [;; https://www.gnu.org/licenses/gpl-faq.html
-   #"GNU General Public License"
-   #"^GPL"
-
-   #"IBM Public License"])
-
-(def licenses-copyleft-weak
-  "Weak or partial copyleft that usually not triggered for static/dynamic linking"
-  [#"GNU Lesser General Public License"
-   #"GNU Library or Lesser General Public License"
-   #"^LGPL"
-
-   #"GPL.*linking exception"
-
-   ;; https://www.mozilla.org/en-US/MPL/2.0/FAQ/
-   #"^MPL"
-   #"Mozilla Public License"
-
-   #"^EUPL"
-   #"European Union Public Licence"
-
-   #"^OSL"
-   #"Open Software License"
-
-   #"^CPL"
-   #"Common Public License"
-
-   #"Artistic"
-
-   ;; https://cecill.info/faq.en.html
-   #"^CeCILL-C"
-   #"CEA CNRS Inria Logiciel Libre License"
-   #"^CeCILL-2.1"])
-
-(def licenses-copyleft-all
-  "All copyleft licenses"
-  (into
-   []
-   (concat
-    licenses-copyleft-network
-    licenses-copyleft-strong
-    licenses-copyleft-weak)))
-
-(def licenses-permissive
-  "Permissive licenses"
-  [#"CeCILL-B Free Software License Agreement"
-   #"^CeCILL-B"
-   #"Academic Free License"
-   #"^AFL"
-   #"Apache Software License"
-   #"^Apache"
-   #"BSD"
-   #"Historical Permission Notice and Disclaimer"
-   #"^HPND"
-   #"Microsoft Public License"
-   #"MIT License"
-   #"^MIT"
-   #"ISC License"
-   #"^ISCL"
-   #"Python Software Foundation License"
-   #"Python License"
-   #"Unlicense"
-   #"Universal Permissive License"
-   #"UPL"
-   #"W3C License"
-   #"W3C"
-   #"Zope Public License"
-   #"zlib/libpng License"
-   #"zlib/libpng"
-   #"Public Domain"])
-
-;; Helpers
-
-
-(defn is-license-type-valid?
-  "Return true if license-type string is valid, false otherwise"
-  [license-type]
-  (contains? license-types license-type))
 
 ;; Get API response, parse it
 
@@ -223,14 +105,14 @@
 (defn license-name->desc
   "Get license description by its name"
   [name]
-  (let [regex-copyleft (strings->pattern licenses-copyleft-all)
+  (let [regex-copyleft (strings->pattern license/regex-list-copyleft-all)
         match-copyleft (some? (re-find regex-copyleft name))
-        regex-permissive (strings->pattern licenses-permissive)
+        regex-permissive (strings->pattern license/regex-list-permissive)
         match-permissive (some? (re-find regex-permissive name))]
     (cond
-      match-copyleft license-desc-copyleft-all
-      match-permissive license-desc-permissive
-      :else license-desc-other)))
+      match-copyleft license/type-copyleft-all
+      match-permissive license/type-permissive
+      :else license/type-other)))
 
 (defn data->license-map
   "Get license name from info.classifiers or info.license field of PyPI API data"
@@ -244,10 +126,10 @@
                       license-license
                       (github/homepage->license-name home_page))
         license-desc
-        (license-name->desc (or license-name license-name-error))]
+        (license-name->desc (or license-name license/name-error))]
     (if license-name
       {:name license-name :desc license-desc}
-      license-data-error)))
+      license/data-error)))
 
 ;; Get license data from API JSON
 
@@ -265,7 +147,7 @@
        :license (data->license-map data)}
       {:ok? false
        :requirement requirement
-       :license license-data-error})))
+       :license license/data-error})))
 
 ;; Entrypoint
 

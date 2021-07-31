@@ -9,6 +9,7 @@
    [clojure.tools.cli :refer [parse-opts]]
    [pip-license-checker.file :as file]
    [pip-license-checker.filters :as filters]
+   [pip-license-checker.license :as license]
    [pip-license-checker.pypi :as pypi]
    [pip-license-checker.spec :as sp]))
 
@@ -196,7 +197,7 @@
    ["-f" "--fail LICENSE_TYPE" "Return non-zero exit code if license type is found"
     :default (sorted-set)
     :assoc-fn #(update %1 %2 conj %3)
-    :validate [pypi/is-license-type-valid? pypi/invalid-license-type]]
+    :validate [license/is-type-valid? license/invalid-type]]
    ["-e" "--exclude REGEX" "PCRE to exclude matching packages. Used only if [package]... or requirement files specified"
     :parse-fn #(re-pattern %)]
    ["-p" "--[no-]pre" "Include pre-release and development versions. By default, use only stable versions"
