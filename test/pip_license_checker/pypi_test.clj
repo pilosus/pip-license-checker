@@ -4,6 +4,7 @@
    [clj-http.client :as http]
    [pip-license-checker.github :as github]
    [pip-license-checker.pypi :as pypi]
+   [pip-license-checker.license :as license]
    [pip-license-checker.version :as version]))
 
 
@@ -155,17 +156,20 @@
 
 
 (def params-license-name->desc
-  [["MIT License" pypi/license-desc-permissive "Permissive"]
-   ["Artistic license" pypi/license-desc-permissive "Permissive"]
-   ["zope public license" pypi/license-desc-permissive "Permissive"]
-   ["GPLv3" pypi/license-desc-copyleft "Copyleft"]
-   ["EULA" pypi/license-desc-other "Other"]])
+  [["MIT License" license/type-permissive "Permissive"]
+   ["Artistic license" license/type-permissive "Permissive"]
+   ["zope public license" license/type-permissive "Permissive"]
+   ["Mozilla Public License 2.0" license/type-copyleft-weak "WeakCopyleft"]
+   ["GPLv3" license/type-copyleft-strong "StrongCopyleft"]
+   ["AGPLv3" license/type-copyleft-network "NetworkCopyleft"]
+   ["GNU Affero GPL version 3" license/type-copyleft-network "NetworkCopyleft"]
+   ["EULA" license/type-other "Other"]])
 
 (deftest test-license-name->desc
   (testing "Get license description by its name"
     (doseq [[license expected description] params-license-name->desc]
       (testing description
-        (is (= expected (pypi/license-name->desc license)))))))
+        (is (= expected (pypi/license-name->desc license)) license)))))
 
 ;; pypi/data->license-map
 
@@ -208,7 +212,7 @@
     "Get from GitHub API for older metadata format for missing license field - list with UNKNOWN"]
    [{"wut" 123}
     nil
-    pypi/license-data-error
+    license/data-error
     "Error fallback"]])
 
 (deftest test-data->license-map
@@ -240,7 +244,7 @@
        "classifiers" ["License :: OSI Approved :: MIT License"]}}}
     {:ok? false
      :requirement 1
-     :license pypi/license-data-error}
+     :license license/data-error}
     "Fallback"]])
 
 (deftest test-data->license

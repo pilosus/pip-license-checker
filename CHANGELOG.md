@@ -6,6 +6,43 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 ## [Unreleased]
 ### Fixed
 
+## [0.18.0] - 2021-08-01
+
+Release **breaks backward compatibility** by introducing fine-grained
+copyleft detection and moving some licenses between permissive and
+weak copyleft types.
+
+### Removed
+- License type `Copyleft` has been removed from result output in
+  favour of more granular copyleft types: `WeakCopyleft` (weak or
+  partial copyleft licenses like MPL, LGPL, or GPL with linking
+  exception), `StrongCopyleft` (GPL), `NetworkCopyleft` (AGPL, OSL)
+
+### Added
+- `--fail` option is extended with the new values: `WeakCopyleft`, `StrongCopyleft`, `NetworkCopyleft`.
+- Copyleft over the network (private use loophole fixed) licenses: RPSL, Sybase Open Watcom Public License
+- Strong copyleft licenses: RPL, Sleepycat
+- Weak copyleft licenses: GPL linking exception, Motosoto, Nokia Open
+  Source License, Netscape Public License, Netizen Open Source
+  License, BitTorrent Open Source License, Sun Public License, Eclipse
+  Public License, Eurosym License, CPL, Common Development and
+  Distribution License, Apple Public Source License, Microsoft
+  Reciprocal License, SIL Open Font License
+- Permissive licenses: AAL, Eiffel Forum License, MirOS, Intel Open
+  Source License, Microsoft Public License, PostgreSQL License, Q
+  Public License, Repoze Public License, UPL, UIUC, Vovida Software
+  License, X.Net License
+
+### Changed
+- `--fail` option `Copyleft` is still suppported and is triggered for
+  all licenses under newly introduced `WeakCopyleft`,
+  `StrongCopyleft`, `NetworkCopyleft` types.
+- Following licenses were moved from `Permissive` to `WeakCopyleft`: CeCILL-2.1, CeCILL-C, LGPL
+- Following licenses were moved from `Copyleft` to `WeakCopyleft`: MPL
+- Following licenses were moved from `Copyleft` to `StrongCopyleft`: GPL, IBM Public License
+- Following licenses were moved from `Copyleft` to `NetworkCopyleft`: AGPL, OSL
+
+
 ## [0.17.0] - 2021-07-18
 ### Added
 - Flag `--fails-only` to print only licenses found for `--fail` flags ([#57](https://github.com/pilosus/pip-license-checker/issues/57))
@@ -125,7 +162,8 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 ### Added
 - Structure for Leiningen app project
 
-[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.17.0...HEAD
+[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.18.0...HEAD
+[0.17.0]: https://github.com/pilosus/pip-license-checker/compare/0.17.0...0.18.0
 [0.17.0]: https://github.com/pilosus/pip-license-checker/compare/0.16.0...0.17.0
 [0.16.0]: https://github.com/pilosus/pip-license-checker/compare/0.15.0...0.16.0
 [0.15.0]: https://github.com/pilosus/pip-license-checker/compare/0.14.0...0.15.0

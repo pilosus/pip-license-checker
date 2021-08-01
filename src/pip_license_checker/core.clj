@@ -9,6 +9,7 @@
    [clojure.tools.cli :refer [parse-opts]]
    [pip-license-checker.file :as file]
    [pip-license-checker.filters :as filters]
+   [pip-license-checker.license :as license]
    [pip-license-checker.pypi :as pypi]
    [pip-license-checker.spec :as sp]))
 
@@ -188,15 +189,16 @@
        (str/join \newline errors)))
 
 (def cli-options
-  [;; FIXME update with :multi true update-fn: conj once clojure.tools.cli 1.0.195 (?) released
-   ["-r" "--requirements REQUIREMENT_NAME" "Requirement file name to read"
+  [["-r" "--requirements REQUIREMENT_NAME" "Requirement file name to read"
+    :multi true
     :default []
-    :assoc-fn #(update %1 %2 conj %3)
+    :update-fn conj
     :validate [file/exists? "Requirement file does not exist"]]
    ["-f" "--fail LICENSE_TYPE" "Return non-zero exit code if license type is found"
     :default (sorted-set)
-    :assoc-fn #(update %1 %2 conj %3)
-    :validate [pypi/is-license-type-valid? pypi/invalid-license-type]]
+    :multi true
+    :update-fn conj
+    :validate [license/is-type-valid? license/invalid-type]]
    ["-e" "--exclude REGEX" "PCRE to exclude matching packages. Used only if [package]... or requirement files specified"
     :parse-fn #(re-pattern %)]
    ["-p" "--[no-]pre" "Include pre-release and development versions. By default, use only stable versions"
@@ -206,6 +208,32 @@
    ["-d" "--[no-]table-headers" "Print table headers" :default false]
    ["-m" "--[no-]fails-only" "Print only packages of license types specified with --fail flags" :default false]
    ["-h" "--help" "Print this help message"]])
+
+(s/fdef extend-fail-opt
+  :args (s/? ::sp/options-fail)
+  :ret (s/? ::sp/options-fail))
+
+(defn extend-fail-opt
+  "Try to substitute common fail option in set with specific parts it consist of"
+  [fail-opts]
+  (if (contains? fail-opts license/type-copyleft-all)
+    (clojure.set/difference
+     (clojure.set/union fail-opts license/types-copyleft)
+     #{license/type-copyleft-all})
+    fail-opts))
+
+(s/fdef post-process-options
+  :args (s/? ::sp/options-cli-arg)
+  :ret (s/? ::sp/options-cli-arg))
+
+(defn post-process-options
+  "Update option map"
+  [options]
+  (let [opts' (dissoc options :requirements)
+        fail-opt (:fail opts')
+        fail-opt-exteded (extend-fail-opt fail-opt)
+        updated-opts (assoc opts' :fail fail-opt-exteded)]
+    updated-opts))
 
 (s/fdef validate-args
   :args (s/cat :args (s/coll-of string?))
@@ -228,7 +256,7 @@
        (> (count (:requirements options)) 0))
       {:requirements (:requirements options)
        :packages arguments
-       :options (dissoc options :requirements)}
+       :options (post-process-options options)}
       :else
       {:exit-message (usage summary)})))
 

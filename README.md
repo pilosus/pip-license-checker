@@ -34,14 +34,17 @@ lein run --pre aiohttp
 ### scan all packages in requirements file
 lein run -r resources/requirements.txt
 
-aiohttp:3.7.2                  Apache Software License        Permissive
-piny:0.6                       MIT License                    Permissive
-aiostream                      GPLv3                          Copyleft
-aiocache:0.11.1                                               Other
-aiokafka:0.6                   Apache Software License        Permissive
-aiopg:122.3.5                  Error                          ???
-workflow-tools:0.5.0           Apache Software License        Permissive
-Synx                           Other/Proprietary License      Other
+aiohttp:3.7.2                       Apache Software License                                 Permissive
+piny:0.6.0                          MIT License                                             Permissive
+aiostream:0.4.3                     GPLv3                                                   StrongCopyleft
+mo-collections:4.30.21121           Mozilla Public License 2.0 (MPL 2.0)                    WeakCopyleft
+aiocache:0.11.1                     BSD 3-Clause "New" or "Revised" License                 Permissive
+aiokafka:0.6.0                      Apache Software License                                 Permissive
+aiopg:122.3.5                       Error                                                   Error
+telegram-bot-framework:3.15.2       GNU Affero General Public License v3 or later (AGPLv3+) NetworkCopyleft
+aio-throttle:1.6.2                  MIT License                                             Permissive
+workflow-tools:0.6.0                Apache Software License                                 Permissive
+Synx:0.0.3                          Other/Proprietary License                               Other
 
 ### scan packages matching regex pattern
 ### e.g. all lines except containing "aio.*" packages
@@ -94,6 +97,9 @@ pip-license-checker --pre 'aiohttp<4'
 pip-license-checker --with-totals --table-headers --requirements resources/requirements.txt
 pip-license-checker --totals-only -r file1.txt -r file2.txt -r file3.txt
 pip-license-checker -r resources/requirements.txt django aiohttp==3.7.1 --exclude 'aio.*'
+
+Valid license types:
+NetworkCopyleft, StrongCopyleft, WeakCopyleft, Copyleft, Permissive, Other, Error
 ```
 
 ## Docker
