@@ -9,52 +9,125 @@
 
 ;;
 ;; When discriminating between permissive and copyleft licenses here,
-;; we are mostly concerned with the linking, because this is the most used
-;; aspect of the dependency libraries, and distribution.
-;; See more details here (be careful though, as not all the details are acurate enough):
+;; we are mostly concerned with the dynamic *linking*, because this is
+;; the most used aspect of the dependency libraries for a Python program.
+;; See more details here (be careful though, as not all the details
+;; are acurate enough):
 ;; https://en.wikipedia.org/wiki/Comparison_of_free_and_open-source_software_licences
 ;;
+;; Another useful links to learn about licenses
+;;
+;; GNU licenses (GPL, LGPL, AGPL)
+;; https://www.gnu.org/licenses/
+;; https://www.gnu.org/licenses/gpl-3.0.txt
+;; https://www.gnu.org/licenses/gpl-faq.html
+
+;; Free Software Movement license list
+;; https://www.gnu.org/licenses/license-list.html
+
+;; OSI license list
+;; https://opensource.org/licenses
+
+;; European Union Public Licence (EUPL)
+;; https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12
+;; https://joinup.ec.europa.eu/collection/eupl/matrix-eupl-compatible-open-source-licences#section-3
+
+;; Mozilla Public License (MPL)
+;; https://www.mozilla.org/en-US/MPL/
+;; https://www.mozilla.org/en-US/MPL/2.0/FAQ/
+
+;; CeCILL
+;; https://cecill.info/licences.en.html
+;; https://cecill.info/faq.en.html
+
+;; Misc
+;; https://tldrlegal.com/
+;; https://opensource.stackexchange.com/
 
 
 (def regex-list-copyleft-network
   "Copyleft licenses that consider access over the network as distribution"
-  [#"Affero"
-   #"AGPL"
-   #"GNU Affero General Public License"])
+  [#"\bAffero"
+   #"\bAGPL"
+   #"GNU Affero General Public License"
+
+   #"\bOSL"
+   #"Open Software License"
+
+   #"\bRPSL"
+   #"RealNetworks Public Source License"
+
+   #"\bWatcom"
+   #"Sybase Open Watcom Public License"])
 
 (def regex-list-copyleft-strong
   "Copyleft licenses with wide range of activities considered as derivation"
-  [;; https://www.gnu.org/licenses/gpl-faq.html
-   #"GNU General Public License"
-   #"^GPL"
+  [#"GNU General Public License"
+   #"\bGPL"
 
-   #"IBM Public License"])
+   #"IBM Public License"
+
+   #"\bRPL"
+   #"Reciprocal Public License"
+
+   #"Sleepycat License"])
 
 (def regex-list-copyleft-weak
   "Weak or partial copyleft that usually not triggered for static and/or dynamic linking"
   [#"GNU Lesser General Public License"
    #"GNU Library or Lesser General Public License"
-   #"LGPL"
+   #"\bLGPL"
 
    #"GPL.*linking exception"
 
-   ;; https://www.mozilla.org/en-US/MPL/2.0/FAQ/
-   #"MPL"
+   #"\bMPL"
    #"Mozilla Public License"
 
-   #"EUPL"
+   #"Motosoto"
+
+   #"Nokia Open Source License"
+
+   #"\bNPL"
+   #"Netscape Public License"
+
+   #"\bNOSL"
+   #"Netizen Open Source License"
+
+   #"BitTorrent Open Source License"
+
+   #"\bSPL"
+   #"Sun Public License"
+
+   #"\bEPL"
+   #"Eclipse Public License"
+
+   ;; Linking as producing a derivative work is not confirmed by case law yet,
+   ;; but probably contradicts the EU laws, that's why weak copyleft
+   ;; If proved otherwise, may be moved to a strong copyleft list
+   ;; See https://joinup.ec.europa.eu/collection/eupl/matrix-eupl-compatible-open-source-licences#section-3
+   #"\bEUPL"
    #"European Union Public Licence"
 
-   #"OSL"
-   #"Open Software License"
+   #"Eurosym License"
 
-   #"CPL"
+   #"\bCPL"
    #"Common Public License"
 
-   ;; https://cecill.info/faq.en.html
+   #"\bCDDL"
+   #"Common Development and Distribution License"
+
    #"CeCILL-C"
    #"CEA CNRS Inria Logiciel Libre License"
-   #"CeCILL-2.1"])
+   #"CeCILL-2.1"
+
+   #"\bAPSL"
+   #"Apple Public Source License"
+
+   #"Ms-RL"
+   #"Microsoft Reciprocal License"
+
+   #"\bOFL"
+   #"SIL Open Font License"])
 
 (def regex-list-copyleft-all
   "All copyleft licenses"
@@ -67,11 +140,14 @@
 
 (def regex-list-permissive
   "Permissive licenses"
-  [#"Academic Free License"
-   #"AFL"
+  [#"\bAFL"
+   #"Academic Free License"
 
+   #"\bApache"
    #"Apache Software License"
-   #"^Apache"
+
+   #"\bAAL"
+   #"Attribution Assurance License"
 
    #"Artistic"
 
@@ -80,33 +156,55 @@
    #"CeCILL-B Free Software License Agreement"
    #"CeCILL-B"
 
-   #"Historical Permission Notice and Disclaimer"
-   #"HPND"
+   #"Eiffel Forum License"
 
-   #"Microsoft Public License"
+   #"Historical Permission Notice and Disclaimer"
+   #"\bHPND"
 
    #"MIT License"
-   #"MIT"
+   #"\bMIT"
 
+   #"MirOS"
+
+   #"Intel Open Source License"
+
+   #"\bISCL"
    #"ISC License"
-   #"ISCL"
+
+   #"Ms-PL"
+   #"Microsoft Public License"
+
+   #"PostgreSQL License"
 
    #"Python Software Foundation License"
    #"Python License"
 
    #"Public Domain"
 
+   #"\bQPL"
+   #"Q Public License"
+
+   #"Repoze Public License"
+
    #"Unlicense"
 
+   #"\bUPL"
    #"Universal Permissive License"
-   #"UPL"
+
+   #"\bUIUC"
+   #"University of Illinois"
+   #"NCSA Open Source License"
+   #"University of Illinois/NCSA Open Source License"
+
+   #"Vovida Software License"
 
    #"W3C"
 
+   #"X.Net License"
+
    #"Zope Public License"
 
-   #"zlib/libpng"
-])
+   #"zlib/libpng"])
 
 
 ;; Const
