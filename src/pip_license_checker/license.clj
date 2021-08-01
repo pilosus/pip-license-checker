@@ -18,7 +18,8 @@
 
 (def regex-list-copyleft-network
   "Copyleft licenses that consider access over the network as distribution"
-  [#"^Affero"
+  [#"Affero"
+   #"AGPL"
    #"GNU Affero General Public License"])
 
 (def regex-list-copyleft-strong
@@ -33,29 +34,27 @@
   "Weak or partial copyleft that usually not triggered for static and/or dynamic linking"
   [#"GNU Lesser General Public License"
    #"GNU Library or Lesser General Public License"
-   #"^LGPL"
+   #"LGPL"
 
    #"GPL.*linking exception"
 
    ;; https://www.mozilla.org/en-US/MPL/2.0/FAQ/
-   #"^MPL"
+   #"MPL"
    #"Mozilla Public License"
 
-   #"^EUPL"
+   #"EUPL"
    #"European Union Public Licence"
 
-   #"^OSL"
+   #"OSL"
    #"Open Software License"
 
-   #"^CPL"
+   #"CPL"
    #"Common Public License"
 
-   #"Artistic"
-
    ;; https://cecill.info/faq.en.html
-   #"^CeCILL-C"
+   #"CeCILL-C"
    #"CEA CNRS Inria Logiciel Libre License"
-   #"^CeCILL-2.1"])
+   #"CeCILL-2.1"])
 
 (def regex-list-copyleft-all
   "All copyleft licenses"
@@ -68,30 +67,34 @@
 
 (def regex-list-permissive
   "Permissive licenses"
-  [#"CeCILL-B Free Software License Agreement"
-   #"^CeCILL-B"
-
-   #"Academic Free License"
-   #"^AFL"
+  [#"Academic Free License"
+   #"AFL"
 
    #"Apache Software License"
    #"^Apache"
 
+   #"Artistic"
+
    #"BSD"
 
+   #"CeCILL-B Free Software License Agreement"
+   #"CeCILL-B"
+
    #"Historical Permission Notice and Disclaimer"
-   #"^HPND"
+   #"HPND"
 
    #"Microsoft Public License"
 
    #"MIT License"
-   #"^MIT"
+   #"MIT"
 
    #"ISC License"
-   #"^ISCL"
+   #"ISCL"
 
    #"Python Software Foundation License"
    #"Python License"
+
+   #"Public Domain"
 
    #"Unlicense"
 
@@ -103,8 +106,7 @@
    #"Zope Public License"
 
    #"zlib/libpng"
-
-   #"Public Domain"])
+])
 
 
 ;; Const

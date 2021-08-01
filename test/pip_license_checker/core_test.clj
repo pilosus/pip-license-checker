@@ -263,7 +263,6 @@
           (let [actual (with-out-str (core/process-requirements [] [] options))]
             (is (= expected actual))))))))
 
-
 (def params-options
   [[{:requirements ["test1" "test2"] :totals-only true :fail #{}}
     {:totals-only true :fail #{}}

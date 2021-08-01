@@ -157,9 +157,12 @@
 
 (def params-license-name->desc
   [["MIT License" license/type-permissive "Permissive"]
-   ["Artistic license" license/type-copyleft-weak "WeakCopyleft"]
+   ["Artistic license" license/type-permissive "Permissive"]
    ["zope public license" license/type-permissive "Permissive"]
+   ["Mozilla Public License 2.0" license/type-copyleft-weak "WeakCopyleft"]
    ["GPLv3" license/type-copyleft-strong "StrongCopyleft"]
+   ["AGPLv3" license/type-copyleft-network "NetworkCopyleft"]
+   ["GNU Affero GPL version 3" license/type-copyleft-network "NetworkCopyleft"]
    ["EULA" license/type-other "Other"]])
 
 (deftest test-license-name->desc
