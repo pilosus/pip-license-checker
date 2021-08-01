@@ -163,7 +163,7 @@ weak copyleft types.
 - Structure for Leiningen app project
 
 [Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.18.0...HEAD
-[0.17.0]: https://github.com/pilosus/pip-license-checker/compare/0.17.0...0.18.0
+[0.18.0]: https://github.com/pilosus/pip-license-checker/compare/0.17.0...0.18.0
 [0.17.0]: https://github.com/pilosus/pip-license-checker/compare/0.16.0...0.17.0
 [0.16.0]: https://github.com/pilosus/pip-license-checker/compare/0.15.0...0.16.0
 [0.15.0]: https://github.com/pilosus/pip-license-checker/compare/0.14.0...0.15.0
