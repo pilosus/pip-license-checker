@@ -262,3 +262,25 @@
           core/exit #(println (format "Exit code: %s" %))]
           (let [actual (with-out-str (core/process-requirements [] [] options))]
             (is (= expected actual))))))))
+
+
+(def params-options
+  [[{:requirements ["test1" "test2"] :totals-only true :fail #{}}
+    {:totals-only true :fail #{}}
+    "Requirements removed from options"]
+   [{:requirements ["test1" "test2"]
+     :fails-only true
+     :fail #{"Copyleft" "Other"}}
+    {:fails-only true
+     :fail #{"WeakCopyleft" "StrongCopyleft" "NetworkCopyleft" "Other"}}
+    "Copyleft Extended"]
+   [{:requirements ["test1" "test2"]
+     :fail #{"WeakCopyleft" "Other"}}
+    {:fail #{"WeakCopyleft" "Other"}}
+    "Other copyleft types left unextended"]])
+
+(deftest test-post-process-options
+  (testing "Post process options"
+    (doseq [[options expected description] params-options]
+      (testing description
+        (is (= expected (core/post-process-options options)))))))
