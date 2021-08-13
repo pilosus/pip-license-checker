@@ -160,7 +160,12 @@
    ["Artistic license" license/type-permissive "Permissive"]
    ["zope public license" license/type-permissive "Permissive"]
    ["Mozilla Public License 2.0" license/type-copyleft-weak "WeakCopyleft"]
+   ["GPL with linking exception" license/type-copyleft-weak "WeakCopyleft"]
+   ["GPL Classpath" license/type-copyleft-weak "WeakCopyleft"]
+   ["GPL v2 or later with classpath exception" license/type-copyleft-weak "WeakCopyleft"]
+   ["GNU General Public License v2 or later (GPLv2+)" license/type-copyleft-strong "StrongCopyleft"]
    ["GPLv3" license/type-copyleft-strong "StrongCopyleft"]
+   ["GNU General Public License version 3" license/type-copyleft-strong "StrongCopyleft"]
    ["AGPLv3" license/type-copyleft-network "NetworkCopyleft"]
    ["GNU Affero GPL version 3" license/type-copyleft-network "NetworkCopyleft"]
    ["EULA" license/type-other "Other"]])
