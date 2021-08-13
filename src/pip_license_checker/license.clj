@@ -40,8 +40,11 @@
 ;; https://cecill.info/licences.en.html
 ;; https://cecill.info/faq.en.html
 
+;; Eclipse Public License
+;; https://www.eclipse.org/org/documents/epl-2.0/EPL-2.0.txt
+;; https://www.eclipse.org/legal/epl-2.0/faq.php
+
 ;; Misc
-;; https://tldrlegal.com/
 ;; https://opensource.stackexchange.com/
 
 
@@ -62,8 +65,8 @@
 
 (def regex-list-copyleft-strong
   "Copyleft licenses with wide range of activities considered as derivation"
-  [#"GNU General Public License"
-   #"\bGPL"
+  [#"GNU General Public License(?!.*classpath|.*linking|.*exception)"
+   #"\bGPL(?!.*classpath|.*linking|.*exception)"
 
    #"IBM Public License"
 
@@ -78,12 +81,13 @@
    #"GNU Library or Lesser General Public License"
    #"\bLGPL"
 
-   #"GPL.*linking exception"
+   #"GNU General Public License.*(?:classpath|linking|exception)"
+   #"\bGPL.*(?:classpath|linking|exception)"
 
    #"\bMPL"
    #"Mozilla Public License"
 
-   #"Motosoto"
+   #"\bMotosoto"
 
    #"Nokia Open Source License"
 

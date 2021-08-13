@@ -6,6 +6,11 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 ## [Unreleased]
 ### Fixed
 
+## [0.19.0] - 2021-08-13
+### Added
+- Support for GPL with linking exception licenses. Instead of
+  `StrongCopyleft` these are recognised as `WeakCopyleft`.
+
 ## [0.18.0] - 2021-08-01
 
 Release **breaks backward compatibility** by introducing fine-grained
@@ -162,7 +167,8 @@ weak copyleft types.
 ### Added
 - Structure for Leiningen app project
 
-[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.18.0...HEAD
+[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.19.0...HEAD
+[0.19.0]: https://github.com/pilosus/pip-license-checker/compare/0.18.0...0.19.0
 [0.18.0]: https://github.com/pilosus/pip-license-checker/compare/0.17.0...0.18.0
 [0.17.0]: https://github.com/pilosus/pip-license-checker/compare/0.16.0...0.17.0
 [0.16.0]: https://github.com/pilosus/pip-license-checker/compare/0.15.0...0.16.0
