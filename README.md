@@ -2,8 +2,8 @@
 
 [![codecov](https://codecov.io/gh/pilosus/pip-license-checker/branch/main/graph/badge.svg?token=MXN6PDETET)](https://codecov.io/gh/pilosus/pip-license-checker)
 
-Check Python PyPI package license
-
+Check Python PyPI package license names and types: permissive, copyleft, etc.
+Check license types for any list of dependencies with given license names.
 
 ## Installation
 
@@ -81,6 +81,8 @@ Description:
   package	List of package names in format `name[specifier][version]`
 
   -r, --requirements REQUIREMENT_NAME  []   Requirement file name to read
+  -x, --external FILE_NAME             []   CSV file with prefetched license data in format: package-name,license-name[,...]
+  -xcsvh, --[no-]external-csv-headers       CSV file contains header line
   -f, --fail LICENSE_TYPE              #{}  Return non-zero exit code if license type is found
   -e, --exclude REGEX                       PCRE to exclude matching packages. Used only if [package]... or requirement files specified
   -p, --[no-]pre                            Include pre-release and development versions. By default, use only stable versions

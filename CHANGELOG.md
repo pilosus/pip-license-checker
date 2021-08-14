@@ -6,11 +6,11 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 ## [Unreleased]
 ### Fixed
 
-## [0.20.0] - 2021-08-..
+## [0.20.0] - 2021-08-14
 ### Added
-- External CSV files with prefetched license names support with `--external` option
-- External CSV files with/without header line support with `--external-csv-headers` option
-- Permissive licenses support: CC0, WTFPLe
+- External CSV files with prefetched license names support with `--external` option.
+- External CSV files with/without header line support with `--external-csv-headers` option.
+- Permissive licenses support: CC0, CC-BY, WTFPL.
 
 ## [0.19.0] - 2021-08-13
 ### Added
