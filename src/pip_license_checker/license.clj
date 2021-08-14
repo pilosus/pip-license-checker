@@ -44,6 +44,10 @@
 ;; https://www.eclipse.org/org/documents/epl-2.0/EPL-2.0.txt
 ;; https://www.eclipse.org/legal/epl-2.0/faq.php
 
+;; ODC-BY, ODBl
+;; https://opendatacommons.org/licenses/by/1-0/
+;; https://opendatacommons.org/licenses/odbl/1-0/
+
 ;; Misc
 ;; https://opensource.stackexchange.com/
 
@@ -98,6 +102,9 @@
 
    #"\bNOSL"
    #"Netizen Open Source License"
+
+   #"\bODbL"
+   #"Open Database License"
 
    #"BitTorrent Open Source License"
 
@@ -183,6 +190,9 @@
 
    #"Ms-PL"
    #"Microsoft Public License"
+
+   #"\bODC(-?|\s*)BY"
+   #"Open Data Commons Attribution License"
 
    #"PostgreSQL License"
 
