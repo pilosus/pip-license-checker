@@ -11,6 +11,7 @@
    [pip-license-checker.filters :as filters]
    [pip-license-checker.license :as license]
    [pip-license-checker.pypi :as pypi]
+   [pip-license-checker.csv :as csv]
    [pip-license-checker.spec :as sp]))
 
 (def formatter-license "%-35s %-55s %-30s")
@@ -35,39 +36,9 @@
   (let [{:keys [requirement license]} license-data
         {req-name :name req-version :version} requirement
         package
-        (str req-name ":" req-version)
-        {lic-name :name lic-desc :desc} license]
-    (format formatter-license package lic-name lic-desc)))
-
-(s/fdef get-all-requirements
-  :args (s/cat :packages ::sp/requirements :requirements ::sp/requirements)
-  :ret ::sp/requirements)
-
-(defn get-all-requirements
-  "Get a sequence of all requirements"
-  [packages requirements]
-  (let [file-packages (file/get-requirement-lines requirements)]
-    (concat packages file-packages)))
-
-(s/fdef get-parsed-requiements
-  :args (s/cat
-         :requirements ::sp/requirements-cli-arg
-         :packages ::sp/packages-cli-arg
-         :options ::sp/options-cli-arg)
-  :ret (s/coll-of ::sp/requirement-response-license))
-
-(defn get-parsed-requiements
-  "Apply filters and get verdicts for all requirements"
-  [packages requirements options]
-  (let [exclude-pattern (:exclude options)
-        pre (:pre options)
-        licenses (->> (get-all-requirements packages requirements)
-                      (filters/remove-requirements-internal-rules)
-                      (filters/remove-requirements-user-rules exclude-pattern)
-                      (map filters/sanitize-requirement)
-                      (map filters/requirement->map)
-                      (pmap #(pypi/requirement->license % :pre pre)))]
-    licenses))
+        (if req-version (str req-name ":" req-version) req-name)
+        {lic-name :name lic-type :type} license]
+    (format formatter-license package lic-name lic-type)))
 
 (s/fdef get-license-type-totals
   :args (s/coll-of ::sp/requirement-response-license)
@@ -76,7 +47,7 @@
 (defn get-license-type-totals
   "Return a frequency map of license types as keys and license types as values"
   [licenses]
-  (let [freqs (frequencies (map #(:desc (:license %)) licenses))
+  (let [freqs (frequencies (map #(:type (:license %)) licenses))
         ordered-freqs (into (sorted-map) freqs)]
     ordered-freqs))
 
@@ -89,33 +60,6 @@
   []
   (println (format formatter-totals "License Type" "Found")))
 
-(s/fdef filter-fails-only-requirements
-  :args (s/cat
-         :licenses (s/coll-of ::sp/requirement-response-license)
-         :options ::sp/options-cli-arg)
-  :ret (s/coll-of ::sp/requirement-response-license))
-
-(defn filter-fails-only-licenses
-  "Filter license types specified with --failed flag(s) if needed"
-  [licenses options]
-  (let [{:keys [fail fails-only]} options]
-    (if (or
-         (not fails-only)
-         (not (seq fail)))
-      licenses
-      (filter #(contains? fail (get-in % [:license :desc])) licenses))))
-
-(s/fdef filter-fails-only-requirements
-  :args (s/cat
-         :licenses (s/coll-of ::sp/requirement-response-license)
-         :options ::sp/options-cli-arg)
-  :ret (s/coll-of ::sp/requirement-response-license))
-
-(defn filter-parsed-requirements
-  "Post parsing filtering pipeline"
-  [licenses options]
-  (-> (filter-fails-only-licenses licenses options)))
-
 (s/fdef process-requirements
   :args (s/cat
          :requirements ::sp/requirements-cli-arg
@@ -124,15 +68,17 @@
 
 (defn process-requirements
   "Print parsed requirements pretty"
-  [packages requirements options]
+  [packages requirements external options]
   (let [fail-opt (:fail options)
         with-fail (seq fail-opt)
         with-totals-opt (:with-totals options)
         totals-only-opt (:totals-only options)
         show-totals (or with-totals-opt totals-only-opt)
         table-headers (:table-headers options)
-        parsed-licenses (get-parsed-requiements packages requirements options)
-        licenses (filter-parsed-requirements parsed-licenses options)
+        parsed-csv-licenses (csv/get-parsed-requiements external options)
+        parsed-pypi-licenses (pypi/get-parsed-requiements packages requirements options)
+        parsed-licenses (concat parsed-pypi-licenses parsed-csv-licenses)
+        licenses (filters/filter-parsed-requirements parsed-licenses options)
         totals
         (if (or show-totals with-fail)
           (get-license-type-totals licenses)
@@ -194,6 +140,12 @@
     :default []
     :update-fn conj
     :validate [file/exists? "Requirement file does not exist"]]
+   ["-x" "--external FILE_NAME" "CSV file with prefetched license data in format: package-name,license-name[,...]"
+    :multi true
+    :default []
+    :update-fn conj
+    :validate [file/exists? "File does not exist"]]
+   ["-xcsvh" "--[no-]external-csv-headers" "CSV file contains header line" :default true]
    ["-f" "--fail LICENSE_TYPE" "Return non-zero exit code if license type is found"
     :default (sorted-set)
     :multi true
@@ -229,7 +181,7 @@
 (defn post-process-options
   "Update option map"
   [options]
-  (let [opts' (dissoc options :requirements)
+  (let [opts' (dissoc options :requirements :external)
         fail-opt (:fail opts')
         fail-opt-exteded (extend-fail-opt fail-opt)
         updated-opts (assoc opts' :fail fail-opt-exteded)]
@@ -253,8 +205,10 @@
       errors {:exit-message (error-msg errors)}
       (or
        (> (count arguments) 0)
-       (> (count (:requirements options)) 0))
+       (> (count (:requirements options)) 0)
+       (> (count (:external options)) 0))
       {:requirements (:requirements options)
+       :external (:external options)
        :packages arguments
        :options (post-process-options options)}
       :else
@@ -263,17 +217,15 @@
 (defn -main
   "App entry point"
   [& args]
-  (let [{:keys [packages requirements options exit-message ok?]} (validate-args args)]
+  (let [{:keys [packages requirements external options exit-message ok?]} (validate-args args)]
     (if exit-message
       (exit (if ok? 0 1) exit-message)
-      (process-requirements packages requirements options))))
+      (process-requirements packages requirements external options))))
 
 
 ;;
 ;; Instrumented functions - uncomment only while testing
 ;;
 
-;; (instrument `get-all-requirements)
-;; (instrument `get-parsed-requiements)
 ;; (instrument `process-requirements)
 ;; (instrument `validate-args)

@@ -32,11 +32,20 @@
   :ret ::sp/requirements)
 
 (defn remove-requirements-user-rules
-  "Exclude requirements from sequence according to user-defined pattern"
+  "Exclude requirement strings from sequence according to user-defined pattern.
+  Used for requirements pre-processing"
   [pattern requirements]
   (if pattern
     (remove #(re-matches pattern %) requirements)
     requirements))
+
+(defn remove-requiment-maps-user-rules
+  "Exclude requiement objects to user-defined pattern
+  Used for requirements post-processing"
+  [pattern packages]
+  (if pattern
+    (remove #(re-matches pattern (get-in % [:requirement :name])) packages)
+    packages))
 
 (defn sanitize-requirement
   "Sanitize requirement line"
@@ -62,6 +71,21 @@
         specifiers (if (= specifiers-vec [nil]) nil specifiers-vec)
         result {:name package-name :specifiers specifiers}]
     result))
+
+(defn filter-fails-only-licenses
+  "Filter license types specified with --failed flag(s) if needed"
+  [licenses options]
+  (let [{:keys [fail fails-only]} options]
+    (if (or
+         (not fails-only)
+         (not (seq fail)))
+      licenses
+      (filter #(contains? fail (get-in % [:license :type])) licenses))))
+
+(defn filter-parsed-requirements
+  "Post parsing filtering pipeline"
+  [licenses options]
+  (-> (filter-fails-only-licenses licenses options)))
 
 ;;
 ;; Instrumented functions - uncomment only while testing
