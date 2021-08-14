@@ -123,7 +123,7 @@
                  :version ::version-str)
    :license (s/cat
              :name string?
-             :desc string?)))
+             :type string?)))
 
 
 ;; CLI

@@ -48,6 +48,8 @@
 ;; https://opensource.stackexchange.com/
 
 
+(def regex-ignore-case #"(?i)")
+
 (def regex-list-copyleft-network
   "Copyleft licenses that consider access over the network as distribution"
   [#"\bAffero"
@@ -157,6 +159,8 @@
 
    #"BSD"
 
+   #"CC0"
+
    #"CeCILL-B Free Software License Agreement"
    #"CeCILL-B"
 
@@ -172,6 +176,7 @@
 
    #"Intel Open Source License"
 
+   #"\bISC\b"
    #"\bISCL"
    #"ISC License"
 
@@ -208,7 +213,10 @@
 
    #"Zope Public License"
 
-   #"zlib/libpng"])
+   #"zlib/libpng"
+
+   #"WTFPL"
+   #"Do What the Fuck You Want To Public License"])
 
 
 ;; Const
@@ -242,13 +250,39 @@
   (format "Invalid license type. Use one of: %s"
           (str/join ", " types)))
 
-(def data-error {:name name-error :desc type-error})
+(def data-error {:name name-error :type type-error})
 
 
-;; Helpers
+;; Functions
 
 
 (defn is-type-valid?
   "Return true if license-type string is valid, false otherwise"
   [license-type]
   (contains? types license-type))
+
+(defn strings->pattern
+  "Get regex pattern from sequence of strings"
+  [patterns]
+  (re-pattern
+   (str regex-ignore-case
+        (apply str (interpose "|" (map #(str "(?:" % ")") patterns))))))
+
+(defn name->type
+  "Get license type by its name"
+  [name]
+  (let [regex-copyleft-network (strings->pattern regex-list-copyleft-network)
+        regex-copyleft-strong (strings->pattern regex-list-copyleft-strong)
+        regex-copyleft-weak (strings->pattern regex-list-copyleft-weak)
+        match-copyleft-network (some? (re-find regex-copyleft-network name))
+        match-copyleft-strong (some? (re-find regex-copyleft-strong name))
+        match-copyleft-weak (some? (re-find regex-copyleft-weak name))
+
+        regex-permissive (strings->pattern regex-list-permissive)
+        match-permissive (some? (re-find regex-permissive name))]
+    (cond
+      match-copyleft-network type-copyleft-network
+      match-copyleft-strong type-copyleft-strong
+      match-copyleft-weak type-copyleft-weak
+      match-permissive type-permissive
+      :else type-other)))

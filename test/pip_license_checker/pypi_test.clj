@@ -4,6 +4,7 @@
    [clj-http.client :as http]
    [pip-license-checker.github :as github]
    [pip-license-checker.pypi :as pypi]
+   [pip-license-checker.file :as file]
    [pip-license-checker.license :as license]
    [pip-license-checker.version :as version]))
 
@@ -138,44 +139,6 @@
       (testing description
         (is (= expected (pypi/classifiers->license classifiers)))))))
 
-;; pypi/strings->pattern
-
-(def params-strings->pattern
-  [[[] "(?i)" "Empty pattern"]
-   [["^a"] "(?i)(?:^a)" "Pattern 1"]
-   [["^a" "b.*"] "(?i)(?:^a)|(?:b.*)" "Pattern 2"]])
-
-(deftest test-strings->pattern
-  (testing "Concatenating strings to pattern"
-    (doseq [[strings expected description] params-strings->pattern]
-      (testing description
-        (is (= expected (str (pypi/strings->pattern strings))))))))
-
-
-;; pypi/license-name->desc
-
-
-(def params-license-name->desc
-  [["MIT License" license/type-permissive "Permissive"]
-   ["Artistic license" license/type-permissive "Permissive"]
-   ["zope public license" license/type-permissive "Permissive"]
-   ["Mozilla Public License 2.0" license/type-copyleft-weak "WeakCopyleft"]
-   ["GPL with linking exception" license/type-copyleft-weak "WeakCopyleft"]
-   ["GPL Classpath" license/type-copyleft-weak "WeakCopyleft"]
-   ["GPL v2 or later with classpath exception" license/type-copyleft-weak "WeakCopyleft"]
-   ["GNU General Public License v2 or later (GPLv2+)" license/type-copyleft-strong "StrongCopyleft"]
-   ["GPLv3" license/type-copyleft-strong "StrongCopyleft"]
-   ["GNU General Public License version 3" license/type-copyleft-strong "StrongCopyleft"]
-   ["AGPLv3" license/type-copyleft-network "NetworkCopyleft"]
-   ["GNU Affero GPL version 3" license/type-copyleft-network "NetworkCopyleft"]
-   ["EULA" license/type-other "Other"]])
-
-(deftest test-license-name->desc
-  (testing "Get license description by its name"
-    (doseq [[license expected description] params-license-name->desc]
-      (testing description
-        (is (= expected (pypi/license-name->desc license)) license)))))
-
 ;; pypi/data->license-map
 
 (def params-data->license-map
@@ -183,37 +146,37 @@
      {"license" "MIT"
       "classifiers" ["License :: OSI Approved :: MIT License"]}}
     "MIT"
-    {:name "MIT License", :desc "Permissive"}
+    {:name "MIT License", :type "Permissive"}
     "Get from classifiers field"]
    [{"info"
      {"license" "MIT"
       "classifiers" ["Operating System :: Unix"]}}
     "BSD"
-    {:name "MIT", :desc "Permissive"}
+    {:name "MIT", :type "Permissive"}
     "Get from license field"]
    [{"info"
      {"license" ""
       "classifiers" []}}
     "BSD"
-    {:name "BSD", :desc "Permissive"}
+    {:name "BSD", :type "Permissive"}
     "Get from GitHub API"]
    [{"info"
      {"license" "UNKNOWN"
       "classifiers" []}}
     "MIT"
-    {:name "MIT", :desc "Permissive"}
+    {:name "MIT", :type "Permissive"}
     "Get from GitHub API for older metadata format for missing license field - UNKNOWN string"]
    [{"info"
      {"license" []
       "classifiers" []}}
     "MIT"
-    {:name "MIT", :desc "Permissive"}
+    {:name "MIT", :type "Permissive"}
     "Get from GitHub API for older metadata format for missing license field - empty list"]
    [{"info"
      {"license" ["UNKNOWN"]
       "classifiers" []}}
     "MIT"
-    {:name "MIT", :desc "Permissive"}
+    {:name "MIT", :type "Permissive"}
     "Get from GitHub API for older metadata format for missing license field - list with UNKNOWN"]
    [{"wut" 123}
     nil
@@ -239,7 +202,7 @@
        "classifiers" ["License :: OSI Approved :: MIT License"]}}}
     {:ok? true
      :requirement 1
-     :license {:name "MIT License", :desc "Permissive"}}
+     :license {:name "MIT License", :type "Permissive"}}
     "Ok"]
    [{:ok? false
      :requirement 1
@@ -257,3 +220,51 @@
     (doseq [[data expected description] params-data->license]
       (testing description
         (is (= expected (pypi/data->license data)))))))
+
+
+;; get-parsed-requirements
+
+
+(def params-get-parsed-requirements
+  [[[] [] {} "{}" [] "No input"]
+   [["aiohttp==3.7.2"]
+    ["test==3.7.2"]
+    {}
+    "{\"info\": {\"license\": \"MIT License\"}}"
+    [{:ok? true,
+      :requirement {:name "aiohttp", :version "3.7.2"},
+      :license {:name "MIT License", :type "Permissive"}}
+     {:ok? true,
+      :requirement {:name "test", :version "3.7.2"},
+      :license {:name "MIT License", :type "Permissive"}}]
+    "Packages and requirements"]
+   [["aiohttp==3.7.2"]
+    ["test==3.7.2"]
+    {:exclude #"aio.*"}
+    "{\"info\": {\"license\": \"MIT License\"}}"
+    [{:ok? true,
+      :requirement {:name "test", :version "3.7.2"},
+      :license {:name "MIT License", :type "Permissive"}}]
+    "Exclude pattern"]])
+
+(deftest ^:integration ^:request
+  test-get-parsed-requirements
+  (testing "Integration testing of requirements parsing"
+    (doseq [[packages requirements options mock-body expected description]
+            params-get-parsed-requirements]
+      (testing description
+        (with-redefs
+          ;; Ugliest hack ever: core_test.clj runs before pypi_test.clj
+          ;; and as a part of core/process-requirements testing we shutdown threadpool
+          ;; so that when pypi/get-parsed-requiements tries to use the threadpool for pmap
+          ;; it's already gone and java.util.concurrent.RejectedExecutionException is thrown.
+          ;; Since we are not testing concurrency itself, just monkey-patch pmap with simple map.
+         [pmap map
+          http/get (constantly {:body mock-body})
+          pypi/get-releases (constantly [])
+          version/get-version (constantly "3.7.2")
+          file/get-requirement-lines (fn [_] requirements)]
+          (is
+           (= expected
+              (vec (pypi/get-parsed-requiements
+                    packages requirements options)))))))))

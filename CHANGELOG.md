@@ -6,6 +6,12 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 ## [Unreleased]
 ### Fixed
 
+## [0.20.0] - 2021-08-..
+### Added
+- External CSV files with prefetched license names support with `--external` option
+- External CSV files with/without header line support with `--external-csv-headers` option
+- Permissive licenses support: CC0, WTFPLe
+
 ## [0.19.0] - 2021-08-13
 ### Added
 - Support for GPL with linking exception licenses. Instead of
@@ -167,7 +173,8 @@ weak copyleft types.
 ### Added
 - Structure for Leiningen app project
 
-[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.19.0...HEAD
+[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.20.0...HEAD
+[0.20.0]: https://github.com/pilosus/pip-license-checker/compare/0.19.0...0.20.0
 [0.19.0]: https://github.com/pilosus/pip-license-checker/compare/0.18.0...0.19.0
 [0.18.0]: https://github.com/pilosus/pip-license-checker/compare/0.17.0...0.18.0
 [0.17.0]: https://github.com/pilosus/pip-license-checker/compare/0.16.0...0.17.0

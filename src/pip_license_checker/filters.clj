@@ -32,11 +32,20 @@
   :ret ::sp/requirements)
 
 (defn remove-requirements-user-rules
-  "Exclude requirements from sequence according to user-defined pattern"
+  "Exclude requirement strings from sequence according to user-defined pattern.
+  Used for requirements pre-processing"
   [pattern requirements]
   (if pattern
     (remove #(re-matches pattern %) requirements)
     requirements))
+
+(defn remove-requiment-maps-user-rules
+  "Exclude requiement objects to user-defined pattern
+  Used for requirements post-processing"
+  [pattern packages]
+  (if pattern
+    (remove #(re-matches pattern (get-in % [:requirement :name])) packages)
+    packages))
 
 (defn sanitize-requirement
   "Sanitize requirement line"

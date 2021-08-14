@@ -9,6 +9,8 @@
    [clojure.string :as str]
    [pip-license-checker.github :as github]
    [pip-license-checker.spec :as sp]
+   [pip-license-checker.file :as file]
+   [pip-license-checker.filters :as filters]
    [pip-license-checker.version :as version]
    [pip-license-checker.license :as license]))
 
@@ -24,8 +26,6 @@
 
 (def regex-match-classifier #"License :: .*")
 (def regex-split-classifier #" :: ")
-
-(def regex-ignore-case #"(?i)")
 
 ;; Get API response, parse it
 
@@ -95,32 +95,6 @@
         result (if (= classifier "") nil classifier)]
     result))
 
-(defn strings->pattern
-  "Get regex pattern from sequence of strings"
-  [patterns]
-  (re-pattern
-   (str regex-ignore-case
-        (apply str (interpose "|" (map #(str "(?:" % ")") patterns))))))
-
-(defn license-name->desc
-  "Get license description by its name"
-  [name]
-  (let [regex-copyleft-network (strings->pattern license/regex-list-copyleft-network)
-        regex-copyleft-strong (strings->pattern license/regex-list-copyleft-strong)
-        regex-copyleft-weak (strings->pattern license/regex-list-copyleft-weak)
-        match-copyleft-network (some? (re-find regex-copyleft-network name))
-        match-copyleft-strong (some? (re-find regex-copyleft-strong name))
-        match-copyleft-weak (some? (re-find regex-copyleft-weak name))
-
-        regex-permissive (strings->pattern license/regex-list-permissive)
-        match-permissive (some? (re-find regex-permissive name))]
-    (cond
-      match-copyleft-network license/type-copyleft-network
-      match-copyleft-strong license/type-copyleft-strong
-      match-copyleft-weak license/type-copyleft-weak
-      match-permissive license/type-permissive
-      :else license/type-other)))
-
 (defn data->license-map
   "Get license name from info.classifiers or info.license field of PyPI API data"
   [data]
@@ -133,9 +107,9 @@
                       license-license
                       (github/homepage->license-name home_page))
         license-desc
-        (license-name->desc (or license-name license/name-error))]
+        (license/name->type (or license-name license/name-error))]
     (if license-name
-      {:name license-name :desc license-desc}
+      {:name license-name :type license-desc}
       license/data-error)))
 
 ;; Get license data from API JSON
@@ -156,8 +130,6 @@
        :requirement requirement
        :license license/data-error})))
 
-;; Entrypoint
-
 (s/fdef requirement->license
   :args (s/cat
          :requirement ::sp/requirement
@@ -172,6 +144,34 @@
         data (requirement-response->data resp)
         license (data->license data)]
     license))
+
+(defn get-all-requirements
+  "Get a sequence of all requirements"
+  [packages requirements]
+  (let [file-packages (file/get-requirement-lines requirements)]
+    (concat packages file-packages)))
+
+;; Entrypoint
+
+(s/fdef get-parsed-requiements
+  :args (s/cat
+         :requirements ::sp/requirements-cli-arg
+         :packages ::sp/packages-cli-arg
+         :options ::sp/options-cli-arg)
+  :ret (s/coll-of ::sp/requirement-response-license))
+
+(defn get-parsed-requiements
+  "Apply filters and get verdicts for all requirements"
+  [packages requirements options]
+  (let [exclude-pattern (:exclude options)
+        pre (:pre options)
+        licenses (->> (get-all-requirements packages requirements)
+                      (filters/remove-requirements-internal-rules)
+                      (filters/remove-requirements-user-rules exclude-pattern)
+                      (map filters/sanitize-requirement)
+                      (map filters/requirement->map)
+                      (pmap #(requirement->license % :pre pre)))]
+    licenses))
 
 ;;
 ;; Instrumented functions - uncomment only while testing
