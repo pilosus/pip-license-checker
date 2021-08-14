@@ -4,6 +4,26 @@
    [pip-license-checker.license :as license]))
 
 
+;; license/is-type-valid?
+
+
+(def params-is-type-valid?
+  [["NetworkCopyleft" true]
+   ["StrongCopyleft" true]
+   ["WeakCopyleft" true]
+   ["Copyleft" true]
+   ["Permissive" true]
+   ["Other" true]
+   ["EULA" false]
+   ["CopyleftWhateverYouCan" false]])
+
+(deftest test-is-type-valid?
+  (testing "Test checking valid license types"
+    (doseq [[type expected] params-is-type-valid?]
+      (testing type
+        (is (= expected (license/is-type-valid? type)))))))
+
+
 ;; license/strings->pattern
 
 

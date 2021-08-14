@@ -3,16 +3,26 @@
    [clojure.string :as str]
    [clojure.test :refer [deftest is testing]]
    [pip-license-checker.core :as core]
+   [pip-license-checker.csv :as csv]
    [pip-license-checker.pypi :as pypi]))
 
 (def params-validate-args
   [[["--requirements"
-     "resources/requirements.txt"
-     "django"
-     "aiohttp==3.7.1"
-     "-r"
-     "README.md"]
-    {:requirements ["resources/requirements.txt" "README.md"]
+     "resources/requirements.txt"]
+    {:requirements ["resources/requirements.txt"]
+     :external []
+     :packages []
+     :options {:fail #{}
+               :pre false
+               :external-csv-headers true
+               :with-totals false
+               :totals-only false
+               :table-headers false
+               :fails-only false}}
+    "Requirements only run"]
+   [["django"
+     "aiohttp==3.7.1"]
+    {:requirements []
      :external []
      :packages ["django" "aiohttp==3.7.1"]
      :options {:fail #{}
@@ -22,14 +32,51 @@
                :totals-only false
                :table-headers false
                :fails-only false}}
-    "Normal run"]])
+    "Packages only"]
+   [["--external"
+     "resources/external.csv"]
+    {:requirements []
+     :external ["resources/external.csv"]
+     :packages []
+     :options {:fail #{}
+               :pre false
+               :external-csv-headers true
+               :with-totals false
+               :totals-only false
+               :table-headers false
+               :fails-only false}}
+    "External only"]
+   [["--requirements"
+     "resources/requirements.txt"
+     "django"
+     "aiohttp==3.7.1"
+     "-r"
+     "README.md"
+     "--external"
+     "resources/external.csv"]
+    {:requirements ["resources/requirements.txt" "README.md"]
+     :external ["resources/external.csv"]
+     :packages ["django" "aiohttp==3.7.1"]
+     :options {:fail #{}
+               :pre false
+               :external-csv-headers true
+               :with-totals false
+               :totals-only false
+               :table-headers false
+               :fails-only false}}
+    "Requirements, packages and externals"]
+   [["--help"]
+    {:exit-message "placeholder" :ok? true}
+    "Help run"]])
 
 (deftest ^:cli ^:default
   test-validate-args
   (testing "Validating CLI args"
     (doseq [[args expected description] params-validate-args]
       (testing description
-        (is (= expected (core/validate-args args)))))))
+        (with-redefs
+         [core/usage (constantly "placeholder")]
+          (is (= expected (core/validate-args args))))))))
 
 (def params-get-license-type-totals
   [[[] {} "Empty vector"]
@@ -113,18 +160,21 @@
 
 (def params-process-requirements
   [[[]
+    []
     {:fail #{} :with-totals false :totals-only false :table-headers false}
     ""
     "No licenses"]
    [[{:ok? true,
       :requirement {:name "test", :version "3.7.2"},
       :license {:name "MIT License", :type "Permissive"}}]
+    []
     {:fail #{} :with-totals false :totals-only false :table-headers false}
     (str (format core/formatter-license "test:3.7.2" "MIT License" "Permissive") "\n")
     "No headers"]
    [[{:ok? true,
       :requirement {:name "test", :version "3.7.2"},
       :license {:name "MIT License", :type "Permissive"}}]
+    []
     {:fail #{} :with-totals false :totals-only false :table-headers true}
     (str/join
      [(str (format core/formatter-license "Requirement" "License Name" "License Type") "\n")
@@ -133,6 +183,7 @@
    [[{:ok? true,
       :requirement {:name "test", :version "3.7.2"},
       :license {:name "MIT License", :type "Permissive"}}]
+    []
     {:fail #{} :with-totals true :totals-only false :table-headers true}
     (str/join
      [(str (format core/formatter-license "Requirement" "License Name" "License Type") "\n")
@@ -144,6 +195,7 @@
    [[{:ok? true,
       :requirement {:name "test", :version "3.7.2"},
       :license {:name "MIT License", :type "Permissive"}}]
+    []
     {:fail #{} :with-totals false :totals-only true :table-headers false}
     (str/join
      [(str (format core/formatter-totals "Permissive" 1) "\n")])
@@ -151,6 +203,18 @@
    [[{:ok? true,
       :requirement {:name "test", :version "3.7.2"},
       :license {:name "MIT License", :type "Permissive"}}]
+    [{:ok? true,
+      :requirement {:name "another", :version "0.1.2"},
+      :license {:name "BSD License", :type "Permissive"}}]
+    {:fail #{} :with-totals false :totals-only false :table-headers false}
+    (str/join
+     [(str (format core/formatter-license "test:3.7.2" "MIT License" "Permissive") "\n")
+      (str (format core/formatter-license "another:0.1.2" "BSD License" "Permissive") "\n")])
+    "Requirements and external file"]
+   [[{:ok? true,
+      :requirement {:name "test", :version "3.7.2"},
+      :license {:name "MIT License", :type "Permissive"}}]
+    []
     {:fail #{"Permissive"} :with-totals false :totals-only true :table-headers false}
     (str/join
      [(str (format core/formatter-totals "Permissive" 1) "\n")
@@ -159,10 +223,11 @@
 
 (deftest test-process-requirements
   (testing "Print results"
-    (doseq [[mock options expected description] params-process-requirements]
+    (doseq [[mock-pypi mock-external options expected description] params-process-requirements]
       (testing description
         (with-redefs
-         [pypi/get-parsed-requiements (constantly mock)
+         [pypi/get-parsed-requiements (constantly mock-pypi)
+          csv/get-parsed-requiements (constantly mock-external)
           core/exit #(println (format "Exit code: %s" %))]
           (let [actual (with-out-str (core/process-requirements [] [] [] options))]
             (is (= expected actual))))))))

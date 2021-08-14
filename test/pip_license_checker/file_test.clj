@@ -41,6 +41,17 @@
            (file/path->lines "resources/simple.txt")))))
 
 
+;; file/csv->lines
+
+
+(def params-simple-csv-file [["package" "license"] ["a" "MIT"] ["b" "BSD"]])
+
+(deftest test-csv->lines
+  (testing "Path to lines vec"
+    (is (= params-simple-csv-file
+           (file/csv->lines "resources/simple.csv")))))
+
+
 ;; file/take-csv-columns
 
 
