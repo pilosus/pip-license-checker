@@ -32,25 +32,33 @@
 
 (def csv-column-indecies-to-read [0 1])
 (def csv-header [:package :license])
+(def csv-out-of-range-column-index nil)
 
 (defn take-csv-columns
   [columns indices]
   (for [idx indices]
-    (nth columns idx)))
+    (nth columns idx csv-out-of-range-column-index)))
 
 (defn csv->lines
-  "Read CSV file in format: package-name,license-name[,...] into a map"
-  [path options]
+  "Read CSV file into vector of lines"
+  [path]
   (with-open [reader (io/reader path)]
     (let [lines (csv/read-csv reader)
-          with-headers (:external-csv-headers options)
-          lines-to-skip (if with-headers 1 0)
-          data (drop lines-to-skip lines)
-          selected-columns (mapv #(take-csv-columns % csv-column-indecies-to-read) data)
-          result (map zipmap (repeat csv-header) selected-columns)]
+          result (vec lines)]
       result)))
+
+(defn csv->data
+  "Read CSV file in format: package-name,license-name[,...] into a map"
+  [path options]
+  (let [lines (csv->lines path)
+        with-headers (:external-csv-headers options)
+        lines-to-skip (if with-headers 1 0)
+        data (drop lines-to-skip lines)
+        selected-columns (map #(take-csv-columns % csv-column-indecies-to-read) data)
+        result (map zipmap (repeat csv-header) selected-columns)]
+    result))
 
 (defn get-csv-lines
   "Concatenates all parsed CSV files"
   [paths with-headers]
-  (apply concat (for [path paths] (csv->lines path with-headers))))
+  (apply concat (for [path paths] (csv->data path with-headers))))
