@@ -99,6 +99,7 @@ pip-license-checker --pre 'aiohttp<4'
 pip-license-checker --with-totals --table-headers --requirements resources/requirements.txt
 pip-license-checker --totals-only -r file1.txt -r file2.txt -r file3.txt
 pip-license-checker -r resources/requirements.txt django aiohttp==3.7.1 --exclude 'aio.*'
+pip-license-checker --external resources/external.csv --exclude 'node.*' --external-csv-headers
 
 Valid license types:
 NetworkCopyleft, StrongCopyleft, WeakCopyleft, Copyleft, Permissive, Other, Error
