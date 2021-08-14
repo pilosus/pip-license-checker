@@ -6,6 +6,11 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 ## [Unreleased]
 ### Fixed
 
+## [0.21.0] - 2021-08-15
+### Added
+- Permissive licenses support: ODC-BY
+- Weak copyleft licenses support: ODbL
+
 ## [0.20.0] - 2021-08-14
 ### Added
 - External CSV files with prefetched license names support with `--external` option.
@@ -173,7 +178,8 @@ weak copyleft types.
 ### Added
 - Structure for Leiningen app project
 
-[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.20.0...HEAD
+[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.21.0...HEAD
+[0.21.0]: https://github.com/pilosus/pip-license-checker/compare/0.20.0...0.21.0
 [0.20.0]: https://github.com/pilosus/pip-license-checker/compare/0.19.0...0.20.0
 [0.19.0]: https://github.com/pilosus/pip-license-checker/compare/0.18.0...0.19.0
 [0.18.0]: https://github.com/pilosus/pip-license-checker/compare/0.17.0...0.18.0
