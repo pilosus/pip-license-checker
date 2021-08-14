@@ -31,63 +31,6 @@
       (testing description
         (is (= expected (core/validate-args args)))))))
 
-(def params-filter-parsed-requirements
-  [[[{:ok? true,
-      :requirement {:name "aiohttp", :version "3.7.2"},
-      :license {:name "MIT License", :type "Permissive"}}
-     {:ok? true,
-      :requirement {:name "aiostream", :version "0.1.0"},
-      :license {:name "GPLv3", :type "Copyleft"}}]
-    {:fail #{"Copyleft"} :fails-only true}
-    [{:ok? true,
-      :requirement {:name "aiostream", :version "0.1.0"},
-      :license {:name "GPLv3", :type "Copyleft"}}]
-    "Filter copyleft licenses"]
-   [[]
-    {:fail #{"Copyleft"} :fails-only true}
-    []
-    "Filter empty sequence"]
-   [[]
-    {:fail #{"Copyleft"} :fails-only true}
-    []
-    "Filter nil sequence"]
-   [[{:ok? true,
-      :requirement {:name "aiohttp", :version "3.7.2"},
-      :license {:name "MIT License", :type "Permissive"}}
-     {:ok? true,
-      :requirement {:name "aiostream", :version "0.1.0"},
-      :license {:name "GPLv3", :type "Copyleft"}}]
-    {:fail #{"Copyleft"} :fails-only false}
-    [{:ok? true,
-      :requirement {:name "aiohttp", :version "3.7.2"},
-      :license {:name "MIT License", :type "Permissive"}}
-     {:ok? true,
-      :requirement {:name "aiostream", :version "0.1.0"},
-      :license {:name "GPLv3", :type "Copyleft"}}]
-    "fails-only flag is off, do not filter"]
-   [[{:ok? true,
-      :requirement {:name "aiohttp", :version "3.7.2"},
-      :license {:name "MIT License", :type "Permissive"}}
-     {:ok? true,
-      :requirement {:name "aiostream", :version "0.1.0"},
-      :license {:name "GPLv3", :type "Copyleft"}}]
-    {:fail #{} :fails-only true}
-    [{:ok? true,
-      :requirement {:name "aiohttp", :version "3.7.2"},
-      :license {:name "MIT License", :type "Permissive"}}
-     {:ok? true,
-      :requirement {:name "aiostream", :version "0.1.0"},
-      :license {:name "GPLv3", :type "Copyleft"}}]
-    "fail flag omitted, do not filter"]])
-
-(deftest ^:integration ^:request
-  test-filter-parsed-requirements
-  (testing "Integration testing for filtering parsed requirements"
-    (doseq [[licenses options expected description]
-            params-filter-parsed-requirements]
-      (testing description
-        (is (= expected (core/filter-parsed-requirements licenses options)))))))
-
 (def params-get-license-type-totals
   [[[] {} "Empty vector"]
    [[{:ok? true,

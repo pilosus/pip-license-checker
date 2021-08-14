@@ -72,6 +72,21 @@
         result {:name package-name :specifiers specifiers}]
     result))
 
+(defn filter-fails-only-licenses
+  "Filter license types specified with --failed flag(s) if needed"
+  [licenses options]
+  (let [{:keys [fail fails-only]} options]
+    (if (or
+         (not fails-only)
+         (not (seq fail)))
+      licenses
+      (filter #(contains? fail (get-in % [:license :type])) licenses))))
+
+(defn filter-parsed-requirements
+  "Post parsing filtering pipeline"
+  [licenses options]
+  (-> (filter-fails-only-licenses licenses options)))
+
 ;;
 ;; Instrumented functions - uncomment only while testing
 ;;

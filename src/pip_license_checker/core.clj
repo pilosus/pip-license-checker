@@ -8,6 +8,7 @@
    [clojure.string :as str]
    [clojure.tools.cli :refer [parse-opts]]
    [pip-license-checker.file :as file]
+   [pip-license-checker.filters :as filters]
    [pip-license-checker.license :as license]
    [pip-license-checker.pypi :as pypi]
    [pip-license-checker.csv :as csv]
@@ -59,34 +60,6 @@
   []
   (println (format formatter-totals "License Type" "Found")))
 
-(s/fdef filter-fails-only-requirements
-  :args (s/cat
-         :licenses (s/coll-of ::sp/requirement-response-license)
-         :options ::sp/options-cli-arg)
-  :ret (s/coll-of ::sp/requirement-response-license))
-
-(defn filter-fails-only-licenses
-  "Filter license types specified with --failed flag(s) if needed"
-  [licenses options]
-  (let [{:keys [fail fails-only]} options]
-    (if (or
-         (not fails-only)
-         (not (seq fail)))
-      licenses
-      (filter #(contains? fail (get-in % [:license :type])) licenses))))
-
-(s/fdef filter-fails-only-requirements
-  :args (s/cat
-         :licenses (s/coll-of ::sp/requirement-response-license)
-         :options ::sp/options-cli-arg)
-  :ret (s/coll-of ::sp/requirement-response-license))
-
-(defn filter-parsed-requirements
-  "Post parsing filtering pipeline"
-  [licenses options]
-  (-> (filter-fails-only-licenses licenses options)))
-
-;; FIXME
 (s/fdef process-requirements
   :args (s/cat
          :requirements ::sp/requirements-cli-arg
@@ -103,12 +76,9 @@
         show-totals (or with-totals-opt totals-only-opt)
         table-headers (:table-headers options)
         parsed-csv-licenses (csv/get-parsed-requiements external options)
-        ;; TODO refactor:
-        ;; - rename/move filter-parsed-requirements to filters
         parsed-pypi-licenses (pypi/get-parsed-requiements packages requirements options)
         parsed-licenses (concat parsed-pypi-licenses parsed-csv-licenses)
-        licenses (filter-parsed-requirements parsed-licenses options)
-        ;; ./TODO
+        licenses (filters/filter-parsed-requirements parsed-licenses options)
         totals
         (if (or show-totals with-fail)
           (get-license-type-totals licenses)
@@ -257,7 +227,5 @@
 ;; Instrumented functions - uncomment only while testing
 ;;
 
-;; (instrument `get-all-requirements)
-;; (instrument `get-parsed-requiements)
 ;; (instrument `process-requirements)
 ;; (instrument `validate-args)
