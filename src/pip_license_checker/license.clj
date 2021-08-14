@@ -160,6 +160,7 @@
    #"BSD"
 
    #"CC0"
+   #"CC(-?|\s*)BY(-?|\s*)(?!.*SA|.*share|.*ND|.*derivative|.*NC|.*commercial)"
 
    #"CeCILL-B Free Software License Agreement"
    #"CeCILL-B"

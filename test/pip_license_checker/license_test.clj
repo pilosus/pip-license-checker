@@ -28,6 +28,9 @@
    ["zope public license" license/type-permissive "Permissive"]
    ["WTFPL" license/type-permissive "Permissive"]
    ["CC0" license/type-permissive "Permissive"]
+   ["CC-BY-4.0" license/type-permissive "Permissive"]
+   ["CC BY 4.0" license/type-permissive "Permissive"]
+   ["cc  by 2.0" license/type-permissive "Permissive"]
    ["Mozilla Public License 2.0" license/type-copyleft-weak "WeakCopyleft"]
    ["GPL with linking exception" license/type-copyleft-weak "WeakCopyleft"]
    ["GPL Classpath" license/type-copyleft-weak "WeakCopyleft"]
@@ -38,6 +41,11 @@
    ["GNU General Public License version 3" license/type-copyleft-strong "StrongCopyleft"]
    ["AGPLv3" license/type-copyleft-network "NetworkCopyleft"]
    ["GNU Affero GPL version 3" license/type-copyleft-network "NetworkCopyleft"]
+   ["CC-BY-SA" license/type-other "Other"]
+   ["CC BY-NC" license/type-other "Other"]
+   ["CC BY-ND" license/type-other "Other"]
+   ["CC BY-NC-ND" license/type-other "Other"]
+   ["CC BY-NC-SA-4.0" license/type-other "Other"]
    ["EULA" license/type-other "Other"]])
 
 (deftest test-name->type
