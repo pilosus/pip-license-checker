@@ -1,5 +1,5 @@
-(defproject org.clojars.vrs/pip-license-checker "0.19.0"
-  :description "Check Python PyPI package license"
+(defproject org.clojars.vrs/pip-license-checker "0.20.0"
+  :description "Check Python PyPI package license names and types: permissive, copyleft, etc."
   :url "https://github.com/pilosus/pip-license-checker"
   :license {:name "The MIT License (MIT)"
             :url "https://github.com/pilosus/pip-license-checker/blob/main/LICENSE"}
