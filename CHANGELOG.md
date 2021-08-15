@@ -6,6 +6,11 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 ## [Unreleased]
 ### Fixed
 
+## [0.22.0] - 2021-08-15
+### Added
+- Better README documentation: clear project description, fancy
+  badges, installation/usage improvements, FAQ section.
+
 ## [0.21.0] - 2021-08-15
 ### Added
 - Permissive licenses support: ODC-BY
@@ -178,7 +183,8 @@ weak copyleft types.
 ### Added
 - Structure for Leiningen app project
 
-[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.21.0...HEAD
+[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.22.0...HEAD
+[0.22.0]: https://github.com/pilosus/pip-license-checker/compare/0.21.0...0.22.0
 [0.21.0]: https://github.com/pilosus/pip-license-checker/compare/0.20.0...0.21.0
 [0.20.0]: https://github.com/pilosus/pip-license-checker/compare/0.19.0...0.20.0
 [0.19.0]: https://github.com/pilosus/pip-license-checker/compare/0.18.0...0.19.0
