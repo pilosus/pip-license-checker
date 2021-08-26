@@ -127,7 +127,8 @@
         "pip-license-checker --pre 'aiohttp<4'"
         "pip-license-checker --with-totals --table-headers --requirements resources/requirements.txt"
         "pip-license-checker --totals-only -r file1.txt -r file2.txt -r file3.txt"
-        "pip-license-checker -r resources/requirements.txt django aiohttp==3.7.1 --exclude 'aio.*'"]
+        "pip-license-checker -r resources/requirements.txt django aiohttp==3.7.1 --exclude 'aio.*'"
+        "pip-license-checker -x resources/external.csv --exclude-license '(?i).*(?:mit|bsd).*'"]
        (str/join \newline)))
 
 (defn error-msg [errors]
@@ -151,8 +152,8 @@
     :multi true
     :update-fn conj
     :validate [license/is-type-valid? license/invalid-type]]
-   ["-e" "--exclude REGEX" "PCRE to exclude matching packages" :parse-fn #(re-pattern %)]
-   ["-el" "--exclude-license REGEX" "PCRE to exclude matching licenses" :parse-fn #(re-pattern %)]
+   ["-e" "--exclude REGEX" "PCRE to exclude packages with matching names" :parse-fn #(re-pattern %)]
+   ["-el" "--exclude-license REGEX" "PCRE to exclude packages with matching license names" :parse-fn #(re-pattern %)]
    ["-p" "--[no-]pre" "Include pre-release and development versions. By default, use only stable versions"
     :default false]
    ["-t" "--[no-]with-totals" "Print totals for license types" :default false]
