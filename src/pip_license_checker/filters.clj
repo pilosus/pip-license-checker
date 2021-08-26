@@ -74,7 +74,7 @@
 
 (defn filter-fails-only-licenses
   "Filter license types specified with --failed flag(s) if needed"
-  [licenses options]
+  [options licenses]
   (let [{:keys [fail fails-only]} options]
     (if (or
          (not fails-only)
@@ -82,10 +82,19 @@
       licenses
       (filter #(contains? fail (get-in % [:license :type])) licenses))))
 
+(defn remove-licenses
+  "Remove parsed licenses matching the pattern"
+  [options licenses]
+  (let [{:keys [exclude-license]} options]
+    (if exclude-license
+      (remove #(re-matches exclude-license (get-in % [:license :name])) licenses)
+      licenses)))
+
 (defn filter-parsed-requirements
   "Post parsing filtering pipeline"
   [licenses options]
-  (-> (filter-fails-only-licenses licenses options)))
+  (->> (filter-fails-only-licenses options licenses)
+       (remove-licenses options)))
 
 ;;
 ;; Instrumented functions - uncomment only while testing

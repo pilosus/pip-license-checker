@@ -151,8 +151,8 @@
     :multi true
     :update-fn conj
     :validate [license/is-type-valid? license/invalid-type]]
-   ["-e" "--exclude REGEX" "PCRE to exclude matching packages. Used only if [package]... or requirement files specified"
-    :parse-fn #(re-pattern %)]
+   ["-e" "--exclude REGEX" "PCRE to exclude matching packages" :parse-fn #(re-pattern %)]
+   ["-el" "--exclude-license REGEX" "PCRE to exclude matching licenses" :parse-fn #(re-pattern %)]
    ["-p" "--[no-]pre" "Include pre-release and development versions. By default, use only stable versions"
     :default false]
    ["-t" "--[no-]with-totals" "Print totals for license types" :default false]
