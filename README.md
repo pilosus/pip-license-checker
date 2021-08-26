@@ -161,7 +161,8 @@ Description:
   -x, --external FILE_NAME             []   CSV file with prefetched license data in format: package-name,license-name[,...]
   -xcsvh, --[no-]external-csv-headers       CSV file contains header line
   -f, --fail LICENSE_TYPE              #{}  Return non-zero exit code if license type is found
-  -e, --exclude REGEX                       PCRE to exclude matching packages. Used only if [package]... or requirement files specified
+  -e, --exclude REGEX                       PCRE to exclude packages with matching names
+  -el, --exclude-license REGEX              PCRE to exclude packages with matching license names
   -p, --[no-]pre                            Include pre-release and development versions. By default, use only stable versions
   -t, --[no-]with-totals                    Print totals for license types
   -o, --[no-]totals-only                    Print only totals for license types
@@ -177,6 +178,7 @@ pip-license-checker --with-totals --table-headers --requirements resources/requi
 pip-license-checker --totals-only -r file1.txt -r file2.txt -r file3.txt
 pip-license-checker -r resources/requirements.txt django aiohttp==3.7.1 --exclude 'aio.*'
 pip-license-checker --external resources/external.csv --exclude 'node.*' --external-csv-headers
+pip-license-checker -x resources/external.csv --exclude-license '(?i).*(?:mit|bsd).*'
 
 Valid license types:
 NetworkCopyleft, StrongCopyleft, WeakCopyleft, Copyleft, Permissive, Other, Error

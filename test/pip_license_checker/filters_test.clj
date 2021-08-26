@@ -198,7 +198,24 @@
      {:ok? true,
       :requirement {:name "aiostream", :version "0.1.0"},
       :license {:name "GPLv3", :type "Copyleft"}}]
-    "fail flag omitted, do not filter"]])
+    "fail flag omitted, do not filter"]
+   [[{:ok? true,
+      :requirement {:name "aiohttp", :version "3.7.2"},
+      :license {:name "MIT License", :type "Permissive"}}
+     {:ok? true,
+      :requirement {:name "aiostream", :version "0.1.0"},
+      :license {:name "GPLv3", :type "Copyleft"}}
+     {:ok? true,
+      :requirement {:name "whatever", :version "10.1.2"},
+      :license {:name "GPL version 2", :type "Copyleft"}}
+     {:ok? true,
+      :requirement {:name "yet_another_package", :version "21.04"},
+      :license {:name "GNU General Public License (GPLv2+)", :type "Copyleft"}}]
+    {:exclude-license #"(?i)(?:^GPL.*|gnu general public license.*)"}
+    [{:ok? true,
+      :requirement {:name "aiohttp", :version "3.7.2"},
+      :license {:name "MIT License", :type "Permissive"}}]
+    "Exclude license"]])
 
 (deftest ^:integration ^:request
   test-filter-parsed-requirements
