@@ -181,10 +181,34 @@ pip-license-checker -r resources/requirements.txt django aiohttp==3.7.1 --exclud
 pip-license-checker -x resources/external.csv --exclude-license '(?i).*(?:mit|bsd).*'
 pip-license-checker -x resources/external.csv --external-options '{:skip-header false}'
 pip-license-checker -x resources/external.cocoapods --external-format cocoapods'
-
-Valid license types:
-NetworkCopyleft, StrongCopyleft, WeakCopyleft, Copyleft, Permissive, Other, Error
 ```
+
+### License types
+
+The following valid license types are available (to be used with `--fail` option):
+
+- `NetworkCopyleft`
+- `StrongCopyleft`
+- `WeakCopyleft`
+- `Copyleft` (includes all of above)
+- `Permissive`
+- `Other`
+- `Error`
+
+### External file formats
+
+The following valid external file formats are available (to be used with `--external-format` option):
+
+- `csv`
+- `cocoapods`
+
+### External file options
+
+The following valid external file options are available (to be used
+with `--external-options` option) for the external formats:
+
+- `csv`: `'{:skip-header [boolean]}'` -- skip the first (header) line of the `csv` file or not.
+- `cocoapods`: see the [documentation](https://github.com/pilosus/cocoapods-acknowledgements-licenses#options).
 
 ## FAQ
 
