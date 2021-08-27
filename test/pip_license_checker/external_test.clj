@@ -93,13 +93,21 @@
     [{:ok? true
       :requirement {:name "test-package" :version nil}
       :license {:name "MIT License" :type "Permissive"}}]
-    "Exclude pattern"]])
+    "Exclude pattern"]
+   [[{:package "test-package" :license "MIT License"}
+     {:package "another-package" :license "GPLv2"}]
+    {:external-format external/format-gradle :exclude #"another-.*"}
+    [{:ok? true
+      :requirement {:name "test-package" :version nil}
+      :license {:name "MIT License" :type "Permissive"}}]
+    "Gradle license plugin"]])
 
-(deftest test-get-parsed-requiements-cocoapods
+(deftest test-get-parsed-requiements-external-plugins
   (testing "Test license name formatting"
     (doseq [[external-data options expected description] params-get-parsed-requiements-cocoapods]
       (testing description
         #_:clj-kondo/ignore
         (with-redefs
-         [cocoapods-acknowledgements-licenses.core/plist->data (constantly external-data)]
+         [cocoapods-acknowledgements-licenses.core/plist->data (constantly external-data)
+          gradle-licenses.core/gradle-json->data (constantly external-data)]
           (is (= expected (external/get-parsed-requiements ["placeholder"] options))))))))

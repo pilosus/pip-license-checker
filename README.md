@@ -159,7 +159,7 @@ Description:
 
   -r, --requirements REQUIREMENT_NAME        []                                      Requirement file name to read
   -x, --external FILE_NAME                   []                                      CSV file with prefetched license data in format: package-name,license-name[,...]
-      --external-format LICENSE_FILE_FORMAT  csv                                     External file format: csv, cocoapods
+      --external-format LICENSE_FILE_FORMAT  csv                                     External file format: csv, cocoapods, gradle
       --external-options OPTS_EDN_STRING     {:skip-header true, :skip-footer true}  String of options map in EDN format
   -f, --fail LICENSE_TYPE                    #{}                                     Return non-zero exit code if license type is found
   -e, --exclude REGEX                                                                PCRE to exclude packages with matching names
@@ -201,6 +201,7 @@ The following valid external file formats are available (to be used with `--exte
 
 - `csv`
 - `cocoapods`
+- `gradle`
 
 ### External file options
 
@@ -209,6 +210,7 @@ with `--external-options` option) for the external formats:
 
 - `csv`: `'{:skip-header [boolean]}'` -- skip the first (header) line of the `csv` file or not.
 - `cocoapods`: see the [documentation](https://github.com/pilosus/cocoapods-acknowledgements-licenses#options).
+- `gradle`: see the [documentation](https://github.com/pilosus/gradle-licenses)
 
 ## FAQ
 

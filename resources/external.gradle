@@ -1,0 +1,67 @@
+[
+  {
+    "project": "Android GIF Drawable Library",
+    "description": "Views and Drawable for displaying animated GIFs for Android",
+    "version": "1.2.3",
+    "developers": [
+      "Karol Wrótniak"
+    ],
+    "url": "https://github.com/koral--/android-gif-drawable",
+    "year": null,
+    "licenses": [
+      {
+        "license": "The MIT License",
+        "license_url": "http://opensource.org/licenses/MIT"
+      }
+    ],
+    "dependency": "pl.droidsonroids.gif:android-gif-drawable:1.2.3"
+  },
+  {
+    "project": "Design",
+    "description": null,
+    "version": "26.1.0",
+    "developers": [],
+    "url": null,
+    "year": null,
+    "licenses": [
+      {
+        "license": "The Apache Software License",
+        "license_url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+      }
+    ],
+    "dependency": "com.android.support:design:26.1.0"
+  },
+  {
+    "project": "WSDL4J",
+    "description": "Java stub generator for WSDL",
+    "version": "1.5.1",
+    "developers": [],
+    "url": "http://sf.net/projects/wsdl4j",
+    "year": null,
+    "licenses": [],
+    "dependency": "wsdl4j:wsdl4j:1.5.1"
+  },
+  {
+    "project": "Checker Qual",
+    "description": "Checker Qual is the set of annotations (qualifiers) and supporting classes\n        used by the Checker Framework to type check Java source code.  Please\n        see artifact:\n        org.checkerframework:checker",
+    "version": "2.5.5",
+    "developers": [
+      "Michael Ernst",
+      "Werner M. Dietl",
+      "Suzanne Millstein"
+    ],
+    "url": "https://checkerframework.org",
+    "year": null,
+    "licenses": [
+      {
+        "license": "GNU General Public License, version 2 (GPL2), with the classpath exception",
+        "license_url": "http://www.gnu.org/software/classpath/license.html"
+      },
+      {
+        "license": "The MIT License",
+        "license_url": "http://opensource.org/licenses/MIT"
+      }
+    ],
+    "dependency": "org.checkerframework:checker-compat-qual:2.5.5"
+  }
+]
