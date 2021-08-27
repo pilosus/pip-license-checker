@@ -11,7 +11,7 @@
                  [cheshire "5.10.0"]
                  [org.clojure/test.check "1.1.0"]
                  [org.clojars.vrs/cocoapods-acknowledgements-licenses "0.1.0"]
-                 [org.clojars.vrs/gradle-licenses "0.1.0"]]
+                 [org.clojars.vrs/gradle-licenses "0.2.0"]]
   :plugins [[lein-cljfmt "0.7.0"]
             [lein-cloverage "1.2.1"]]
   :main pip-license-checker.core
