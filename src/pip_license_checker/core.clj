@@ -111,7 +111,7 @@
       (exit 1))))
 
 (defn usage [options-summary]
-  (->> ["pip-license-checker - check Python PyPI package license"
+  (->> ["pip-license-checker - license compliance tool to identify dependencies license names and types."
         ""
         "Usage:"
         "pip-license-checker [options]... [package]..."
@@ -150,7 +150,7 @@
     :validate [file/exists? "File does not exist"]]
    [nil "--external-format LICENSE_FILE_FORMAT" "External file format: csv, cocoapods"
     :default external/format-csv
-    :validate [external/is-format-valid? "License file format does not exist"]]
+    :validate [external/is-format-valid? external/invalid-format]]
    [nil "--external-options OPTS_EDN_STRING" "String of options map in EDN format"
     :default external/default-options
     :parse-fn external/opts-str->map]

@@ -149,7 +149,7 @@ jar for more details.
 ```bash
 lein run
 
-pip-license-checker - check Python PyPI package license
+pip-license-checker - license compliance tool to identify dependencies license names and types.
 
 Usage:
 pip-license-checker [options]... [package]...
@@ -157,18 +157,19 @@ pip-license-checker [options]... [package]...
 Description:
   package	List of package names in format `name[specifier][version]`
 
-  -r, --requirements REQUIREMENT_NAME  []   Requirement file name to read
-  -x, --external FILE_NAME             []   CSV file with prefetched license data in format: package-name,license-name[,...]
-  -xcsvh, --[no-]external-csv-headers       CSV file contains header line
-  -f, --fail LICENSE_TYPE              #{}  Return non-zero exit code if license type is found
-  -e, --exclude REGEX                       PCRE to exclude packages with matching names
-  -el, --exclude-license REGEX              PCRE to exclude packages with matching license names
-  -p, --[no-]pre                            Include pre-release and development versions. By default, use only stable versions
-  -t, --[no-]with-totals                    Print totals for license types
-  -o, --[no-]totals-only                    Print only totals for license types
-  -d, --[no-]table-headers                  Print table headers
-  -m, --[no-]fails-only                     Print only packages of license types specified with --fail flags
-  -h, --help                                Print this help message
+  -r, --requirements REQUIREMENT_NAME        []                                      Requirement file name to read
+  -x, --external FILE_NAME                   []                                      CSV file with prefetched license data in format: package-name,license-name[,...]
+      --external-format LICENSE_FILE_FORMAT  csv                                     External file format: csv, cocoapods
+      --external-options OPTS_EDN_STRING     {:skip-header true, :skip-footer true}  String of options map in EDN format
+  -f, --fail LICENSE_TYPE                    #{}                                     Return non-zero exit code if license type is found
+  -e, --exclude REGEX                                                                PCRE to exclude packages with matching names
+      --exclude-license REGEX                                                        PCRE to exclude packages with matching license names
+      --[no-]pre                                                                     Include pre-release and development versions. By default, use only stable versions
+      --[no-]with-totals                                                             Print totals for license types
+      --[no-]totals-only                                                             Print only totals for license types
+      --[no-]table-headers                                                           Print table headers
+      --[no-]fails-only                                                              Print only packages of license types specified with --fail flags
+  -h, --help                                                                         Print this help message
 
 Examples:
 pip-license-checker django
@@ -177,8 +178,9 @@ pip-license-checker --pre 'aiohttp<4'
 pip-license-checker --with-totals --table-headers --requirements resources/requirements.txt
 pip-license-checker --totals-only -r file1.txt -r file2.txt -r file3.txt
 pip-license-checker -r resources/requirements.txt django aiohttp==3.7.1 --exclude 'aio.*'
-pip-license-checker --external resources/external.csv --exclude 'node.*' --external-csv-headers
 pip-license-checker -x resources/external.csv --exclude-license '(?i).*(?:mit|bsd).*'
+pip-license-checker -x resources/external.csv --external-options '{:skip-header false}'
+pip-license-checker -x resources/external.cocoapods --external-format cocoapods'
 
 Valid license types:
 NetworkCopyleft, StrongCopyleft, WeakCopyleft, Copyleft, Permissive, Other, Error
@@ -186,15 +188,13 @@ NetworkCopyleft, StrongCopyleft, WeakCopyleft, Copyleft, Permissive, Other, Erro
 
 ## FAQ
 
-### General questions
-
-#### Q1. Does the tool consider the Python package's version? What if a package changes its license over time?
+### Q1. Does the tool consider the Python package's version? What if a package changes its license over time?
 
 The tool resolves the version for Python packages just `pip` package
 manager does. It also checks the license only for the resolved version
 of the package.
 
-#### Q2. How do I check all Python dependencies for my project, both explicit and transitive ones?
+### Q2. How do I check all Python dependencies for my project, both explicit and transitive ones?
 
 `pip-license-checker` checks only explicitly defined dependencies,
 without
@@ -207,7 +207,7 @@ pip freeze > requirements-all.txt
 lein run -r requirements-all.txt
 ```
 
-#### Q3. Does the tool consider PEP-508 extras and markers specified for requirements?
+### Q3. Does the tool consider PEP-508 extras and markers specified for requirements?
 
 [PEP508](https://www.python.org/dev/peps/pep-0508/) indeed allows
 specifying extra packages to be installed for the package as well as
