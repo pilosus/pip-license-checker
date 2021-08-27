@@ -10,9 +10,7 @@
   [path]
   (.exists (io/file path)))
 
-
 ;; requirements.txt files
-
 
 (defn path->lines
   "Return a vector of file lines
@@ -26,9 +24,7 @@
   [requirements]
   (apply concat (for [path requirements] (path->lines path))))
 
-
 ;; CSV files
-
 
 (def csv-header [:package :license])
 (def csv-column-indecies-to-read [0 1])
@@ -49,25 +45,18 @@
 
 (defn csv->data
   "Read CSV file in format: package-name,license-name[,...] into a map"
-  [path options]
+  [path external-options]
   (let [lines (csv->lines path)
-        with-headers (:external-csv-headers options)
-        lines-to-skip (if with-headers 1 0)
+        skip-header (:skip-header external-options)
+        lines-to-skip (if skip-header 1 0)
         data (drop lines-to-skip lines)
         selected-columns (map #(take-csv-columns % csv-column-indecies-to-read) data)
         result (map zipmap (repeat csv-header) selected-columns)]
     result))
 
-(defn get-csv-lines
-  "Concatenates all parsed CSV files"
-  [paths options]
-  (apply concat (for [path paths] (csv->data path options))))
-
-
 ;; Universal, used with external files adapters
-
 
 (defn get-all-extenal-files-content
   "Concatenates all parsed external files"
-  [parse-fn paths options]
-  (apply concat (for [path paths] (parse-fn path options))))
+  [parse-fn paths external-options]
+  (apply concat (for [path paths] (parse-fn path external-options))))

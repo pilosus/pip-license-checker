@@ -15,7 +15,7 @@
      :options {:fail #{}
                :pre false
                :external-format "csv"
-               :external-csv-headers true
+               :external-options external/default-options
                :with-totals false
                :totals-only false
                :table-headers false
@@ -29,7 +29,7 @@
      :options {:fail #{}
                :pre false
                :external-format "csv"
-               :external-csv-headers true
+               :external-options external/default-options
                :with-totals false
                :totals-only false
                :table-headers false
@@ -43,7 +43,7 @@
      :options {:fail #{}
                :pre false
                :external-format "csv"
-               :external-csv-headers true
+               :external-options external/default-options
                :with-totals false
                :totals-only false
                :table-headers false
@@ -63,7 +63,7 @@
      :options {:fail #{}
                :pre false
                :external-format "csv"
-               :external-csv-headers true
+               :external-options external/default-options
                :with-totals false
                :totals-only false
                :table-headers false
@@ -71,6 +71,8 @@
     "Requirements, packages and externals"]
    [["--external"
      "resources/external.cocoapods"
+     "--external-options"
+     "{:skip-header false :skip-footer true :int-opt 42 :str-opt \"str-val\"}"
      "--external-format"
      "cocoapods"
      "--with-totals"]
@@ -80,12 +82,12 @@
      :options {:fail #{}
                :pre false
                :external-format "cocoapods"
-               :external-csv-headers true
+               :external-options {:skip-header false :skip-footer true :int-opt 42 :str-opt "str-val"}
                :with-totals true
                :totals-only false
                :table-headers false
                :fails-only false}}
-    "Externals with format specified"]
+    "Externals with format and options specified"]
    [["--help"]
     {:exit-message "placeholder" :ok? true}
     "Help run"]])

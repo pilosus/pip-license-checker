@@ -82,14 +82,14 @@
 (def params-csv->data
   [[[["test-package@0.1.2" "MIT License"]
      ["another-package@21.04" "GPLv2"]]
-    {:external-csv-headers false}
+    {:skip-header false}
     [{:package "test-package@0.1.2" :license "MIT License"}
      {:package "another-package@21.04" :license "GPLv2"}]
     "No headers"]
    [[["package name" "license name"]
      ["test-package" "BSD License"]
      ["another-package" "EULA"]]
-    {:external-csv-headers true}
+    {:skip-header true}
     [{:package "test-package" :license "BSD License"}
      {:package "another-package" :license "EULA"}]
     "Skip headers"]])

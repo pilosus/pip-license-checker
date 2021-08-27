@@ -128,7 +128,9 @@
         "pip-license-checker --with-totals --table-headers --requirements resources/requirements.txt"
         "pip-license-checker --totals-only -r file1.txt -r file2.txt -r file3.txt"
         "pip-license-checker -r resources/requirements.txt django aiohttp==3.7.1 --exclude 'aio.*'"
-        "pip-license-checker -x resources/external.csv --exclude-license '(?i).*(?:mit|bsd).*'"]
+        "pip-license-checker -x resources/external.csv --exclude-license '(?i).*(?:mit|bsd).*'"
+        "pip-license-checker -x resources/external.csv --external-options '{:skip-header false}'"
+        "pip-license-checker -x resources/external.cocoapods --external-format cocoapods'"]
        (str/join \newline)))
 
 (defn error-msg [errors]
@@ -146,23 +148,24 @@
     :default []
     :update-fn conj
     :validate [file/exists? "File does not exist"]]
-   ["-xf" "--external-format LICENSE_FILE_FORMAT" "External file format: csv, cocoapods"
+   [nil "--external-format LICENSE_FILE_FORMAT" "External file format: csv, cocoapods"
     :default external/format-csv
     :validate [external/is-format-valid? "License file format does not exist"]]
-   ["-xcsvh" "--[no-]external-csv-headers" "CSV file contains header line" :default true]
+   [nil "--external-options OPTS_EDN_STRING" "String of options map in EDN format"
+    :default external/default-options
+    :parse-fn external/opts-str->map]
    ["-f" "--fail LICENSE_TYPE" "Return non-zero exit code if license type is found"
     :default (sorted-set)
     :multi true
     :update-fn conj
     :validate [license/is-type-valid? license/invalid-type]]
    ["-e" "--exclude REGEX" "PCRE to exclude packages with matching names" :parse-fn #(re-pattern %)]
-   ["-el" "--exclude-license REGEX" "PCRE to exclude packages with matching license names" :parse-fn #(re-pattern %)]
-   ["-p" "--[no-]pre" "Include pre-release and development versions. By default, use only stable versions"
-    :default false]
-   ["-t" "--[no-]with-totals" "Print totals for license types" :default false]
-   ["-o" "--[no-]totals-only" "Print only totals for license types" :default false]
-   ["-d" "--[no-]table-headers" "Print table headers" :default false]
-   ["-m" "--[no-]fails-only" "Print only packages of license types specified with --fail flags" :default false]
+   [nil "--exclude-license REGEX" "PCRE to exclude packages with matching license names" :parse-fn #(re-pattern %)]
+   [nil "--[no-]pre" "Include pre-release and development versions. By default, use only stable versions" :default false]
+   [nil "--[no-]with-totals" "Print totals for license types" :default false]
+   [nil "--[no-]totals-only" "Print only totals for license types" :default false]
+   [nil "--[no-]table-headers" "Print table headers" :default false]
+   [nil "--[no-]fails-only" "Print only packages of license types specified with --fail flags" :default false]
    ["-h" "--help" "Print this help message"]])
 
 (s/fdef extend-fail-opt

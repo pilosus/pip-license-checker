@@ -3,6 +3,7 @@
   (:gen-class)
   (:require
    [clojure.string :as str]
+   [clojure.edn :as edn]
    [pip-license-checker.file :as file]
    [pip-license-checker.filters :as filters]
    [pip-license-checker.license :as license]
@@ -10,6 +11,8 @@
 
 (def prefetched-correctly true)
 (def regex-version-separator #"(@|:)")
+
+(def default-options {:skip-header true :skip-footer true})
 
 (def format-csv "csv")
 (def format-cocoapods "cocoapods")
@@ -28,7 +31,17 @@
   [format]
   (contains? formats format))
 
+;; EDN string to Clojure data structure
+
+
+(defn opts-str->map
+  "Parse options string in EDN format into Clojure map"
+  [options-str]
+  (edn/read-string options-str))
+
+
 ;; Formatting and extensing package names
+
 
 (defn package-name->requirement-map
   "Format package string into requirement map"
@@ -66,8 +79,10 @@
   "Apply filters and get verdicts for all requirements"
   [external options]
   (let [exclude-pattern (:exclude options)
+        external-options (:external-options options)
         parse-fn (get-extenal-package-parse-fn options)
-        packages (file/get-all-extenal-files-content parse-fn external options)
+        packages (file/get-all-extenal-files-content parse-fn external external-options)
+
         requirements (map external-obj->requirement packages)
         result (filters/remove-requiment-maps-user-rules exclude-pattern requirements)]
     result))

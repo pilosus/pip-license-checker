@@ -51,7 +51,7 @@
   [[[["package name" "license name"]
      ["test-package@0.1.2" "MIT License"]
      ["another-package@21.04" "GPLv2"]]
-    {:external-csv-headers true}
+    {:external-options {:skip-header true}}
     [{:ok? true
       :requirement {:name "test-package" :version "0.1.2"}
       :license {:name "MIT License" :type "Permissive"}}
@@ -62,7 +62,7 @@
    [[["package name" "license name"]
      ["test-package@0.1.2" "MIT License"]
      ["another-package@21.04" "GPLv2"]]
-    {:external-csv-headers true :exclude #"another-.*"}
+    {:external-options {:skip-header true} :exclude #"another-.*"}
     [{:ok? true
       :requirement {:name "test-package" :version "0.1.2"}
       :license {:name "MIT License" :type "Permissive"}}]
