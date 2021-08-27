@@ -7,11 +7,11 @@
    [clojure.spec.alpha :as s]
    [clojure.string :as str]
    [clojure.tools.cli :refer [parse-opts]]
+   [pip-license-checker.external :as external]
    [pip-license-checker.file :as file]
    [pip-license-checker.filters :as filters]
    [pip-license-checker.license :as license]
    [pip-license-checker.pypi :as pypi]
-   [pip-license-checker.csv :as csv]
    [pip-license-checker.spec :as sp]))
 
 (def formatter-license "%-35s %-55s %-30s")
@@ -75,9 +75,9 @@
         totals-only-opt (:totals-only options)
         show-totals (or with-totals-opt totals-only-opt)
         table-headers (:table-headers options)
-        parsed-csv-licenses (csv/get-parsed-requiements external options)
+        parsed-external-licenses (external/get-parsed-requiements external options)
         parsed-pypi-licenses (pypi/get-parsed-requiements packages requirements options)
-        parsed-licenses (concat parsed-pypi-licenses parsed-csv-licenses)
+        parsed-licenses (concat parsed-pypi-licenses parsed-external-licenses)
         licenses (filters/filter-parsed-requirements parsed-licenses options)
         totals
         (if (or show-totals with-fail)
@@ -146,6 +146,9 @@
     :default []
     :update-fn conj
     :validate [file/exists? "File does not exist"]]
+   ["-xf" "--external-format LICENSE_FILE_FORMAT" "External file format: csv, cocoapods"
+    :default external/format-csv
+    :validate [external/is-format-valid? "License file format does not exist"]]
    ["-xcsvh" "--[no-]external-csv-headers" "CSV file contains header line" :default true]
    ["-f" "--fail LICENSE_TYPE" "Return non-zero exit code if license type is found"
     :default (sorted-set)

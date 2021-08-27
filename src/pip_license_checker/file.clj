@@ -30,8 +30,8 @@
 ;; CSV files
 
 
-(def csv-column-indecies-to-read [0 1])
 (def csv-header [:package :license])
+(def csv-column-indecies-to-read [0 1])
 (def csv-out-of-range-column-index nil)
 
 (defn take-csv-columns
@@ -60,5 +60,14 @@
 
 (defn get-csv-lines
   "Concatenates all parsed CSV files"
-  [paths with-headers]
-  (apply concat (for [path paths] (csv->data path with-headers))))
+  [paths options]
+  (apply concat (for [path paths] (csv->data path options))))
+
+
+;; Universal, used with external files adapters
+
+
+(defn get-all-extenal-files-content
+  "Concatenates all parsed external files"
+  [parse-fn paths options]
+  (apply concat (for [path paths] (parse-fn path options))))

@@ -1,13 +1,13 @@
-(ns pip-license-checker.csv-test
+(ns pip-license-checker.external-test
   (:require
    [clojure.test :refer [deftest is testing]]
    [pip-license-checker.file :as file]
-   [pip-license-checker.csv :as csv]))
+   [pip-license-checker.external :as external]))
 
 (def params-package-name->requirement-map
-  [[nil {:name nil :version ""} "No package"]
-   ["test-package" {:name "test-package" :version ""} "No separators"]
-   ["test-package_0.10.0" {:name "test-package_0.10.0" :version ""} "Unknown separator"]
+  [[nil {:name nil :version nil} "No package"]
+   ["test-package" {:name "test-package" :version nil} "No separators"]
+   ["test-package_0.10.0" {:name "test-package_0.10.0" :version nil} "Unknown separator"]
    ["node-forge@0.10.0" {:name "node-forge" :version "0.10.0"} "Single @ separator"]
    ["node-forge:0.10.0" {:name "node-forge" :version "0.10.0"} "Single : separator"]
    ["@org-name/node-forge@0.10.0" {:name "org-name/node-forge" :version "0.10.0"} "Multiple @ separators"]])
@@ -16,7 +16,7 @@
   (testing "Test formatting package string into requirement map"
     (doseq [[package expected description] params-package-name->requirement-map]
       (testing description
-        (is (= expected (csv/package-name->requirement-map package)))))))
+        (is (= expected (external/package-name->requirement-map package)))))))
 
 (def params-license-name->map
   [["MIT License" {:name "MIT License" :type "Permissive"} "Permissive license"]
@@ -27,7 +27,7 @@
   (testing "Test license name formatting"
     (doseq [[license expected description] params-license-name->map]
       (testing description
-        (is (= expected (csv/license-name->map license)))))))
+        (is (= expected (external/license-name->map license)))))))
 
 (def params-external-obj->requirement
   [[{:package "test-package@0.1.2" :license "MIT License"}
@@ -37,7 +37,7 @@
     "Test 1"]
    [{:package "test-package" :license "LGPL"}
     {:ok? true
-     :requirement {:name "test-package" :version ""}
+     :requirement {:name "test-package" :version nil}
      :license {:name "LGPL" :type "WeakCopyleft"}}
     "Test 2"]])
 
@@ -45,9 +45,9 @@
   (testing "Test converting external object to requirement"
     (doseq [[external-obj expected description] params-external-obj->requirement]
       (testing description
-        (is (= expected (csv/external-obj->requirement external-obj)))))))
+        (is (= expected (external/external-obj->requirement external-obj)))))))
 
-(def params-get-parsed-requiements
+(def params-get-parsed-requiements-csv
   [[[["package name" "license name"]
      ["test-package@0.1.2" "MIT License"]
      ["another-package@21.04" "GPLv2"]]
@@ -68,10 +68,38 @@
       :license {:name "MIT License" :type "Permissive"}}]
     "Exclude pattern"]])
 
-(deftest test-get-parsed-requiements
+(deftest test-get-parsed-requiements-csv
   (testing "Test license name formatting"
-    (doseq [[external-lines options expected description] params-get-parsed-requiements]
+    (doseq [[external-lines options expected description] params-get-parsed-requiements-csv]
       (testing description
         (with-redefs
          [file/csv->lines (constantly external-lines)]
-          (is (= expected (csv/get-parsed-requiements ["placeholder"] options))))))))
+          (is (= expected (external/get-parsed-requiements ["placeholder"] options))))))))
+
+(def params-get-parsed-requiements-cocoapods
+  [[[{:package "test-package" :license "MIT License"}
+     {:package "another-package" :license "GPLv2"}]
+    {:external-format external/format-cocoapods}
+    [{:ok? true
+      :requirement {:name "test-package" :version nil}
+      :license {:name "MIT License" :type "Permissive"}}
+     {:ok? true
+      :requirement {:name "another-package" :version nil}
+      :license {:name "GPLv2" :type "StrongCopyleft"}}]
+    "No headers"]
+   [[{:package "test-package" :license "MIT License"}
+     {:package "another-package" :license "GPLv2"}]
+    {:external-format external/format-cocoapods :exclude #"another-.*"}
+    [{:ok? true
+      :requirement {:name "test-package" :version nil}
+      :license {:name "MIT License" :type "Permissive"}}]
+    "Exclude pattern"]])
+
+(deftest test-get-parsed-requiements-cocoapods
+  (testing "Test license name formatting"
+    (doseq [[external-data options expected description] params-get-parsed-requiements-cocoapods]
+      (testing description
+        #_:clj-kondo/ignore
+        (with-redefs
+         [cocoapods-acknowledgements-licenses.core/plist->data (constantly external-data)]
+          (is (= expected (external/get-parsed-requiements ["placeholder"] options))))))))

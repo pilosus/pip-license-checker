@@ -1,22 +1,41 @@
-(ns pip-license-checker.csv
-  "Process packages with prefetched licenses from CSV file"
+(ns pip-license-checker.external
+  "External files adapters"
   (:gen-class)
   (:require
    [clojure.string :as str]
    [pip-license-checker.file :as file]
    [pip-license-checker.filters :as filters]
-   [pip-license-checker.license :as license]))
+   [pip-license-checker.license :as license]
+   [cocoapods-acknowledgements-licenses.core :refer [plist->data]]))
 
 (def prefetched-correctly true)
-
 (def regex-version-separator #"(@|:)")
+
+(def format-csv "csv")
+(def format-cocoapods "cocoapods")
+
+(def formats
+  (sorted-set
+   format-csv
+   format-cocoapods))
+
+(def invalid-format
+  (format "Invalid external format. Use one of: %s"
+          (str/join ", " formats)))
+
+(defn is-format-valid?
+  "Return true if format string is valid, false otherwise"
+  [format]
+  (contains? formats format))
+
+;; Formatting and extensing package names
 
 (defn package-name->requirement-map
   "Format package string into requirement map"
   [package]
   (let [split (if package (str/split package regex-version-separator) [])
         splitted? (> (count split) 1)
-        version (if splitted? (last split) "")
+        version (if splitted? (last split) nil)
         name (if splitted? (str/join (butlast split)) (first split))]
     {:name name :version version}))
 
@@ -32,11 +51,23 @@
    :requirement (package-name->requirement-map package)
    :license (license-name->map license)})
 
+;; External file format to function
+
+(defn get-extenal-package-parse-fn
+  "Get parse function for given external file format"
+  [{:keys [external-format]}]
+  (cond
+    (= external-format format-cocoapods) plist->data
+    :else file/csv->data))
+
+;; Entrypoint
+
 (defn get-parsed-requiements
   "Apply filters and get verdicts for all requirements"
   [external options]
   (let [exclude-pattern (:exclude options)
-        packages (file/get-csv-lines external options)
+        parse-fn (get-extenal-package-parse-fn options)
+        packages (file/get-all-extenal-files-content parse-fn external options)
         requirements (map external-obj->requirement packages)
         result (filters/remove-requiment-maps-user-rules exclude-pattern requirements)]
     result))
