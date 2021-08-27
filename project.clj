@@ -1,4 +1,4 @@
-(defproject org.clojars.vrs/pip-license-checker "0.23.0"
+(defproject org.clojars.vrs/pip-license-checker "0.24.0-SNAPSHOT"
   :description "License compliance tool to identify dependencies license names and types: permissive, copyleft, proprietory, etc."
   :url "https://github.com/pilosus/pip-license-checker"
   :license {:name "The MIT License (MIT)"
@@ -9,7 +9,8 @@
                  [org.clojure/tools.cli "1.0.206"]
                  [clj-http "3.11.0"]
                  [cheshire "5.10.0"]
-                 [org.clojure/test.check "1.1.0"]]
+                 [org.clojure/test.check "1.1.0"]
+                 [org.clojars.vrs/cocoapods-acknowledgements-licenses "0.1.0"]]
   :plugins [[lein-cljfmt "0.7.0"]
             [lein-cloverage "1.2.1"]]
   :main pip-license-checker.core

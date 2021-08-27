@@ -71,7 +71,8 @@
    ["CC BY-ND" license/type-other "Other"]
    ["CC BY-NC-ND" license/type-other "Other"]
    ["CC BY-NC-SA-4.0" license/type-other "Other"]
-   ["EULA" license/type-other "Other"]])
+   ["EULA" license/type-other "Other"]
+   [nil license/type-error "Exception catched"]])
 
 (deftest test-name->type
   (testing "Get license description by its name"

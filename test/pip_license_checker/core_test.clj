@@ -3,7 +3,7 @@
    [clojure.string :as str]
    [clojure.test :refer [deftest is testing]]
    [pip-license-checker.core :as core]
-   [pip-license-checker.csv :as csv]
+   [pip-license-checker.external :as external]
    [pip-license-checker.pypi :as pypi]))
 
 (def params-validate-args
@@ -14,7 +14,8 @@
      :packages []
      :options {:fail #{}
                :pre false
-               :external-csv-headers true
+               :external-format "csv"
+               :external-options external/default-options
                :with-totals false
                :totals-only false
                :table-headers false
@@ -27,7 +28,8 @@
      :packages ["django" "aiohttp==3.7.1"]
      :options {:fail #{}
                :pre false
-               :external-csv-headers true
+               :external-format "csv"
+               :external-options external/default-options
                :with-totals false
                :totals-only false
                :table-headers false
@@ -40,7 +42,8 @@
      :packages []
      :options {:fail #{}
                :pre false
-               :external-csv-headers true
+               :external-format "csv"
+               :external-options external/default-options
                :with-totals false
                :totals-only false
                :table-headers false
@@ -59,12 +62,32 @@
      :packages ["django" "aiohttp==3.7.1"]
      :options {:fail #{}
                :pre false
-               :external-csv-headers true
+               :external-format "csv"
+               :external-options external/default-options
                :with-totals false
                :totals-only false
                :table-headers false
                :fails-only false}}
     "Requirements, packages and externals"]
+   [["--external"
+     "resources/external.cocoapods"
+     "--external-options"
+     "{:skip-header false :skip-footer true :int-opt 42 :str-opt \"str-val\"}"
+     "--external-format"
+     "cocoapods"
+     "--with-totals"]
+    {:requirements []
+     :external ["resources/external.cocoapods"]
+     :packages []
+     :options {:fail #{}
+               :pre false
+               :external-format "cocoapods"
+               :external-options {:skip-header false :skip-footer true :int-opt 42 :str-opt "str-val"}
+               :with-totals true
+               :totals-only false
+               :table-headers false
+               :fails-only false}}
+    "Externals with format and options specified"]
    [["--help"]
     {:exit-message "placeholder" :ok? true}
     "Help run"]])
@@ -227,7 +250,7 @@
       (testing description
         (with-redefs
          [pypi/get-parsed-requiements (constantly mock-pypi)
-          csv/get-parsed-requiements (constantly mock-external)
+          external/get-parsed-requiements (constantly mock-external)
           core/exit #(println (format "Exit code: %s" %))]
           (let [actual (with-out-str (core/process-requirements [] [] [] options))]
             (is (= expected actual))))))))

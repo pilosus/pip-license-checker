@@ -282,18 +282,21 @@
 (defn name->type
   "Get license type by its name"
   [name]
-  (let [regex-copyleft-network (strings->pattern regex-list-copyleft-network)
-        regex-copyleft-strong (strings->pattern regex-list-copyleft-strong)
-        regex-copyleft-weak (strings->pattern regex-list-copyleft-weak)
-        match-copyleft-network (some? (re-find regex-copyleft-network name))
-        match-copyleft-strong (some? (re-find regex-copyleft-strong name))
-        match-copyleft-weak (some? (re-find regex-copyleft-weak name))
+  (try
+    (let [regex-copyleft-network (strings->pattern regex-list-copyleft-network)
+          regex-copyleft-strong (strings->pattern regex-list-copyleft-strong)
+          regex-copyleft-weak (strings->pattern regex-list-copyleft-weak)
+          match-copyleft-network (some? (re-find regex-copyleft-network name))
+          match-copyleft-strong (some? (re-find regex-copyleft-strong name))
+          match-copyleft-weak (some? (re-find regex-copyleft-weak name))
 
-        regex-permissive (strings->pattern regex-list-permissive)
-        match-permissive (some? (re-find regex-permissive name))]
-    (cond
-      match-copyleft-network type-copyleft-network
-      match-copyleft-strong type-copyleft-strong
-      match-copyleft-weak type-copyleft-weak
-      match-permissive type-permissive
-      :else type-other)))
+          regex-permissive (strings->pattern regex-list-permissive)
+          match-permissive (some? (re-find regex-permissive name))]
+      (cond
+        match-copyleft-network type-copyleft-network
+        match-copyleft-strong type-copyleft-strong
+        match-copyleft-weak type-copyleft-weak
+        match-permissive type-permissive
+        :else type-other))
+    ;; in case license name is null, return error license type
+    (catch NullPointerException _ type-error)))
