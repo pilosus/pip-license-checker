@@ -7,7 +7,8 @@
    [pip-license-checker.file :as file]
    [pip-license-checker.filters :as filters]
    [pip-license-checker.license :as license]
-   [cocoapods-acknowledgements-licenses.core :refer [plist->data]]))
+   [cocoapods-acknowledgements-licenses.core :refer [plist->data]]
+   [gradle-licenses.core :refer [gradle-json->data]]))
 
 (def prefetched-correctly true)
 (def regex-version-separator #"(@|:)")
@@ -16,11 +17,13 @@
 
 (def format-csv "csv")
 (def format-cocoapods "cocoapods")
+(def format-gradle "gradle")
 
 (def formats
   (sorted-set
    format-csv
-   format-cocoapods))
+   format-cocoapods
+   format-gradle))
 
 (def invalid-format
   (format "Invalid external format. Use one of: %s"
@@ -71,6 +74,7 @@
   [{:keys [external-format]}]
   (cond
     (= external-format format-cocoapods) plist->data
+    (= external-format format-gradle) gradle-json->data
     :else file/csv->data))
 
 ;; Entrypoint
@@ -82,7 +86,6 @@
         external-options (:external-options options)
         parse-fn (get-extenal-package-parse-fn options)
         packages (file/get-all-extenal-files-content parse-fn external external-options)
-
         requirements (map external-obj->requirement packages)
         result (filters/remove-requiment-maps-user-rules exclude-pattern requirements)]
     result))

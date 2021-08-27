@@ -32,7 +32,7 @@ There are two options for getting a docker image:
 1. Pulling an official image from [Docker Hub](https://hub.docker.com/r/pilosus/pip-license-checker/)
 
 ```
-docker pull pilosus/pip-license-checker:0.21.0
+docker pull pilosus/pip-license-checker:0.25.0
 ```
 
 Use specific version tag (it's matching version of the tool in the repo) or just `latest`.
@@ -81,7 +81,7 @@ on `pip-license-checker`.
 ### Docker
 
 ```bash
-docker run -it --rm pilosus/pip-license-checker:0.21.0 \
+docker run -it --rm pilosus/pip-license-checker:0.25.0 \
   java -jar app.jar 'aiostream==0.4.3' 'pygit2' 'aiohttp>3.7.1'
 ```
 
@@ -92,7 +92,7 @@ docker's `-v` option:
 
 ```bash
 docker run -v `pwd`:/volume \
-    -it --rm pilosus/pip-license-checker:0.21.0 \
+    -it --rm pilosus/pip-license-checker:0.25.0 \
     java -jar app.jar --exclude 'pylint.*' \
     --requirements '/volume/requirements.txt' \
     --external '/volume/licenses.csv' \
@@ -159,7 +159,7 @@ Description:
 
   -r, --requirements REQUIREMENT_NAME        []                                      Requirement file name to read
   -x, --external FILE_NAME                   []                                      CSV file with prefetched license data in format: package-name,license-name[,...]
-      --external-format LICENSE_FILE_FORMAT  csv                                     External file format: csv, cocoapods
+      --external-format LICENSE_FILE_FORMAT  csv                                     External file format: csv, cocoapods, gradle
       --external-options OPTS_EDN_STRING     {:skip-header true, :skip-footer true}  String of options map in EDN format
   -f, --fail LICENSE_TYPE                    #{}                                     Return non-zero exit code if license type is found
   -e, --exclude REGEX                                                                PCRE to exclude packages with matching names
@@ -201,6 +201,7 @@ The following valid external file formats are available (to be used with `--exte
 
 - `csv`
 - `cocoapods`
+- `gradle`
 
 ### External file options
 
@@ -209,6 +210,7 @@ with `--external-options` option) for the external formats:
 
 - `csv`: `'{:skip-header [boolean]}'` -- skip the first (header) line of the `csv` file or not.
 - `cocoapods`: see the [documentation](https://github.com/pilosus/cocoapods-acknowledgements-licenses#options).
+- `gradle`: see the [documentation](https://github.com/pilosus/gradle-licenses)
 
 ## FAQ
 

@@ -148,7 +148,7 @@
     :default []
     :update-fn conj
     :validate [file/exists? "File does not exist"]]
-   [nil "--external-format LICENSE_FILE_FORMAT" "External file format: csv, cocoapods"
+   [nil "--external-format LICENSE_FILE_FORMAT" "External file format: csv, cocoapods, gradle"
     :default external/format-csv
     :validate [external/is-format-valid? external/invalid-format]]
    [nil "--external-options OPTS_EDN_STRING" "String of options map in EDN format"
