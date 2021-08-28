@@ -1,4 +1,4 @@
-(defproject org.clojars.vrs/pip-license-checker "0.25.0"
+(defproject org.clojars.vrs/pip-license-checker "0.26.0-SNAPSHOT"
   :description "License compliance tool to identify dependencies license names and types: permissive, copyleft, proprietory, etc."
   :url "https://github.com/pilosus/pip-license-checker"
   :license {:name "The MIT License (MIT)"

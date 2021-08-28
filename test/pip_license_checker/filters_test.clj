@@ -204,8 +204,7 @@
     [{:license {:name nil :type "Error"}}]
     "Null value ignored"]])
 
-(deftest t
-est-remove-licenses
+(deftest test-remove-licenses
   (testing "Requirement string to a map of name and specifiers"
     (doseq [[licenses options expected description] params-remove-licenses]
       (testing description
