@@ -27,6 +27,13 @@
   [requirements]
   (remove #(re-matches regex-skip-line-internal %) requirements))
 
+(defn- requirement-matching?
+  "Match requirement against regex, catch NPE in case of null values"
+  [requirement pattern]
+  (try
+    (re-matches pattern requirement)
+    (catch NullPointerException _ false)))
+
 (s/fdef remove-requirements-user-rules
   :args (s/cat :pattern ::sp/opt-pattern :requirements ::sp/requirements)
   :ret ::sp/requirements)
@@ -36,15 +43,22 @@
   Used for requirements pre-processing"
   [pattern requirements]
   (if pattern
-    (remove #(re-matches pattern %) requirements)
+    (remove #(requirement-matching? % pattern) requirements)
     requirements))
+
+(defn- requirement-name-matching?
+  "Match requirement name against regex, catch NPE in case of null values"
+  [requirement pattern]
+  (try
+    (re-matches pattern (get-in requirement [:requirement :name]))
+    (catch NullPointerException _ false)))
 
 (defn remove-requiment-maps-user-rules
   "Exclude requiement objects to user-defined pattern
   Used for requirements post-processing"
   [pattern packages]
   (if pattern
-    (remove #(re-matches pattern (get-in % [:requirement :name])) packages)
+    (remove #(requirement-name-matching? % pattern) packages)
     packages))
 
 (defn sanitize-requirement
@@ -82,12 +96,19 @@
       licenses
       (filter #(contains? fail (get-in % [:license :type])) licenses))))
 
+(defn- license-name-matching?
+  "Match license name against regex, catch NPE in case of null values"
+  [license pattern]
+  (try
+    (re-matches pattern (get-in license [:license :name]))
+    (catch NullPointerException _ false)))
+
 (defn remove-licenses
   "Remove parsed licenses matching the pattern"
   [options licenses]
   (let [{:keys [exclude-license]} options]
     (if exclude-license
-      (remove #(re-matches exclude-license (get-in % [:license :name])) licenses)
+      (remove #(license-name-matching? % exclude-license) licenses)
       licenses)))
 
 (defn filter-parsed-requirements
