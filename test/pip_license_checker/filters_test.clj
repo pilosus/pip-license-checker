@@ -23,10 +23,10 @@
   (testing "Removing lines from requirements with internal rules"
     (doseq [[requirements expected description]
             params-remove-requirements-internal-rules]
-      (testing description)
-      (is
-       (= expected
-          (filters/remove-requirements-internal-rules requirements))))))
+      (testing description
+        (is
+         (= expected
+            (filters/remove-requirements-internal-rules requirements)))))))
 
 (def params-generators-requirements (gen/sample sp/requirements-str-gen 100))
 (def params-generators-pattern (map re-pattern (gen/sample sp/non-empty-str-gen 100)))
@@ -45,6 +45,7 @@
 (def params-remove-requirements-user-rules
   [[[] #"test" [] "No requirements"]
    [nil #"test" [] "Requirements is nil"]
+   [["aiohttp==3.7.2" nil "django" nil] #"aio.*" [nil "django" nil] "Do nothing with null values"]
    [["aiohttp==3.7.2" "django"] #"aio.*" ["django"] "Pattern 1"]
    [["aiohttp==3.7.2" "django"] #".*" [] "Pattern 2"]])
 
@@ -52,10 +53,10 @@
   (testing "Removing lines from requirements with user-defined rules"
     (doseq [[requirements pattern expected description]
             params-remove-requirements-user-rules]
-      (testing description)
-      (is
-       (= expected
-          (filters/remove-requirements-user-rules pattern requirements))))))
+      (testing description
+        (is
+         (= expected
+            (filters/remove-requirements-user-rules pattern requirements)))))))
 
 (deftest test-generators-remove-requirements-user-rules
   (testing "Generative test using test.check for user requirements filtering"
@@ -68,6 +69,36 @@
         (let [result
               (filters/remove-requirements-user-rules pattern requirements)]
           (is (seq? result)))))))
+
+
+;; filters/remove-requiment-maps-user-rules
+
+
+(def params-remove-requiment-maps-user-rules
+  [[[{:requirement {:name "test" :version "1.2.3"} :license {:name "MIT" :type "Permissive"}}]
+    #"wut"
+    [{:requirement {:name "test" :version "1.2.3"} :license {:name "MIT" :type "Permissive"}}]
+    "No matches"]
+   [[{:requirement {:name "test" :version "1.2.3"} :license {:name "MIT" :type "Permissive"}}]
+    #"(?i).*test.*"
+    []
+    "Match"]
+   [[{:requirement {:name "test" :version "1.2.3"} :license {:name "MIT" :type "Permissive"}}
+     {:requirement {:name nil :version nil} :license {:name nil :type "Error"}}
+     {:requirement {:name "another" :version "21.04"} :license {:name "GPLv2+" :type "StrongCopyleft"}}]
+    #"^test$"
+    [{:requirement {:name nil :version nil} :license {:name nil :type "Error"}}
+     {:requirement {:name "another" :version "21.04"} :license {:name "GPLv2+" :type "StrongCopyleft"}}]
+    "Nil is ignored"]])
+
+(deftest test-remove-requiment-maps-user-rules
+  (testing "Removing lines from requirements with user-defined rules"
+    (doseq [[packages pattern expected description]
+            params-remove-requiment-maps-user-rules]
+      (testing description
+        (is
+         (= expected
+            (filters/remove-requiment-maps-user-rules pattern packages)))))))
 
 
 ;; filters/sanitize-requirement
@@ -150,6 +181,38 @@
                (map? requirement-parsed)
                (not (nil? (:name requirement-parsed)))
                (not (nil? (:specifiers requirement-parsed))))))))))
+
+
+;; filters/remove-licenses
+
+
+(def params-remove-licenses
+  [[[{:license {:name "MIT" :type "Permissive"}}
+     {:license {:name "GPLv2+" :type "StrongCopyleft"}}]
+    {}
+    [{:license {:name "MIT" :type "Permissive"}}
+     {:license {:name "GPLv2+" :type "StrongCopyleft"}}]
+    "No options, nothing removed"]
+   [[{:license {:name "MIT" :type "Permissive"}}
+     {:license {:name "GPLv2+" :type "StrongCopyleft"}}]
+    {:exclude-license #"(?i)^MIT.*"}
+    [{:license {:name "GPLv2+" :type "StrongCopyleft"}}]
+    "Skip MIT"]
+   [[{:license {:name nil :type "Error"}}
+     {:license {:name "GPLv2+" :type "StrongCopyleft"}}]
+    {:exclude-license #"GPL.*"}
+    [{:license {:name nil :type "Error"}}]
+    "Null value ignored"]])
+
+(deftest test-remove-licenses
+  (testing "Requirement string to a map of name and specifiers"
+    (doseq [[licenses options expected description] params-remove-licenses]
+      (testing description
+        (is (= expected (filters/remove-licenses options licenses)))))))
+
+
+;; filters/filter-parsed-requirements
+
 
 (def params-filter-parsed-requirements
   [[[{:ok? true,
