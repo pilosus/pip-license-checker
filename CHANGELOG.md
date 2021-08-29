@@ -6,6 +6,18 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 ## [Unreleased]
 ### Fixed
 
+## [0.28.0] - 2021-08-29
+
+Release **breaks backward compatibility** by changing from permissive
+MIT license to the weak copyleft license of EPL-2.0 or GNU GPLv2 or any
+later with the GNU Classpath Exception.
+
+### Changed
+- MIT license changed to Eclipse Public License 2.0 or GNU General
+  Public License as published by the Free Software Foundation, either
+  version 2 of the License, or (at your option) any later version, with
+  the GNU Classpath Exception
+
 ## [0.27.0] - 2021-08-29
 ### Added
 - Options for `csv` external file format to specify a package name
@@ -226,7 +238,8 @@ weak copyleft types.
 ### Added
 - Structure for Leiningen app project
 
-[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.27.0...HEAD
+[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.28.0...HEAD
+[0.28.0]: https://github.com/pilosus/pip-license-checker/compare/0.27.0...0.28.0
 [0.27.0]: https://github.com/pilosus/pip-license-checker/compare/0.26.0...0.27.0
 [0.26.0]: https://github.com/pilosus/pip-license-checker/compare/0.25.0...0.26.0
 [0.25.0]: https://github.com/pilosus/pip-license-checker/compare/0.24.0...0.25.0
