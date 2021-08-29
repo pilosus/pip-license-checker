@@ -6,6 +6,16 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 ## [Unreleased]
 ### Fixed
 
+## [0.27.0] - 2021-08-29
+### Added
+- Options for `csv` external file format to specify a package name
+  column index and a license name column index respectively:
+  `:package-column-index [integer]`, `license-column-index
+  [integer]`. To pass options in use:
+  ```
+  --external-options '{:package-column-index 0 :license-column-index 1}'
+  ```
+
 ## [0.26.0] - 2021-08-28
 ### Fixed
 - NullPointerException fixed for `--exclude` option regex matching for packages with `nil` name.
@@ -216,7 +226,8 @@ weak copyleft types.
 ### Added
 - Structure for Leiningen app project
 
-[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.26.0...HEAD
+[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.27.0...HEAD
+[0.27.0]: https://github.com/pilosus/pip-license-checker/compare/0.26.0...0.27.0
 [0.26.0]: https://github.com/pilosus/pip-license-checker/compare/0.25.0...0.26.0
 [0.25.0]: https://github.com/pilosus/pip-license-checker/compare/0.24.0...0.25.0
 [0.24.0]: https://github.com/pilosus/pip-license-checker/compare/0.23.0...0.24.0
