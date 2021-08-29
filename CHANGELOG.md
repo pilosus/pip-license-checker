@@ -6,6 +6,10 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 ## [Unreleased]
 ### Fixed
 
+## [0.28.1] - 2021-08-29
+### Fixed
+- Project's license metadata fixed
+
 ## [0.28.0] - 2021-08-29
 
 Release **breaks backward compatibility** by changing from permissive
@@ -238,7 +242,8 @@ weak copyleft types.
 ### Added
 - Structure for Leiningen app project
 
-[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.28.0...HEAD
+[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.28.1...HEAD
+[0.28.1]: https://github.com/pilosus/pip-license-checker/compare/0.28.0...0.28.1
 [0.28.0]: https://github.com/pilosus/pip-license-checker/compare/0.27.0...0.28.0
 [0.27.0]: https://github.com/pilosus/pip-license-checker/compare/0.26.0...0.27.0
 [0.26.0]: https://github.com/pilosus/pip-license-checker/compare/0.25.0...0.26.0
