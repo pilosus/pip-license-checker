@@ -1,7 +1,7 @@
-(defproject org.clojars.vrs/pip-license-checker "0.28.0"
+(defproject org.clojars.vrs/pip-license-checker "0.28.1-SNAPSHOT"
   :description "License compliance tool to identify dependencies license names and types: permissive, copyleft, proprietory, etc."
   :url "https://github.com/pilosus/pip-license-checker"
-  :license {:name "The MIT License (MIT)"
+  :license {:name "Eclipse Public License 2.0 OR GNU GPL v2+ with Classpath exception"
             :url "https://github.com/pilosus/pip-license-checker/blob/main/LICENSE"}
   :dependencies [
                  [org.clojure/clojure "1.10.1"]
