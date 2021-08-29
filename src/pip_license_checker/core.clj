@@ -117,7 +117,7 @@
         "pip-license-checker [options]... [package]..."
         ""
         "Description:"
-        "  package\tList of package names in format `name[specifier][version]`"
+        "  package\tList of Python package names in format `name[specifier][version]`"
         ""
         options-summary
         ""
@@ -138,17 +138,17 @@
        (str/join \newline errors)))
 
 (def cli-options
-  [["-r" "--requirements REQUIREMENT_NAME" "Requirement file name to read"
+  [["-r" "--requirements REQUIREMENTS_FILE" "Python pip requirement file name"
     :multi true
     :default []
     :update-fn conj
-    :validate [file/exists? "Requirement file does not exist"]]
-   ["-x" "--external FILE_NAME" "CSV file with prefetched license data in format: package-name,license-name[,...]"
+    :validate [file/exists? "Requirements file does not exist"]]
+   ["-x" "--external FILE_NAME" "File containing package names and license names"
     :multi true
     :default []
     :update-fn conj
     :validate [file/exists? "File does not exist"]]
-   [nil "--external-format LICENSE_FILE_FORMAT" "External file format: csv, cocoapods, gradle"
+   [nil "--external-format FILE_FORMAT" "External file format: csv, cocoapods, gradle"
     :default external/format-csv
     :validate [external/is-format-valid? external/invalid-format]]
    [nil "--external-options OPTS_EDN_STRING" "String of options map in EDN format"
