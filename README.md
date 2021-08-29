@@ -34,7 +34,7 @@ There are two options for getting a docker image:
 1. Pulling an official image from [Docker Hub](https://hub.docker.com/r/pilosus/pip-license-checker/)
 
 ```
-docker pull pilosus/pip-license-checker:0.27.0
+docker pull pilosus/pip-license-checker:0.28.0
 ```
 
 Use specific version tag (it's matching version of the tool in the repo) or just `latest`.
@@ -83,7 +83,7 @@ on `pip-license-checker`.
 ### Docker
 
 ```bash
-docker run -it --rm pilosus/pip-license-checker:0.27.0 \
+docker run -it --rm pilosus/pip-license-checker:0.28.0 \
   java -jar app.jar 'aiostream==0.4.3' 'pygit2' 'aiohttp>3.7.1'
 ```
 
@@ -94,7 +94,7 @@ docker's `-v` option:
 
 ```bash
 docker run -v `pwd`:/volume \
-    -it --rm pilosus/pip-license-checker:0.27.0 \
+    -it --rm pilosus/pip-license-checker:0.28.0 \
     java -jar app.jar --exclude 'pylint.*' \
     --requirements '/volume/requirements.txt' \
     --external '/volume/licenses.csv' \
@@ -289,3 +289,21 @@ warranties regarding any information provided through it, and
 disclaims liability for damages resulting from using it. Using
 `pip-license-checker` does not constitute legal advice nor does it
 create an attorney-client relationship.
+
+
+## License
+
+Copyright © 2020, 2021 Vitaly Samigullin
+
+This program and the accompanying materials are made available under the
+terms of the Eclipse Public License 2.0 which is available at
+http://www.eclipse.org/legal/epl-2.0.
+
+This Source Code may also be made available under the following Secondary
+Licenses when the conditions for such availability set forth in the Eclipse
+Public License, v. 2.0 are satisfied: GNU General Public License as published by
+the Free Software Foundation, either version 2 of the License, or (at your
+option) any later version, with the GNU Classpath Exception which is available
+at https://www.gnu.org/software/classpath/license.html.
+
+SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
