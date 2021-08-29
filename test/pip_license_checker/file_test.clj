@@ -92,7 +92,34 @@
     {:skip-header true}
     [{:package "test-package" :license "BSD License"}
      {:package "another-package" :license "EULA"}]
-    "Skip headers"]])
+    "Skip headers"]
+   [[["package name" "version" "url" "license name"]
+     ["test-package" "0.0.1" "http://example.com/test-package" "BSD License"]
+     ["another-package" "21.04" "http://example.com/another-package" "MIT License"]
+     ["yet-another-package" "1.0" "http://example.com/yet-another-package" "EPL-2.0 or GPL v2+ Classpath exception"]]
+    {:skip-header true :package-column-index 0 :license-column-index 3}
+    [{:package "test-package" :license "BSD License"}
+     {:package "another-package" :license "MIT License"}
+     {:package "yet-another-package" :license "EPL-2.0 or GPL v2+ Classpath exception"}]
+    "Specify proper indices"]
+   [[["package name" "version" "url" "license name"]
+     ["test-package" "0.0.1" "http://example.com/test-package" "BSD License"]
+     ["another-package" "21.04" "http://example.com/another-package" "MIT License"]
+     ["yet-another-package" "1.0" "http://example.com/yet-another-package" "EPL-2.0 or GPL v2+ Classpath exception"]]
+    {:skip-header true :package-column-index 100 :license-column-index 3}
+    [{:package nil :license "BSD License"}
+     {:package nil :license "MIT License"}
+     {:package nil :license "EPL-2.0 or GPL v2+ Classpath exception"}]
+    "Package column index is out of range"]
+   [[["package name" "version" "url" "license name"]
+     ["test-package" "0.0.1" "http://example.com/test-package" "BSD License"]
+     ["another-package" "21.04" "http://example.com/another-package" "MIT License"]
+     ["yet-another-package" "1.0" "http://example.com/yet-another-package" "EPL-2.0 or GPL v2+ Classpath exception"]]
+    {:skip-header true :package-column-index 0 :license-column-index 30}
+    [{:package "test-package" :license nil}
+     {:package "another-package" :license nil}
+     {:package "yet-another-package" :license nil}]
+    "License column index is out of range"]])
 
 (deftest test-csv->data
   (testing "Concat of requirement file lines"

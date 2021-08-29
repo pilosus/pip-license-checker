@@ -27,7 +27,6 @@
 ;; CSV files
 
 (def csv-header [:package :license])
-(def csv-column-indecies-to-read [0 1])
 (def csv-out-of-range-column-index nil)
 
 (defn take-csv-columns
@@ -44,10 +43,12 @@
       result)))
 
 (defn csv->data
-  "Read CSV file in format: package-name,license-name[,...] into a map"
+  "Read CSV file into a map"
   [path external-options]
-  (let [lines (csv->lines path)
-        skip-header (:skip-header external-options)
+  (let [{:keys [skip-header package-column-index license-column-index]
+         :or {skip-header true package-column-index 0 license-column-index 1}} external-options
+        csv-column-indecies-to-read [package-column-index license-column-index]
+        lines (csv->lines path)
         lines-to-skip (if skip-header 1 0)
         data (drop lines-to-skip lines)
         selected-columns (map #(take-csv-columns % csv-column-indecies-to-read) data)
