@@ -4,7 +4,10 @@ All notable changes to this project will be documented in this file.
 This change log follows the conventions of [keepachangelog.com](http://keepachangelog.com/).
 
 ## [Unreleased]
-### Fixed
+
+## [0.29.0] - 2021-08-30
+### Added
+- GitHub action to check `pip-license-checker` deps licenses
 
 ## [0.28.1] - 2021-08-29
 ### Fixed
@@ -242,7 +245,8 @@ weak copyleft types.
 ### Added
 - Structure for Leiningen app project
 
-[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.28.1...HEAD
+[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.29.0...HEAD
+[0.29.0]: https://github.com/pilosus/pip-license-checker/compare/0.28.1...0.29.0
 [0.28.1]: https://github.com/pilosus/pip-license-checker/compare/0.28.0...0.28.1
 [0.28.0]: https://github.com/pilosus/pip-license-checker/compare/0.27.0...0.28.0
 [0.27.0]: https://github.com/pilosus/pip-license-checker/compare/0.26.0...0.27.0
