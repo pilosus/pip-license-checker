@@ -1,4 +1,4 @@
-(defproject org.clojars.vrs/pip-license-checker "0.28.1"
+(defproject org.clojars.vrs/pip-license-checker "0.29.0-SNAPSHOT"
   :description "License compliance tool to identify dependencies license names and types: permissive, copyleft, proprietory, etc."
   :url "https://github.com/pilosus/pip-license-checker"
   :license {:name "Eclipse Public License 2.0 OR GNU GPL v2+ with Classpath exception"
@@ -13,7 +13,8 @@
                  [org.clojars.vrs/cocoapods-acknowledgements-licenses "0.1.0"]
                  [org.clojars.vrs/gradle-licenses "0.2.0"]]
   :plugins [[lein-cljfmt "0.7.0"]
-            [lein-cloverage "1.2.1"]]
+            [lein-cloverage "1.2.1"]
+            [lein-licenses "0.2.2"]]
   :main pip-license-checker.core
   :aot [pip-license-checker.core]
   :target-path "target/%s"

@@ -34,7 +34,7 @@ There are two options for getting a docker image:
 1. Pulling an official image from [Docker Hub](https://hub.docker.com/r/pilosus/pip-license-checker/)
 
 ```
-docker pull pilosus/pip-license-checker:0.28.0
+docker pull pilosus/pip-license-checker
 ```
 
 Use specific version tag (it's matching version of the tool in the repo) or just `latest`.
@@ -83,7 +83,7 @@ on `pip-license-checker`.
 ### Docker
 
 ```bash
-docker run -it --rm pilosus/pip-license-checker:0.28.0 \
+docker run -it --rm pilosus/pip-license-checker \
   java -jar app.jar 'aiostream==0.4.3' 'pygit2' 'aiohttp>3.7.1'
 ```
 
@@ -94,7 +94,7 @@ docker's `-v` option:
 
 ```bash
 docker run -v `pwd`:/volume \
-    -it --rm pilosus/pip-license-checker:0.28.0 \
+    -it --rm pilosus/pip-license-checker \
     java -jar app.jar --exclude 'pylint.*' \
     --requirements '/volume/requirements.txt' \
     --external '/volume/licenses.csv' \
