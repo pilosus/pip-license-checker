@@ -18,7 +18,9 @@
   (:gen-class)
   (:require
    [clojure.data.csv :as csv]
-   [clojure.java.io :as io]))
+   [clojure.edn :as edn]
+   [clojure.java.io :as io]
+   [clojure.string :as str]))
 
 (defn exists?
   "Return true if file exists"
@@ -38,6 +40,48 @@
   "Get a sequence of lines from all requirement files"
   [requirements]
   (apply concat (for [path requirements] (path->lines path))))
+
+
+;; EDN files
+
+
+(defn path->string
+  "Return a string with the file contents"
+  [path]
+  (slurp path))
+
+(defn- format-edn-package-name
+  "Apply options to format EDN package name"
+  [package options]
+  (let [{:keys [fully-qualified-names]
+         :or {fully-qualified-names true}} options
+        ;; package is a symbol
+        package-str (str package)
+        result
+        (cond
+          (and (not fully-qualified-names) (not-empty package-str)) (last (str/split package-str #"/"))
+          :else (not-empty package-str))]
+    result))
+
+(defn edn-item->data-item
+  "Format edn item into a package data map"
+  [[[package version] license] options]
+  (let [package-formatted (format-edn-package-name package options)
+        version-formatted (not-empty version)
+        parts (cond (and package-formatted version-formatted) [package-formatted version-formatted]
+                    package-formatted [package-formatted]
+                    :else nil)
+        package-with-version (not-empty (str/join ":" parts))
+        result {:package package-with-version :license license}]
+    result))
+
+(defn edn->data
+  "Read EDN file into Clojure data structure"
+  [path external-options]
+  (->> path
+       path->string
+       edn/read-string
+       (map #(edn-item->data-item % external-options))))
 
 ;; CSV files
 

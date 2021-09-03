@@ -144,3 +144,81 @@
          [file/csv->lines (constantly lines)]
           (is (= expected
                  (file/csv->data "fake/path.csv" options))))))))
+
+
+;; file/edn->data
+
+
+(def params-edn-item->data-item
+  [[[["org.clojars.vrs/gradle-licenses" "0.2.0"] "EPL-2.0"]
+    {}
+    {:package "org.clojars.vrs/gradle-licenses:0.2.0" :license "EPL-2.0"}
+    "Package name and version, no options"]
+   [[["org.clojars.vrs/gradle-licenses" "0.2.0"] "EPL-2.0"]
+    {:fully-qualified-names false}
+    {:package "gradle-licenses:0.2.0" :license "EPL-2.0"}
+    "Short names option"]
+   [[["org.clojars.vrs/gradle-licenses" ""] "EPL-2.0"]
+    {}
+    {:package "org.clojars.vrs/gradle-licenses" :license "EPL-2.0"}
+    "Version is blank"]
+   [[["org.clojars.vrs/gradle-licenses" nil] "EPL-2.0"]
+    {}
+    {:package "org.clojars.vrs/gradle-licenses" :license "EPL-2.0"}
+    "Version is nil"]
+   [[[nil "0.2.0"] "EPL-2.0"]
+    {}
+    {:package nil :license "EPL-2.0"}
+    "Package name is nil"]
+   [[[nil nil] nil]
+    {}
+    {:package nil :license nil}
+    "All data is nil"]
+   [[[nil nil] nil]
+    {:fully-qualified-names false}
+    {:package nil :license nil}
+    "All data is nil, short name option breaks nothing"]])
+
+(deftest test-edn-item->data-item
+  (testing "Parse EDN item into package map"
+    (doseq [[item options expected description] params-edn-item->data-item]
+      (testing description
+        (is (= expected (file/edn-item->data-item item options)))))))
+
+(def params-edn->data
+  [["([[org.clojars.vrs/gradle-licenses \"0.2.0\"] \"EPL-2.0\"]
+      [[commons-io \"2.6\"] \"Apache License, Version 2.0\"]
+      [[department/org/another-dep nil] \"MIT License\"])"
+    {}
+    [{:package "org.clojars.vrs/gradle-licenses:0.2.0" :license "EPL-2.0"}
+     {:package "commons-io:2.6" :license "Apache License, Version 2.0"}
+     {:package "department/org/another-dep" :license "MIT License"}]
+    "Default options"]
+   ["([[org.clojars.vrs/gradle-licenses \"0.2.0\"] \"EPL-2.0\"]
+      [[commons-io \"2.6\"] \"Apache License, Version 2.0\"]
+      [[department/org/another-dep nil] \"MIT License\"])"
+    {:fully-qualified-names false}
+    [{:package "gradle-licenses:0.2.0" :license "EPL-2.0"}
+     {:package "commons-io:2.6" :license "Apache License, Version 2.0"}
+     {:package "another-dep" :license "MIT License"}]
+    "Turn off fully-qualified names"]])
+
+(deftest test-edn->data
+  (testing "EDN file to data"
+    (doseq [[content options expected description] params-edn->data]
+      (testing description
+        (with-redefs
+         [file/path->string (constantly content)]
+          (is (= expected
+                 (file/edn->data "fake/path.csv" options))))))))
+
+(def params-edn->data-integration
+  [["resources/external.edn" {} "No options"]
+   ["resources/external.edn" {:fully-qualified-names true} "Explicit fully-qualified names"]
+   ["resources/external.edn" {:fully-qualified-names false} "Explicit short names"]])
+
+(deftest test-edn->data-integration
+  (testing "Parse real EDN file"
+    (doseq [[path options description] params-edn->data-integration]
+      (testing description
+        (is (seq? (file/edn->data path options)))))))
