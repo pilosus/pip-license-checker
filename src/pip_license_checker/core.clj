@@ -27,10 +27,8 @@
    [pip-license-checker.filters :as filters]
    [pip-license-checker.license :as license]
    [pip-license-checker.pypi :as pypi]
+   [pip-license-checker.report :as report]
    [pip-license-checker.spec :as sp]))
-
-(def formatter-license "%-35s %-55s %-30s")
-(def formatter-totals "%-35s %-55s")
 
 (defn exit
   "Exit from the app with exit status"
@@ -39,21 +37,6 @@
   ([status msg]
    (println msg)
    (exit status)))
-
-(defn print-license-header
-  []
-  (println
-   (format formatter-license "Requirement" "License Name" "License Type")))
-
-(defn format-license
-  "Print requirement and its license"
-  [license-data]
-  (let [{:keys [requirement license]} license-data
-        {req-name :name req-version :version} requirement
-        package
-        (if req-version (str req-name ":" req-version) req-name)
-        {lic-name :name lic-type :type} license]
-    (format formatter-license package lic-name lic-type)))
 
 (s/fdef get-license-type-totals
   :args (s/coll-of ::sp/requirement-response-license)
@@ -65,15 +48,6 @@
   (let [freqs (frequencies (map #(:type (:license %)) licenses))
         ordered-freqs (into (sorted-map) freqs)]
     ordered-freqs))
-
-(defn format-total
-  "Print lincese type  totals line"
-  [license-type freq]
-  (format formatter-totals license-type freq))
-
-(defn print-totals-header
-  []
-  (println (format formatter-totals "License Type" "Found")))
 
 (s/fdef process-requirements
   :args (s/cat
@@ -104,20 +78,20 @@
 
     (when (not totals-only-opt)
       (when table-headers
-        (print-license-header))
+        (report/print-license-header options))
 
       (doseq [line licenses]
-        (println (format-license line))))
+        (println (report/format-license line options))))
 
     (when with-totals-opt
       (println))
 
     (when show-totals
       (when table-headers
-        (print-totals-header))
+        (report/print-totals-header options))
 
       (doseq [[license-type freq] totals]
-        (println (format-total license-type freq))))
+        (println (report/format-total license-type freq options))))
 
     ;; shutdown a thread pool used by pmap to allow JVM shutdown
     (shutdown-agents)
@@ -146,7 +120,7 @@
         "pip-license-checker -x resources/external.csv --exclude-license '(?i).*(?:mit|bsd).*'"
         "pip-license-checker -x resources/external.csv --external-options '{:skip-header false}'"
         "pip-license-checker -x resources/external.cocoapods --external-format cocoapods'"
-        "pip-license-checker -x resources/external.edn --external-format edn"]
+        "pip-license-checker -x resources/external.edn --external-format edn --formatter '%-70s %-60s %-35s'"]
        (str/join \newline)))
 
 (defn error-msg [errors]
@@ -170,6 +144,9 @@
    [nil "--external-options OPTS_EDN_STRING" "String of options map in EDN format"
     :default external/default-options
     :parse-fn external/opts-str->map]
+   [nil "--formatter PRINTF_FMT" "Printf-style formatter string for report formatting"
+    :default report/table-formatter
+    :validate [report/valid-formatter? report/invalid-formatter]]
    ["-f" "--fail LICENSE_TYPE" "Return non-zero exit code if license type is found"
     :default (sorted-set)
     :multi true

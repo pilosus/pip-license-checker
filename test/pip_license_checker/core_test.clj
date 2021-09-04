@@ -19,7 +19,8 @@
    [clojure.test :refer [deftest is testing]]
    [pip-license-checker.core :as core]
    [pip-license-checker.external :as external]
-   [pip-license-checker.pypi :as pypi]))
+   [pip-license-checker.pypi :as pypi]
+   [pip-license-checker.report :as report]))
 
 (def params-validate-args
   [[["--requirements"
@@ -31,6 +32,7 @@
                :pre false
                :external-format "csv"
                :external-options external/default-options
+               :formatter report/table-formatter
                :with-totals false
                :totals-only false
                :table-headers false
@@ -45,6 +47,7 @@
                :pre false
                :external-format "csv"
                :external-options external/default-options
+               :formatter report/table-formatter
                :with-totals false
                :totals-only false
                :table-headers false
@@ -59,6 +62,7 @@
                :pre false
                :external-format "csv"
                :external-options external/default-options
+               :formatter report/table-formatter
                :with-totals false
                :totals-only false
                :table-headers false
@@ -79,6 +83,7 @@
                :pre false
                :external-format "csv"
                :external-options external/default-options
+               :formatter report/table-formatter
                :with-totals false
                :totals-only false
                :table-headers false
@@ -98,11 +103,31 @@
                :pre false
                :external-format "cocoapods"
                :external-options {:skip-header false :skip-footer true :int-opt 42 :str-opt "str-val"}
+               :formatter report/table-formatter
                :with-totals true
                :totals-only false
                :table-headers false
                :fails-only false}}
     "Externals with format and options specified"]
+   [["--external"
+     "resources/external.cocoapods"
+     "--external-format"
+     "cocoapods"
+     "--formatter"
+     "%-50s %-50s %-30s"]
+    {:requirements []
+     :external ["resources/external.cocoapods"]
+     :packages []
+     :options {:fail #{}
+               :pre false
+               :external-format "cocoapods"
+               :external-options {:skip-header true, :skip-footer true}
+               :formatter "%-50s %-50s %-30s"
+               :with-totals false
+               :totals-only false
+               :table-headers false
+               :fails-only false}}
+    "Formatter string"]
    [["--help"]
     {:exit-message "placeholder" :ok? true}
     "Help run"]])
@@ -147,55 +172,6 @@
         (is
          (= expected (core/get-license-type-totals licenses)))))))
 
-(deftest test-print-license-header
-  (testing "Printing license table header"
-    (let [actual (with-out-str (core/print-license-header))
-          expected (str/join
-                    [(format core/formatter-license
-                             "Requirement"
-                             "License Name"
-                             "License Type")
-                     "\n"])]
-      (is (= expected actual)))))
-
-(def params-format-license
-  [["test"
-    "1.12.3"
-    "GPLv3"
-    "Copyleft"
-    (format core/formatter-license "test:1.12.3" "GPLv3" "Copyleft")
-    "Example 1"]
-   ["aiohttp"
-    "3.7.4.post0"
-    "MIT"
-    "Permissive"
-    (format core/formatter-license "aiohttp:3.7.4.post0" "MIT" "Permissive")
-    "Example 2"]])
-
-(deftest test-format-license
-  (testing "Printing a line of license table"
-    (doseq [[package version license-name license-type expected description] params-format-license]
-      (testing description
-        (let [license-data
-              {:requirement {:name package :version version}
-               :license {:name license-name :type license-type}}
-              actual (core/format-license license-data)]
-          (is (= expected actual)))))))
-
-(deftest test-format-total
-  (testing "Formatting total table line"
-    (let [expected (format core/formatter-totals "Permissive" 7)
-          actual (core/format-total "Permissive" 7)]
-      (is (= expected actual)))))
-
-(deftest test-print-totals-header
-  (testing "Printing totals table header"
-    (let [actual (with-out-str (core/print-totals-header))
-          expected (str/join
-                    [(format core/formatter-totals "License Type" "Found")
-                     "\n"])]
-      (is (= expected actual)))))
-
 (def params-process-requirements
   [[[]
     []
@@ -207,7 +183,7 @@
       :license {:name "MIT License", :type "Permissive"}}]
     []
     {:fail #{} :with-totals false :totals-only false :table-headers false}
-    (str (format core/formatter-license "test:3.7.2" "MIT License" "Permissive") "\n")
+    (str (format report/table-formatter "test:3.7.2" "MIT License" "Permissive") "\n")
     "No headers"]
    [[{:ok? true,
       :requirement {:name "test", :version "3.7.2"},
@@ -215,8 +191,8 @@
     []
     {:fail #{} :with-totals false :totals-only false :table-headers true}
     (str/join
-     [(str (format core/formatter-license "Requirement" "License Name" "License Type") "\n")
-      (str (format core/formatter-license "test:3.7.2" "MIT License" "Permissive") "\n")])
+     [(str (format report/table-formatter "Requirement" "License Name" "License Type") "\n")
+      (str (format report/table-formatter "test:3.7.2" "MIT License" "Permissive") "\n")])
     "With headers"]
    [[{:ok? true,
       :requirement {:name "test", :version "3.7.2"},
@@ -224,11 +200,11 @@
     []
     {:fail #{} :with-totals true :totals-only false :table-headers true}
     (str/join
-     [(str (format core/formatter-license "Requirement" "License Name" "License Type") "\n")
-      (str (format core/formatter-license "test:3.7.2" "MIT License" "Permissive") "\n")
+     [(str (format report/table-formatter "Requirement" "License Name" "License Type") "\n")
+      (str (format report/table-formatter "test:3.7.2" "MIT License" "Permissive") "\n")
       "\n"
-      (str (format core/formatter-totals "License Type" "Found") "\n")
-      (str (format core/formatter-totals "Permissive" 1) "\n")])
+      (str (format report/totals-formatter "License Type" "Found") "\n")
+      (str (format report/totals-formatter "Permissive" 1) "\n")])
     "With totals"]
    [[{:ok? true,
       :requirement {:name "test", :version "3.7.2"},
@@ -236,7 +212,7 @@
     []
     {:fail #{} :with-totals false :totals-only true :table-headers false}
     (str/join
-     [(str (format core/formatter-totals "Permissive" 1) "\n")])
+     [(str (format report/totals-formatter "Permissive" 1) "\n")])
     "Totals only"]
    [[{:ok? true,
       :requirement {:name "test", :version "3.7.2"},
@@ -246,8 +222,8 @@
       :license {:name "BSD License", :type "Permissive"}}]
     {:fail #{} :with-totals false :totals-only false :table-headers false}
     (str/join
-     [(str (format core/formatter-license "test:3.7.2" "MIT License" "Permissive") "\n")
-      (str (format core/formatter-license "another:0.1.2" "BSD License" "Permissive") "\n")])
+     [(str (format report/table-formatter "test:3.7.2" "MIT License" "Permissive") "\n")
+      (str (format report/table-formatter "another:0.1.2" "BSD License" "Permissive") "\n")])
     "Requirements and external file"]
    [[{:ok? true,
       :requirement {:name "test", :version "3.7.2"},
@@ -255,7 +231,7 @@
     []
     {:fail #{"Permissive"} :with-totals false :totals-only true :table-headers false}
     (str/join
-     [(str (format core/formatter-totals "Permissive" 1) "\n")
+     [(str (format report/totals-formatter "Permissive" 1) "\n")
       "Exit code: 1\n"])
     "License matched, exit with non-zero status code"]])
 
