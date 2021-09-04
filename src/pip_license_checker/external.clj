@@ -33,12 +33,14 @@
 (def format-csv "csv")
 (def format-cocoapods "cocoapods")
 (def format-gradle "gradle")
+(def format-edn "edn")
 
 (def formats
   (sorted-set
    format-csv
    format-cocoapods
-   format-gradle))
+   format-gradle
+   format-edn))
 
 (def invalid-format
   (format "Invalid external format. Use one of: %s"
@@ -90,6 +92,7 @@
   (cond
     (= external-format format-cocoapods) plist->data
     (= external-format format-gradle) gradle-json->data
+    (= external-format format-edn) file/edn->data
     :else file/csv->data))
 
 ;; Entrypoint

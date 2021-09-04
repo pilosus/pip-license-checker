@@ -115,7 +115,14 @@
     [{:ok? true
       :requirement {:name "test-package" :version nil}
       :license {:name "MIT License" :type "Permissive"}}]
-    "Gradle license plugin"]])
+    "Gradle license plugin"]
+   [[{:package "test-package" :license "MIT License"}
+     {:package "another-package" :license "GPLv2"}]
+    {:external-format external/format-edn :exclude #"another-.*"}
+    [{:ok? true
+      :requirement {:name "test-package" :version nil}
+      :license {:name "MIT License" :type "Permissive"}}]
+    "EDN plugin"]])
 
 (deftest test-get-parsed-requiements-external-plugins
   (testing "Test license name formatting"
@@ -124,5 +131,6 @@
         #_:clj-kondo/ignore
         (with-redefs
          [cocoapods-acknowledgements-licenses.core/plist->data (constantly external-data)
-          gradle-licenses.core/gradle-json->data (constantly external-data)]
+          gradle-licenses.core/gradle-json->data (constantly external-data)
+          file/edn->data (constantly external-data)]
           (is (= expected (external/get-parsed-requiements ["placeholder"] options))))))))
