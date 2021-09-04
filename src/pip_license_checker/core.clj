@@ -145,7 +145,8 @@
         "pip-license-checker -r resources/requirements.txt django aiohttp==3.7.1 --exclude 'aio.*'"
         "pip-license-checker -x resources/external.csv --exclude-license '(?i).*(?:mit|bsd).*'"
         "pip-license-checker -x resources/external.csv --external-options '{:skip-header false}'"
-        "pip-license-checker -x resources/external.cocoapods --external-format cocoapods'"]
+        "pip-license-checker -x resources/external.cocoapods --external-format cocoapods'"
+        "pip-license-checker -x resources/external.edn --external-format edn"]
        (str/join \newline)))
 
 (defn error-msg [errors]
