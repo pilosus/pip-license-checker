@@ -5,6 +5,10 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 
 ## [Unreleased]
 
+## [0.31.0] - 2021-11-19
+### Added
+- Support both `zlib` and `zlib/libpng` (a.k.a. zlib with Acknowledgement) licenses
+
 ## [0.30.0] - 2021-09-04
 ### Added
 - `--formatter` option to specify a
@@ -255,7 +259,8 @@ weak copyleft types.
 ### Added
 - Structure for Leiningen app project
 
-[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.30.0...HEAD
+[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.31.0...HEAD
+[0.31.0]: https://github.com/pilosus/pip-license-checker/compare/0.30.0...0.31.0
 [0.30.0]: https://github.com/pilosus/pip-license-checker/compare/0.29.0...0.30.0
 [0.29.0]: https://github.com/pilosus/pip-license-checker/compare/0.28.1...0.29.0
 [0.28.1]: https://github.com/pilosus/pip-license-checker/compare/0.28.0...0.28.1
