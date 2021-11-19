@@ -239,7 +239,10 @@
 
    #"Zope Public License"
 
-   #"zlib/libpng"
+   #"\bzlib(?!-|\/)\b"
+
+   ;; Like zlib license above but requires that an acknowledgement be made in the "product documentation"
+   #"\bzlib(.*acknowledgement|\/libpng)\b"
 
    #"WTFPL"
    #"Do What the Fuck You Want To Public License"])
