@@ -5,6 +5,14 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 
 ## [Unreleased]
 
+## [0.32.0] - 2022-06-23
+### Added
+- `lein ancient` to check outdated deps
+
+### Changed
+- Use `clojure:openjdk-11-lein-slim-buster` Docker base image for a build step
+- Bump Clojure version and project's deps
+
 ## [0.31.0] - 2021-11-19
 ### Added
 - Support both `zlib` and `zlib/libpng` (a.k.a. zlib with Acknowledgement) licenses
@@ -259,7 +267,8 @@ weak copyleft types.
 ### Added
 - Structure for Leiningen app project
 
-[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.31.0...HEAD
+[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.32.0...HEAD
+[0.32.0]: https://github.com/pilosus/pip-license-checker/compare/0.31.0...0.32.0
 [0.31.0]: https://github.com/pilosus/pip-license-checker/compare/0.30.0...0.31.0
 [0.30.0]: https://github.com/pilosus/pip-license-checker/compare/0.29.0...0.30.0
 [0.29.0]: https://github.com/pilosus/pip-license-checker/compare/0.28.1...0.29.0
