@@ -112,7 +112,19 @@
      :post ["post" 345]
      :dev ["dev" 456]
      :local nil}
-    "Release, pre, post and dev version"]])
+    "Release, pre, post and dev version"]
+   ["1.0.dev20160909030348"
+    {:orig "1.0.dev20160909030348"
+     :epoch 0
+     :release [1 0]
+     :pre nil
+     :post nil
+     :dev ["dev" 20160909030348]
+     :local nil}
+    "Make sure long numbers handled correctly"]
+   ["1.0.dev(exploit-run)"
+    nil
+    "Make sure no read-string expoit is possible"]])
 
 (deftest test-parse-version
   (testing "Version parsing"

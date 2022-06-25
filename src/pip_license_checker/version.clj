@@ -24,6 +24,7 @@
 
 ;; Parse version
 
+(def regex-number #"^\d+$")
 (def regex-split-comma #",")
 (def regex-specifier #"(?<op>(===|==|~=|!=|>=|<=|<|>))(?<version>(.*))")
 
@@ -32,7 +33,11 @@
 (defn parse-number
   "Parse number string into integer or return 0"
   [number]
-  (if (not number) 0 (Integer/parseInt number)))
+  (if (or (not number)
+          ;; just to make sure no code execution is possible with read-string
+          (not (re-find #"^-?\d+\.?\d*$" number)))
+    0
+    (read-string number)))
 
 (s/fdef parse-letter-version
   :args (s/cat :letter ::sp/matched-version-part
