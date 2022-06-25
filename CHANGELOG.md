@@ -5,6 +5,10 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 
 ## [Unreleased]
 
+## [0.33.0] - 2022-06-25
+### Fixed
+- Parsing long numbers in Python versions ((#99)[https://github.com/pilosus/pip-license-checker/issues/99])
+
 ## [0.32.0] - 2022-06-23
 ### Added
 - `lein ancient` to check outdated deps
@@ -267,7 +271,8 @@ weak copyleft types.
 ### Added
 - Structure for Leiningen app project
 
-[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.32.0...HEAD
+[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.33.0...HEAD
+[0.33.0]: https://github.com/pilosus/pip-license-checker/compare/0.32.0...0.33.0
 [0.32.0]: https://github.com/pilosus/pip-license-checker/compare/0.31.0...0.32.0
 [0.31.0]: https://github.com/pilosus/pip-license-checker/compare/0.30.0...0.31.0
 [0.30.0]: https://github.com/pilosus/pip-license-checker/compare/0.29.0...0.30.0
