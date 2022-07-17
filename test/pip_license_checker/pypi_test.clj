@@ -1,4 +1,4 @@
-;; Copyright © 2020, 2021 Vitaly Samigullin
+;; Copyright © 2020-2022 Vitaly Samigullin
 ;;
 ;; This program and the accompanying materials are made available under the
 ;; terms of the Eclipse Public License 2.0 which is available at
@@ -16,9 +16,9 @@
 (ns pip-license-checker.pypi-test
   (:require
    [clojure.test :refer [deftest is testing]]
-   [clj-http.client :as http]
    [pip-license-checker.github :as github]
    [pip-license-checker.pypi :as pypi]
+   [pip-license-checker.http :as http]
    [pip-license-checker.file :as file]
    [pip-license-checker.license :as license]
    [pip-license-checker.version :as version]))
@@ -57,8 +57,8 @@
     (doseq [[package-name mock expected description] params-get-releases]
       (testing description
         (with-redefs
-         [http/get mock]
-          (is (= (set expected) (set (pypi/get-releases package-name)))))))))
+         [http/request-get mock]
+          (is (= (set expected) (set (pypi/get-releases package-name nil)))))))))
 
 ;; pypi/get-requirement-version
 
@@ -101,9 +101,9 @@
             params-get-requirement-response]
       (testing description
         (with-redefs
-         [http/get http-get-mock
+         [http/request-get http-get-mock
           pypi/get-releases (constantly releases)]
-          (is (= expected (pypi/get-requirement-version requirement))))))))
+          (is (= expected (pypi/get-requirement-version requirement {} nil))))))))
 
 ;; pypi/requirement-response->data
 
@@ -255,7 +255,7 @@
     "Packages and requirements"]
    [["aiohttp==3.7.2"]
     ["test==3.7.2"]
-    {:exclude #"aio.*"}
+    {:exclude #"aio.*" :rate-limits {:requests 1 :millis 60000}}
     "{\"info\": {\"license\": \"MIT License\"}}"
     [{:ok? true,
       :requirement {:name "test", :version "3.7.2"},
@@ -275,7 +275,7 @@
           ;; it's already gone and java.util.concurrent.RejectedExecutionException is thrown.
           ;; Since we are not testing concurrency itself, just monkey-patch pmap with simple map.
          [pmap map
-          http/get (constantly {:body mock-body})
+          http/request-get (constantly {:body mock-body})
           pypi/get-releases (constantly [])
           version/get-version (constantly "3.7.2")
           file/get-requirement-lines (fn [_] requirements)]

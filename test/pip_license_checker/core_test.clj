@@ -1,4 +1,4 @@
-;; Copyright © 2020, 2021 Vitaly Samigullin
+;; Copyright © 2020-2022 Vitaly Samigullin
 ;;
 ;; This program and the accompanying materials are made available under the
 ;; terms of the Eclipse Public License 2.0 which is available at
@@ -36,7 +36,8 @@
                :with-totals false
                :totals-only false
                :table-headers false
-               :fails-only false}}
+               :fails-only false
+               :rate-limits {:requests 120 :millis 60000}}}
     "Requirements only run"]
    [["django"
      "aiohttp==3.7.1"]
@@ -51,7 +52,8 @@
                :with-totals false
                :totals-only false
                :table-headers false
-               :fails-only false}}
+               :fails-only false
+               :rate-limits {:requests 120 :millis 60000}}}
     "Packages only"]
    [["--external"
      "resources/external.csv"]
@@ -66,7 +68,8 @@
                :with-totals false
                :totals-only false
                :table-headers false
-               :fails-only false}}
+               :fails-only false
+               :rate-limits {:requests 120 :millis 60000}}}
     "External only"]
    [["--requirements"
      "resources/requirements.txt"
@@ -87,8 +90,27 @@
                :with-totals false
                :totals-only false
                :table-headers false
-               :fails-only false}}
+               :fails-only false
+               :rate-limits {:requests 120 :millis 60000}}}
     "Requirements, packages and externals"]
+   [["--requirements"
+     "resources/requirements.txt"
+     "--rate-limits"
+     "25/60000"]
+    {:requirements ["resources/requirements.txt"]
+     :external []
+     :packages []
+     :options {:fail #{}
+               :pre false
+               :external-format "csv"
+               :external-options external/default-options
+               :formatter report/table-formatter
+               :with-totals false
+               :totals-only false
+               :table-headers false
+               :fails-only false
+               :rate-limits {:requests 25 :millis 60000}}}
+    "Requirements, rate limits"]
    [["--external"
      "resources/external.cocoapods"
      "--external-options"
@@ -107,7 +129,8 @@
                :with-totals true
                :totals-only false
                :table-headers false
-               :fails-only false}}
+               :fails-only false
+               :rate-limits {:requests 120 :millis 60000}}}
     "Externals with format and options specified"]
    [["--external"
      "resources/external.cocoapods"
@@ -126,7 +149,8 @@
                :with-totals false
                :totals-only false
                :table-headers false
-               :fails-only false}}
+               :fails-only false
+               :rate-limits {:requests 120 :millis 60000}}}
     "Formatter string"]
    [["--help"]
     {:exit-message "placeholder" :ok? true}
@@ -266,3 +290,26 @@
     (doseq [[options expected description] params-options]
       (testing description
         (is (= expected (core/post-process-options options)))))))
+
+(def params-parse-rate-limits
+  [["120/60000" {:requests 120 :millis 60000} "Correct format"]
+   ["25" {:requests 25 :millis nil} "Millis absent"]
+   ["50/1000/120/60000" {:requests 50 :millis 1000} "Excessive args ignored"]])
+
+(deftest test-parse-rate-limits
+  (testing "Parse rate limits CLI option"
+    (doseq [[limits-str expected description] params-parse-rate-limits]
+      (testing description
+        (is (= expected (core/parse-rate-limits limits-str)))))))
+
+(def params-validate-rate-limits
+  [[{:requests 120 :millis 60000} true "All data valid"]
+   [{:requests 25 :millis nil} false "Millis absent"]
+   [{:requests 0 :millis 60000} false "Requests 0"]
+   [{:requests 10 :millis -10} false "Millis negative"]])
+
+(deftest test-validate-rate-limits
+  (testing "Validate rate limits CLI option"
+    (doseq [[limits-str expected description] params-validate-rate-limits]
+      (testing description
+        (is (= expected (core/validate-rate-limits limits-str)))))))

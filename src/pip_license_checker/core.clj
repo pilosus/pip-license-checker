@@ -1,4 +1,4 @@
-;; Copyright © 2020, 2021 Vitaly Samigullin
+;; Copyright © 2020-2022 Vitaly Samigullin
 ;;
 ;; This program and the accompanying materials are made available under the
 ;; terms of the Eclipse Public License 2.0 which is available at
@@ -117,6 +117,7 @@
         "pip-license-checker --with-totals --table-headers --requirements resources/requirements.txt"
         "pip-license-checker --totals-only -r file1.txt -r file2.txt -r file3.txt"
         "pip-license-checker -r resources/requirements.txt django aiohttp==3.7.1 --exclude 'aio.*'"
+        "pip-license-checker -r resources/requirements.txt --rate-limits 10/1000"
         "pip-license-checker -x resources/external.csv --exclude-license '(?i).*(?:mit|bsd).*'"
         "pip-license-checker -x resources/external.csv --external-options '{:skip-header false}'"
         "pip-license-checker -x resources/external.cocoapods --external-format cocoapods'"
@@ -126,6 +127,25 @@
 (defn error-msg [errors]
   (str "The following errors occurred while parsing command arguments:\n"
        (str/join \newline errors)))
+
+(defn parse-rate-limits
+  "Parse rate limits CLI option"
+  [limits-str]
+  (let [split (-> limits-str (str/split #"/"))
+        parsed (->> split (map #(Integer/parseInt %)))
+        result {:requests (first parsed) :millis (second parsed)}]
+    result))
+
+(defn validate-rate-limits
+  "Validate rale limits CLI option"
+  [limits-map]
+  (->>
+   limits-map
+   vals
+   (every? #(and (some? %) (pos? %)))))
+
+(def rate-limits-msg
+  "Rate limits must be positive integers in format REQUESTS/MILLISECONDS")
 
 (def cli-options
   [["-r" "--requirements REQUIREMENTS_FILE" "Python pip requirement file name"
@@ -159,6 +179,10 @@
    [nil "--[no-]totals-only" "Print only totals for license types" :default false]
    [nil "--[no-]table-headers" "Print table headers" :default false]
    [nil "--[no-]fails-only" "Print only packages of license types specified with --fail flags" :default false]
+   [nil "--rate-limits REQUESTS/MILLISECONDS" "Rate limit requests to public APIs"
+    :default {:requests 120 :millis 60000}
+    :parse-fn parse-rate-limits
+    :validate [validate-rate-limits rate-limits-msg]]
    ["-h" "--help" "Print this help message"]])
 
 (s/fdef extend-fail-opt

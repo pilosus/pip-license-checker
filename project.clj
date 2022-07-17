@@ -1,4 +1,4 @@
-(defproject org.clojars.vrs/pip-license-checker "0.33.0"
+(defproject org.clojars.vrs/pip-license-checker "0.34.0-SNAPSHOT"
   :description "License compliance tool to identify dependencies license names and types: permissive, copyleft, proprietory, etc."
   :url "https://github.com/pilosus/pip-license-checker"
   :license {:name "Eclipse Public License 2.0 OR GNU GPL v2+ with Classpath exception"
@@ -9,6 +9,7 @@
                  [org.clojure/tools.cli "1.0.206"]
                  [clj-http "3.12.3"]
                  [cheshire "5.11.0"]
+                 [indole "1.0.0"]
                  [org.clojure/test.check "1.1.1"]
                  [org.clojars.vrs/cocoapods-acknowledgements-licenses "0.1.0"]
                  [org.clojars.vrs/gradle-licenses "0.2.0"]]

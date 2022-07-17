@@ -1,4 +1,4 @@
-;; Copyright © 2020, 2021 Vitaly Samigullin
+;; Copyright © 2020-2022 Vitaly Samigullin
 ;;
 ;; This program and the accompanying materials are made available under the
 ;; terms of the Eclipse Public License 2.0 which is available at
@@ -26,7 +26,7 @@
 ;; (require '[pip-license-checker.spec :as sp])
 ;; (def ->int (sp/with-conformer [val] (Integer/parseInt val)))
 ;; (s/def ::->int ->int)
-;; (s/conform ::-> "123")
+;; (s/conform ::->int "123")
 
 (defmacro with-conformer
   [[bind] & body]
