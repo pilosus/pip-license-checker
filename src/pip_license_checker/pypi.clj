@@ -1,4 +1,4 @@
-;; Copyright © 2020, 2021 Vitaly Samigullin
+;; Copyright © 2020-2022 Vitaly Samigullin
 ;;
 ;; This program and the accompanying materials are made available under the
 ;; terms of the Eclipse Public License 2.0 which is available at
@@ -19,15 +19,16 @@
   (:require
    ;;[clojure.spec.test.alpha :refer [instrument]]
    [cheshire.core :as json]
-   [clj-http.client :as http]
    [clojure.spec.alpha :as s]
    [clojure.string :as str]
-   [pip-license-checker.github :as github]
-   [pip-license-checker.spec :as sp]
+   [indole.core :refer [make-rate-limiter]]
    [pip-license-checker.file :as file]
    [pip-license-checker.filters :as filters]
-   [pip-license-checker.version :as version]
-   [pip-license-checker.license :as license]))
+   [pip-license-checker.github :as github]
+   [pip-license-checker.license :as license]
+   [pip-license-checker.spec :as sp]
+   [pip-license-checker.http :as http]
+   [pip-license-checker.version :as version]))
 
 (def settings-http-client
   {:socket-timeout 3000
@@ -47,9 +48,9 @@
 (defn get-releases
   "Get seq of versions available for a package
   NB! versions are not sorted!"
-  [package-name]
+  [package-name rate-limiter]
   (let [url (str/join "/" [url-pypi-base package-name "json"])
-        response (try (http/get url settings-http-client)
+        response (try (http/request-get url settings-http-client rate-limiter)
                       (catch Exception _ nil))
         body (:body response)
         data (json/parse-string body)
@@ -62,21 +63,23 @@
 (s/fdef get-requirement-version
   :args (s/cat
          :requirement ::sp/requirement
-         :pre (s/? keyword?)
-         :value (s/? boolean?))
+         :options ::sp/options-cli-arg)
   :ret ::sp/requirement-response)
 
 (defn get-requirement-version
   "Return respone of GET request to PyPI API for requirement"
-  [requirement & {:keys [pre] :or {pre true}}]
+  [requirement options rate-limiter]
   (let [{:keys [name specifiers]} requirement
-        versions (get-releases name)
+        pre (:pre options)
+        versions (get-releases name rate-limiter)
         version (version/get-version specifiers versions :pre pre)
         url
         (if (= version nil)
           (str/join "/" [url-pypi-base name "json"])
           (str/join "/" [url-pypi-base name version "json"]))
-        response (try (http/get url settings-http-client) (catch Exception _ nil))
+        response (try
+                   (http/request-get url settings-http-client rate-limiter)
+                   (catch Exception _ nil))
         origin {:name name
                 :version (or version (:orig (last (first specifiers))))}]
     (if (and response version)
@@ -148,14 +151,13 @@
 (s/fdef requirement->license
   :args (s/cat
          :requirement ::sp/requirement
-         :pre (s/? keyword?)
-         :value (s/? boolean?))
+         :options ::sp/options-cli-arg)
   :ret ::sp/requirement-response-license)
 
 (defn requirement->license
   "Return license hash-map for requirement"
-  [requirement & {:keys [pre]}]
-  (let [resp (get-requirement-version requirement :pre pre)
+  [requirement options rate-limiter]
+  (let [resp (get-requirement-version requirement options rate-limiter)
         data (requirement-response->data resp)
         license (data->license data)]
     license))
@@ -179,13 +181,15 @@
   "Apply filters and get verdicts for all requirements"
   [packages requirements options]
   (let [exclude-pattern (:exclude options)
-        pre (:pre options)
+        rate-limiter (make-rate-limiter
+                      (or (get-in options [:rate-limits :millis]) 60000)
+                      (or (get-in options [:rate-limits :requests]) 120))
         licenses (->> (get-all-requirements packages requirements)
                       (filters/remove-requirements-internal-rules)
                       (filters/remove-requirements-user-rules exclude-pattern)
                       (map filters/sanitize-requirement)
                       (map filters/requirement->map)
-                      (pmap #(requirement->license % :pre pre)))]
+                      (pmap #(requirement->license % options rate-limiter)))]
     licenses))
 
 ;;
