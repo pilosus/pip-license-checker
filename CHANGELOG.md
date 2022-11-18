@@ -5,6 +5,13 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 
 ## [Unreleased]
 
+## [0.35.0] - 2022-11-18
+### Added
+- Rate limiting for GitHub public API requests. Option `--rate-limits
+   requests/milliseconds` is used for all external API requests (PyPI, GitHub)
+- Option `--github-token` for OAuth tokens to increase GitHub API requests rate-limits
+  ([#109](https://github.com/pilosus/pip-license-checker/issues/109))
+
 ## [0.34.0] - 2022-07-17
 ### Added
 -  Rate limiting for PyPI's public API requests with `--rate-limits
@@ -280,7 +287,8 @@ weak copyleft types.
 ### Added
 - Structure for Leiningen app project
 
-[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.34.0...HEAD
+[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.35.0...HEAD
+[0.35.0]: https://github.com/pilosus/pip-license-checker/compare/0.34.0...0.35.0
 [0.34.0]: https://github.com/pilosus/pip-license-checker/compare/0.33.0...0.34.0
 [0.33.0]: https://github.com/pilosus/pip-license-checker/compare/0.32.0...0.33.0
 [0.32.0]: https://github.com/pilosus/pip-license-checker/compare/0.31.0...0.32.0
