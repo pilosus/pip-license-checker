@@ -67,3 +67,15 @@
       (testing description
         (with-redefs [http/get (constantly {:body response})]
           (is (= expected (github/homepage->license-name url {} rate-limits))))))))
+
+(def params-get-headers
+  [[{} nil "No options"]
+   [{:some 1 :options 2} nil "No github token option"]
+   [{:github-token nil} nil "Token provided but invalid"]
+   [{:github-token "hello"} {:headers {"Authorization" "Bearer hello"}} "Valid token provided"]])
+
+(deftest test-get-headers
+  (testing "Test HTTP request headers generation"
+    (doseq [[options expected description] params-get-headers]
+      (testing description
+        (is (= expected (github/get-headers options)))))))
