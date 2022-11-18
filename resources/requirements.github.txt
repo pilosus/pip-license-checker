@@ -1,0 +1,5 @@
+# Test packages with license meta available only via GitHub API
+marshmallow-dataclass==0.6.6
+aio-throttle==1.7.0
+magicalimport==0.9.1
+swagger-bundler==0.1.10.6

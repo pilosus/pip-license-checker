@@ -16,11 +16,11 @@
 (ns pip-license-checker.pypi-test
   (:require
    [clojure.test :refer [deftest is testing]]
-   [pip-license-checker.github :as github]
-   [pip-license-checker.pypi :as pypi]
-   [pip-license-checker.http :as http]
    [pip-license-checker.file :as file]
+   [pip-license-checker.github :as github]
+   [pip-license-checker.http :as http]
    [pip-license-checker.license :as license]
+   [pip-license-checker.pypi :as pypi]
    [pip-license-checker.version :as version]))
 
 
@@ -204,7 +204,7 @@
       (testing description
         (with-redefs
          [github/homepage->license-name (constantly github-license)]
-          (is (= expected (pypi/data->license-map data))))))))
+          (is (= expected (pypi/data->license-map data {} nil))))))))
 
 ;; pypi/data->license
 
@@ -234,7 +234,7 @@
   (testing "PyPI API data to license"
     (doseq [[data expected description] params-data->license]
       (testing description
-        (is (= expected (pypi/data->license data)))))))
+        (is (= expected (pypi/data->license data {} nil)))))))
 
 
 ;; get-parsed-requirements

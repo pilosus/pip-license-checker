@@ -15,9 +15,12 @@
 
 (ns pip-license-checker.github-test
   (:require
-   [clojure.test :refer [deftest is testing]]
    [clj-http.client :as http]
+   [clojure.test :refer [deftest is testing]]
+   [indole.core :refer [make-rate-limiter]]
    [pip-license-checker.github :as github]))
+
+(def rate-limits (make-rate-limiter 1000 100))
 
 (def params-get-license-name
   [[["" "owner" "repo"]
@@ -38,7 +41,7 @@
     (doseq [[path-parts body-mock expected description] params-get-license-name]
       (testing description
         (with-redefs [http/get body-mock]
-          (is (= expected (github/get-license-name path-parts))))))))
+          (is (= expected (github/get-license-name path-parts {} rate-limits))))))))
 
 (def params-homepage->license-name
   [["http://example.com"
@@ -63,4 +66,4 @@
     (doseq [[url response expected description] params-homepage->license-name]
       (testing description
         (with-redefs [http/get (constantly {:body response})]
-          (is (= expected (github/homepage->license-name url))))))))
+          (is (= expected (github/homepage->license-name url {} rate-limits))))))))
