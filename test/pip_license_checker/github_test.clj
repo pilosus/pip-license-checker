@@ -15,9 +15,12 @@
 
 (ns pip-license-checker.github-test
   (:require
-   [clojure.test :refer [deftest is testing]]
    [clj-http.client :as http]
+   [clojure.test :refer [deftest is testing]]
+   [indole.core :refer [make-rate-limiter]]
    [pip-license-checker.github :as github]))
+
+(def rate-limits (make-rate-limiter 1000 100))
 
 (def params-get-license-name
   [[["" "owner" "repo"]
@@ -38,7 +41,7 @@
     (doseq [[path-parts body-mock expected description] params-get-license-name]
       (testing description
         (with-redefs [http/get body-mock]
-          (is (= expected (github/get-license-name path-parts))))))))
+          (is (= expected (github/get-license-name path-parts {} rate-limits))))))))
 
 (def params-homepage->license-name
   [["http://example.com"
@@ -63,4 +66,16 @@
     (doseq [[url response expected description] params-homepage->license-name]
       (testing description
         (with-redefs [http/get (constantly {:body response})]
-          (is (= expected (github/homepage->license-name url))))))))
+          (is (= expected (github/homepage->license-name url {} rate-limits))))))))
+
+(def params-get-headers
+  [[{} nil "No options"]
+   [{:some 1 :options 2} nil "No github token option"]
+   [{:github-token nil} nil "Token provided but invalid"]
+   [{:github-token "hello"} {:headers {"Authorization" "Bearer hello"}} "Valid token provided"]])
+
+(deftest test-get-headers
+  (testing "Test HTTP request headers generation"
+    (doseq [[options expected description] params-get-headers]
+      (testing description
+        (is (= expected (github/get-headers options)))))))

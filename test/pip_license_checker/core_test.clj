@@ -37,6 +37,7 @@
                :totals-only false
                :table-headers false
                :fails-only false
+               :github-token nil
                :rate-limits {:requests 120 :millis 60000}}}
     "Requirements only run"]
    [["django"
@@ -53,6 +54,7 @@
                :totals-only false
                :table-headers false
                :fails-only false
+               :github-token nil
                :rate-limits {:requests 120 :millis 60000}}}
     "Packages only"]
    [["--external"
@@ -69,6 +71,7 @@
                :totals-only false
                :table-headers false
                :fails-only false
+               :github-token nil
                :rate-limits {:requests 120 :millis 60000}}}
     "External only"]
    [["--requirements"
@@ -91,6 +94,7 @@
                :totals-only false
                :table-headers false
                :fails-only false
+               :github-token nil
                :rate-limits {:requests 120 :millis 60000}}}
     "Requirements, packages and externals"]
    [["--requirements"
@@ -109,8 +113,30 @@
                :totals-only false
                :table-headers false
                :fails-only false
+               :github-token nil
                :rate-limits {:requests 25 :millis 60000}}}
     "Requirements, rate limits"]
+   [["--requirements"
+     "resources/requirements.github.txt"
+     "--rate-limits"
+     "25/60000"
+     "--github-token"
+     "github-oauth-bearer-token"]
+    {:requirements ["resources/requirements.github.txt"]
+     :external []
+     :packages []
+     :options {:fail #{}
+               :pre false
+               :external-format "csv"
+               :external-options external/default-options
+               :formatter report/table-formatter
+               :with-totals false
+               :totals-only false
+               :table-headers false
+               :fails-only false
+               :github-token "github-oauth-bearer-token"
+               :rate-limits {:requests 25 :millis 60000}}}
+    "GitHub OAuth token"]
    [["--external"
      "resources/external.cocoapods"
      "--external-options"
@@ -130,6 +156,7 @@
                :totals-only false
                :table-headers false
                :fails-only false
+               :github-token nil
                :rate-limits {:requests 120 :millis 60000}}}
     "Externals with format and options specified"]
    [["--external"
@@ -150,6 +177,7 @@
                :totals-only false
                :table-headers false
                :fails-only false
+               :github-token nil
                :rate-limits {:requests 120 :millis 60000}}}
     "Formatter string"]
    [["--help"]

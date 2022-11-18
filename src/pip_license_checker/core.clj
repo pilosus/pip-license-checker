@@ -17,7 +17,6 @@
   "License fetcher for Python PyPI packages"
   (:gen-class)
   (:require
-   ;;[clojure.spec.test.alpha :refer [instrument]]
    [clojure.set :refer [intersection]]
    [clojure.spec.alpha :as s]
    [clojure.string :as str]
@@ -118,6 +117,7 @@
         "pip-license-checker --totals-only -r file1.txt -r file2.txt -r file3.txt"
         "pip-license-checker -r resources/requirements.txt django aiohttp==3.7.1 --exclude 'aio.*'"
         "pip-license-checker -r resources/requirements.txt --rate-limits 10/1000"
+        "pip-license-checker -r resources/requirements.github.txt --github-token your-token"
         "pip-license-checker -x resources/external.csv --exclude-license '(?i).*(?:mit|bsd).*'"
         "pip-license-checker -x resources/external.csv --external-options '{:skip-header false}'"
         "pip-license-checker -x resources/external.cocoapods --external-format cocoapods'"
@@ -183,6 +183,8 @@
     :default {:requests 120 :millis 60000}
     :parse-fn parse-rate-limits
     :validate [validate-rate-limits rate-limits-msg]]
+   [nil "--github-token TOKEN" "GitHub OAuth Token to increase rate-limits"
+    :default nil]
    ["-h" "--help" "Print this help message"]])
 
 (s/fdef extend-fail-opt
@@ -245,11 +247,3 @@
     (if exit-message
       (exit (if ok? 0 1) exit-message)
       (process-requirements packages requirements external options))))
-
-
-;;
-;; Instrumented functions - uncomment only while testing
-;;
-
-;; (instrument `process-requirements)
-;; (instrument `validate-args)

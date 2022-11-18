@@ -115,7 +115,7 @@
 
 (defn data->license-map
   "Get license name from info.classifiers or info.license field of PyPI API data"
-  [data]
+  [data options rate-limiter]
   (let [info (get data "info")
         {:strs [license classifiers home_page]} info
         license-license (if (contains? license-undefined license) nil license)
@@ -123,7 +123,7 @@
         license-name (or
                       classifiers-license
                       license-license
-                      (github/homepage->license-name home_page))
+                      (github/homepage->license-name home_page options rate-limiter))
         license-desc
         (license/name->type (or license-name license/name-error))]
     (if license-name
@@ -138,12 +138,12 @@
 
 (defn data->license
   "Return hash-map with license data"
-  [json-data]
+  [json-data options rate-limiter]
   (let [{:keys [ok? requirement data]} json-data]
     (if ok?
       {:ok? true
        :requirement requirement
-       :license (data->license-map data)}
+       :license (data->license-map data options rate-limiter)}
       {:ok? false
        :requirement requirement
        :license license/data-error})))
@@ -159,7 +159,7 @@
   [requirement options rate-limiter]
   (let [resp (get-requirement-version requirement options rate-limiter)
         data (requirement-response->data resp)
-        license (data->license data)]
+        license (data->license data options rate-limiter)]
     license))
 
 (defn get-all-requirements
