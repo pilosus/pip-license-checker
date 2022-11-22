@@ -5,6 +5,12 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 
 ## [Unreleased]
 
+## [0.36.0] - 2022-11-22
+### Added
+- Environment variable `GITHUB_TOKEN` is used as a default value for
+  `--github-token` option. Use as a safer alternative in CI/CD
+  pipelines so that OAuth token is not exposed in the logs as a plain text.
+
 ## [0.35.0] - 2022-11-18
 ### Added
 - Rate limiting for GitHub public API requests. Option `--rate-limits
@@ -287,7 +293,8 @@ weak copyleft types.
 ### Added
 - Structure for Leiningen app project
 
-[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.35.0...HEAD
+[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.36.0...HEAD
+[0.36.0]: https://github.com/pilosus/pip-license-checker/compare/0.35.0...0.36.0
 [0.35.0]: https://github.com/pilosus/pip-license-checker/compare/0.34.0...0.35.0
 [0.34.0]: https://github.com/pilosus/pip-license-checker/compare/0.33.0...0.34.0
 [0.33.0]: https://github.com/pilosus/pip-license-checker/compare/0.32.0...0.33.0
