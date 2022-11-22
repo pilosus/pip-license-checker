@@ -183,8 +183,8 @@
     :default {:requests 120 :millis 60000}
     :parse-fn parse-rate-limits
     :validate [validate-rate-limits rate-limits-msg]]
-   [nil "--github-token TOKEN" "GitHub OAuth Token to increase rate-limits"
-    :default nil]
+   [nil "--github-token TOKEN" "GitHub OAuth Token to increase rate-limits. Defaults to GITHUB_TOKEN env"
+    :default (System/getenv "GITHUB_TOKEN")]
    ["-h" "--help" "Print this help message"]])
 
 (s/fdef extend-fail-opt

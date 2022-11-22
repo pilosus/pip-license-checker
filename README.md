@@ -174,7 +174,7 @@ Description:
       --[no-]table-headers                                                        Print table headers
       --[no-]fails-only                                                           Print only packages of license types specified with --fail flags
       --rate-limits REQUESTS/MILLISECONDS  {:requests 120, :millis 60000}         Rate limit requests to public APIs
-      --github-token TOKEN                 nil                                    GitHub OAuth Token to increase rate-limits
+      --github-token TOKEN                 nil                                    GitHub OAuth Token to increase rate-limits. Defaults to GITHUB_TOKEN env
   -h, --help                                                                      Print this help message
 
 Examples:
