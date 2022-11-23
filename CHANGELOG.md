@@ -5,6 +5,10 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 
 ## [Unreleased]
 
+## [0.37.0] - 2022-11-23
+### Changed
+- Docker base image switched over vendor-agnostic Eclipse Temurin JRE 17.
+
 ## [0.36.0] - 2022-11-22
 ### Added
 - Environment variable `GITHUB_TOKEN` is used as a default value for
@@ -293,7 +297,8 @@ weak copyleft types.
 ### Added
 - Structure for Leiningen app project
 
-[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.36.0...HEAD
+[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.37.0...HEAD
+[0.37.0]: https://github.com/pilosus/pip-license-checker/compare/0.36.0...0.37.0
 [0.36.0]: https://github.com/pilosus/pip-license-checker/compare/0.35.0...0.36.0
 [0.35.0]: https://github.com/pilosus/pip-license-checker/compare/0.34.0...0.35.0
 [0.34.0]: https://github.com/pilosus/pip-license-checker/compare/0.33.0...0.34.0
