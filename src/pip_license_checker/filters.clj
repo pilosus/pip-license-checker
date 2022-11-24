@@ -31,7 +31,6 @@
 (def regex-remove-modifiers #"(;|@).*")
 (def regex-remove-extra #"\[.*\]")
 (def regex-remove-wildcard #"\.\*")
-(def regex-split-specifier-ops #"(===|==|~=|!=|>=|<=|<|>)")
 
 (s/fdef remove-requirements-internal-rules
   :args (s/cat :requirements ::sp/requirements)
@@ -87,20 +86,6 @@
    (str/replace regex-remove-extra "")
    (str/replace regex-remove-wildcard "")))
 
-(s/fdef requirement->map
-  :args (s/cat :requirement ::sp/requirement)
-  :ret ::sp/requirement-map)
-
-(defn requirement->map
-  "Parse requirement string into map with package name and its specifiers parsed"
-  [requirement]
-  (let [package-name (first (str/split requirement regex-split-specifier-ops))
-        specifiers-str (subs requirement (count package-name))
-        specifiers-vec (version/parse-specifiers specifiers-str)
-        specifiers (if (= specifiers-vec [nil]) nil specifiers-vec)
-        result {:name package-name :specifiers specifiers}]
-    result))
-
 (defn filter-fails-only-licenses
   "Filter license types specified with --failed flag(s) if needed"
   [options licenses]
@@ -131,11 +116,3 @@
   [licenses options]
   (->> (filter-fails-only-licenses options licenses)
        (remove-licenses options)))
-
-;;
-;; Instrumented functions - uncomment only while testing
-;;
-
-;; (instrument `remove-requirements-internal-rules)
-;; (instrument `remove-requirements-user-rules)
-;; (instrument `requirement->map)

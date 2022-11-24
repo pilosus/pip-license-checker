@@ -1,4 +1,4 @@
-;; Copyright © 2020, 2021 Vitaly Samigullin
+;; Copyright © 2020-2022 Vitaly Samigullin
 ;;
 ;; This program and the accompanying materials are made available under the
 ;; terms of the Eclipse Public License 2.0 which is available at
@@ -247,9 +247,9 @@
    #"WTFPL"
    #"Do What the Fuck You Want To Public License"])
 
-
 ;; Const
 
+(defrecord License [name type error])
 
 (def name-error "Error")
 
@@ -279,7 +279,7 @@
   (format "Invalid license type. Use one of: %s"
           (str/join ", " types)))
 
-(def data-error {:name name-error :type type-error})
+(def data-error (->License name-error type-error nil))
 
 
 ;; Functions
@@ -311,10 +311,11 @@
           regex-permissive (strings->pattern regex-list-permissive)
           match-permissive (some? (re-find regex-permissive name))]
       (cond
-        match-copyleft-network type-copyleft-network
-        match-copyleft-strong type-copyleft-strong
-        match-copyleft-weak type-copyleft-weak
-        match-permissive type-permissive
-        :else type-other))
+        match-copyleft-network (->License name type-copyleft-network nil)
+        match-copyleft-strong (->License name type-copyleft-strong nil)
+        match-copyleft-weak (->License name type-copyleft-weak nil)
+        match-permissive (->License name type-permissive nil)
+        :else (->License name type-other nil)))
     ;; in case license name is null, return error license type
-    (catch NullPointerException _ type-error)))
+    (catch NullPointerException _
+      (->License name type-error "License name regexp match failed"))))
