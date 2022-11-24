@@ -15,7 +15,9 @@
 
 (ns pip-license-checker.exception
   "Error handling"
-  (:gen-class))
+  (:gen-class)
+  (:require
+   [clojure.string :as str]))
 
 (defn get-ex-info
   "Generate a human-readable exception message"
@@ -23,3 +25,8 @@
   (let [name (-> ex .getClass .getSimpleName)
         message (ex-message ex)]
     (format "%s: %s" name message)))
+
+(defn join-ex-info
+  "Join exception messages"
+  [& args]
+  (str/join "; " (concat (filter some? args))))

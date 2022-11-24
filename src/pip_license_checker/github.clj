@@ -19,6 +19,7 @@
   (:require
    [cheshire.core :as json]
    [pip-license-checker.http :as http]
+   [pip-license-checker.exception :as exception]
    [clojure.string :as str]))
 
 (def url-github-base "https://api.github.com/repos")
@@ -34,17 +35,20 @@
     (when token
       {:headers {"Authorization" (format "Bearer %s" token)}})))
 
+;; FIXME
 (defn get-license-name
   "Get response from GitHub API"
   [path-parts options rate-limiter]
   (let [[_ owner repo] path-parts
         url (str/join "/" [url-github-base owner repo "license"])
         settings (merge settings-http-client (get-headers options))
-        response (try (http/request-get url settings rate-limiter) (catch Exception _ nil))
-        data (if response (json/parse-string (:body response)) {})
+        resp (try (http/request-get url settings rate-limiter) (catch Exception e e))
+        error (when (instance? Exception resp) (exception/get-ex-info resp))
+        resp-data (when (nil? error) resp)
+        data (if resp-data (json/parse-string (:body resp-data)) {})
         license-obj (get data "license")
         license-name (get license-obj "name")]
-    license-name))
+    {:name license-name :error error}))
 
 (defn homepage->license-name
   "Get license name from homepage if it is GitHub url"
@@ -54,5 +58,5 @@
         (try (re-find #"^(?:https://github.com)/(.*)/(.*)" url-sanitized)
              (catch Exception _ nil))
         is-github-url (= 3 (count github-url))
-        license (if is-github-url (get-license-name github-url options rate-limiter) nil)]
+        license (if is-github-url (get-license-name github-url options rate-limiter) {:name nil :error nil})]
     license))

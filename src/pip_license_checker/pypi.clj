@@ -26,7 +26,8 @@
    [pip-license-checker.http :as http]
    [pip-license-checker.license :as license]
    [pip-license-checker.version :as version]
-))
+
+   [pip-license-checker.exception :as exception]))
 
 (def settings-http-client
   {:socket-timeout 3000
@@ -52,7 +53,8 @@
 (defrecord PyPiProject [ok?
                         ^Requirement requirement
                         api-response
-                        license])
+                        license
+                        error])
 
 ;; Get API response, parse it
 
@@ -61,60 +63,65 @@
   NB! versions are not sorted!"
   [package-name rate-limiter]
   (let [url (str/join "/" [url-pypi-base package-name "json"])
-        response (try (http/request-get url settings-http-client rate-limiter)
-                      (catch Exception _ nil))
-        body (:body response)
-        data (json/parse-string body)
-        releases (get data "releases")
-        versions (keys releases)
-        versions-parsed (map #(version/parse-version %) versions)
-        versions-valid (filter #(not (nil? %)) versions-parsed)]
-    versions-valid))
+        resp (try (http/request-get url settings-http-client rate-limiter)
+                  (catch Exception e e))
+        error (when (instance? Exception resp) (exception/get-ex-info resp))
+        data (when (nil? error) resp)
+        versions (-> data
+                     :body
+                     json/parse-string
+                     (get "releases")
+                     keys)
+        releases (->> versions
+                      (map #(version/parse-version %))
+                      (filter #(not (nil? %))))]
+    releases))
 
 (defn api-get-requirement-version
   "Return respone of GET request to PyPI API for requirement"
   [requirement options rate-limiter]
   (let [{:keys [name specifiers]} requirement
-        pre (:pre options)
-        versions (api-get-releases name rate-limiter)
-        version (version/get-version specifiers versions :pre pre)
+        releases (api-get-releases name rate-limiter)
+        version (version/get-version specifiers releases :pre (:pre options))
         url
-        (if (= version nil)
+        (if (nil? version)
           (str/join "/" [url-pypi-base name "json"])
           (str/join "/" [url-pypi-base name version "json"]))
-        response (try
-                   (http/request-get url settings-http-client rate-limiter)
-                   (catch Exception _ nil))
+        resp (try
+               (http/request-get url settings-http-client rate-limiter)
+               (catch Exception e e))
+        error (when (instance? Exception resp) (exception/get-ex-info resp))
+        resp-data (when (nil? error) resp)
         requirement-with-version
         (map->Requirement {:name name
                            :version (or version (:orig (last (first specifiers))))
                            :specifiers specifiers})]
-    (if (and response version)
+    (if (and resp-data version)
       (map->PyPiProject {:ok? true
                          :requirement requirement-with-version
                          :api-response
                          (->
-                          response
+                          resp-data
                           :body
                           json/parse-string)
-                         :license nil})
+                         :license nil
+                         :error error})
       (map->PyPiProject {:ok? false
                          :requirement requirement-with-version
                          :api-response nil
-                         :license nil}))))
+                         :license nil
+                         :error error}))))
 
 ;; Helpers to get license name and description
 
 (defn classifiers->license
   "Get first most detailed license name from PyPI trove classifiers list"
   [classifiers]
-  (let [license-classifiers
-        (filter #(re-matches regex-match-classifier %) classifiers)
-        specifict-classifiers
-        (remove #(contains? unspecific-license-classifiers %) license-classifiers)
-        license-names
-        (map #(last (str/split % regex-split-classifier)) specifict-classifiers)
-        classifier (str/join ", " license-names)
+  (let [classifier (->> classifiers
+                        (filter #(re-matches regex-match-classifier %))
+                        (remove #(contains? unspecific-license-classifiers %))
+                        (map #(last (str/split % regex-split-classifier)))
+                        (str/join ", "))
         result (if (= classifier "") nil classifier)]
     result))
 
@@ -127,17 +134,23 @@
         classifiers-license (classifiers->license classifiers)
         name (or
               classifiers-license
-              license-license
-              (github/homepage->license-name home_page options rate-limiter))
-        license (license/name->type name)]
-    license))
+              license-license)
+        gh-license (when (nil? name) (github/homepage->license-name home_page options rate-limiter))
+        gh-error (:error gh-license)
+        license-name (or name (:name gh-license))
+        license (license/license-with-type license-name)
+        error-chain (exception/join-ex-info (:error license) gh-error)
+        license-joined (license/->License (:name license) (:type license) error-chain)]
+    license-joined))
 
 ;; Get license data from API JSON
 
 (defn requirement->rec
   "Parse requirement string into map with package name and its specifiers parsed"
   [requirement-line]
-  (let [package-name (first (str/split requirement-line regex-split-specifier-ops))
+  (let [package-name (-> requirement-line
+                         (str/split regex-split-specifier-ops)
+                         first)
         specifiers-str (subs requirement-line (count package-name))
         specifiers-vec (version/parse-specifiers specifiers-str)
         specifiers (if (= specifiers-vec [nil]) nil specifiers-vec)
@@ -148,18 +161,21 @@
   "Return license hash-map for requirement"
   [requirement-rec options rate-limiter]
   (let [api-response (api-get-requirement-version requirement-rec options rate-limiter)
-        {:keys [ok? requirement api-response]} api-response
+        {:keys [ok? requirement api-response error]} api-response
+        license (if ok? (api-response->license-map api-response options rate-limiter) license/data-error)
+        error-chain (exception/join-ex-info error (:error license))
         project
         (if ok?
           (map->PyPiProject {:ok? true
                              :requirement requirement
                              :api-response api-response
-                             :license
-                             (api-response->license-map api-response options rate-limiter)})
+                             :license license
+                             :error error-chain})
           (map->PyPiProject {:ok? false
                              :requirement requirement
                              :api-response api-response
-                             :license license/data-error}))]
+                             :license license
+                             :error error-chain}))]
     project))
 
 (defn get-all-requirements
@@ -183,4 +199,5 @@
                       (map filters/sanitize-requirement)
                       (map requirement->rec)
                       (pmap #(requirement-rec->project-with-license % options rate-limiter)))]
+    (print (map :error licenses))
     licenses))

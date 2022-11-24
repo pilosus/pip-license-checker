@@ -297,7 +297,7 @@
    (str regex-ignore-case
         (apply str (interpose "|" (map #(str "(?:" % ")") patterns))))))
 
-(defn name->type
+(defn license-with-type
   "Get license type by its name"
   [name]
   (try
@@ -318,4 +318,4 @@
         :else (->License name type-other nil)))
     ;; in case license name is null, return error license type
     (catch NullPointerException _
-      (->License name type-error "License name regexp match failed"))))
+      (->License name-error type-error nil))))
