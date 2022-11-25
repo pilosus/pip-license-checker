@@ -148,7 +148,8 @@
   "Rate limits must be positive integers in format REQUESTS/MILLISECONDS")
 
 (def cli-options
-  [["-r" "--requirements REQUIREMENTS_FILE" "Python pip requirement file name"
+  [["-v" "--verbose" "Make output verbose" :default false]
+   ["-r" "--requirements REQUIREMENTS_FILE" "Python pip requirement file name"
     :multi true
     :default []
     :update-fn conj

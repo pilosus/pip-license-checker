@@ -279,11 +279,14 @@
   (format "Invalid license type. Use one of: %s"
           (str/join ", " types)))
 
-(def data-error (->License name-error type-error nil))
-
+(def license-error (->License name-error type-error nil))
 
 ;; Functions
 
+(defn get-license-error
+  "Get license object of error type"
+  [ex]
+  (->License name-error type-error ex))
 
 (defn is-type-valid?
   "Return true if license-type string is valid, false otherwise"
@@ -316,6 +319,5 @@
         match-copyleft-weak (->License name type-copyleft-weak nil)
         match-permissive (->License name type-permissive nil)
         :else (->License name type-other nil)))
-    ;; in case license name is null, return error license type
     (catch NullPointerException _
-      (->License name-error type-error nil))))
+      license-error)))

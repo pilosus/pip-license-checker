@@ -19,7 +19,7 @@
   (:require
    [clojure.string :as str]))
 
-(def table-header ["Requirement" "License Name" "License Type"])
+(def table-header ["Requirement" "License Name" "License Type" "Misc"])
 (def totals-header ["License Type" "Found"])
 (def fmt-params-split-regex #"\s+")
 (def fmt-params-delim " ")
@@ -42,7 +42,8 @@
   [fmt-str]
   (take-fmt (count totals-header) fmt-str))
 
-(def table-formatter "%-35s %-55s %-30s")
+(def table-formatter "%-35s %-55s %-20s")
+(def verbose-formatter "%-40s")
 (def totals-formatter (take-fmt (count totals-header) table-formatter))
 
 (defn valid-formatter?
@@ -61,18 +62,25 @@
 
 (defn print-license-header
   [options]
-  (let [{:keys [formatter] :or {formatter table-formatter}} options]
-    (println (apply format formatter table-header))))
+  (let [{:keys [formatter] :or {formatter table-formatter}} options
+        formatter' (if (:verbose options)
+                     (format "%s %s" formatter verbose-formatter)
+                     formatter)]
+    (println (apply format formatter' table-header))))
 
 (defn format-license
   "Format license"
   [license-data options]
   (let [{:keys [requirement license]} license-data
         {:keys [formatter] :or {formatter table-formatter}} options
+        formatter' (if (:verbose options)
+                     (format "%s %s" formatter verbose-formatter)
+                     formatter)
         {req-name :name req-version :version} requirement
         package (str/join ":" (remove str/blank? [req-name req-version]))
-        {lic-name :name lic-type :type} license]
-    (format formatter package lic-name lic-type)))
+        {lic-name :name lic-type :type error :error} license
+        error' (or error "")]
+    (format formatter' package lic-name lic-type error')))
 
 (defn format-total
   "Print lincese type  totals line"

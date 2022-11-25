@@ -21,10 +21,10 @@
 
 (defn get-ex-info
   "Generate a human-readable exception message"
-  [ex]
+  [logger ex]
   (let [name (-> ex .getClass .getSimpleName)
         message (ex-message ex)]
-    (format "%s: %s" name message)))
+    (format "[%s] %s: %s" logger name message)))
 
 (defn join-ex-info
   "Join exception messages"

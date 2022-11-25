@@ -19,9 +19,7 @@
   (:require
    [clojure.spec.alpha :as s]
    [clojure.string :as str]
-   ;;[clojure.spec.test.alpha :refer [instrument]]
-   [pip-license-checker.spec :as sp]
-   [pip-license-checker.version :as version]))
+   [pip-license-checker.spec :as sp]))
 
 ;; Skip line with -r /--requirement/-e etc, URLs, blank lines, comments
 (def regex-skip-line-internal #"(\s*(?:https?:\/\/|#|-).*)|(^\s*$)")
