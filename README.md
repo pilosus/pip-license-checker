@@ -160,6 +160,7 @@ pip-license-checker [options]... [package]...
 Description:
   package	List of package names in format `name[specifier][version]`
 
+  -v, --verbose                           false                                   Make output verbose
   -r, --requirements REQUIREMENT_NAME     []                                      Requirement file name to read
   -x, --external FILE_NAME                []                                      File containing package names and license names
       --external-format FILE_FORMAT       csv                                     External file format: csv, cocoapods, edn, gradle

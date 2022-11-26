@@ -5,6 +5,12 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 
 ## [Unreleased]
 
+## [0.38.0] - 2022-11-27
+### Added
+- CLI option `--verbose` (or `-v` for short) to make output
+  verbose. Used for better errors visibility
+  ([#105](https://github.com/pilosus/pip-license-checker/issues/105))
+
 ## [0.37.0] - 2022-11-23
 ### Changed
 - Docker base image switched over vendor-agnostic Eclipse Temurin JRE 17.
@@ -297,7 +303,8 @@ weak copyleft types.
 ### Added
 - Structure for Leiningen app project
 
-[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.37.0...HEAD
+[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.38.0...HEAD
+[0.38.0]: https://github.com/pilosus/pip-license-checker/compare/0.37.0...0.38.0
 [0.37.0]: https://github.com/pilosus/pip-license-checker/compare/0.36.0...0.37.0
 [0.36.0]: https://github.com/pilosus/pip-license-checker/compare/0.35.0...0.36.0
 [0.35.0]: https://github.com/pilosus/pip-license-checker/compare/0.34.0...0.35.0
