@@ -20,14 +20,14 @@
    [cheshire.core :as json]
    [clojure.string :as str]
    [indole.core :refer [make-rate-limiter]]
+   [pip-license-checker.data :as d]
+   [pip-license-checker.exception :as exception]
    [pip-license-checker.file :as file]
    [pip-license-checker.filters :as filters]
    [pip-license-checker.github :as github]
    [pip-license-checker.http :as http]
    [pip-license-checker.license :as license]
-   [pip-license-checker.version :as version]
-
-   [pip-license-checker.exception :as exception]))
+   [pip-license-checker.version :as version]))
 
 (def settings-http-client
   {:socket-timeout 3000
@@ -45,18 +45,6 @@
 (def regex-split-specifier-ops #"(===|==|~=|!=|>=|<=|<|>)")
 
 (def logger-pypi "PyPI")
-
-;; Data structures
-
-(defrecord Requirement [name
-                        version
-                        specifiers])
-
-(defrecord PyPiProject [status
-                        ^Requirement requirement
-                        api-response
-                        license
-                        error])
 
 (def req-status-found :found)
 (def req-status-error :error)
@@ -107,32 +95,32 @@
         error (when (instance? Exception resp) (get-error-message resp))
         resp-data (when (nil? error) resp)
         requirement-with-version
-        (map->Requirement {:name name
-                           :version (or version (:orig (last (first specifiers))))
-                           :specifiers specifiers})]
+        (d/map->Requirement {:name name
+                             :version (or version (:orig (last (first specifiers))))
+                             :specifiers specifiers})]
     (cond
       (and resp-data version)
-      (map->PyPiProject {:status req-status-found
-                         :requirement requirement-with-version
-                         :api-response
-                         (->
-                          resp-data
-                          :body
-                          json/parse-string)
-                         :license nil
-                         :error error})
+      (d/map->PyPiProject {:status req-status-found
+                           :requirement requirement-with-version
+                           :api-response
+                           (->
+                            resp-data
+                            :body
+                            json/parse-string)
+                           :license nil
+                           :error error})
       error
-      (map->PyPiProject {:status req-status-error
-                         :requirement requirement-with-version
-                         :api-response nil
-                         :license (license/get-license-error nil)
-                         :error error})
+      (d/map->PyPiProject {:status req-status-error
+                           :requirement requirement-with-version
+                           :api-response nil
+                           :license (license/get-license-error nil)
+                           :error error})
       (nil? version)
-      (map->PyPiProject {:status req-status-error
-                         :requirement requirement-with-version
-                         :api-response nil
-                         :license (license/get-license-error nil)
-                         :error (format "[%s] Version not found" logger-pypi)}))))
+      (d/map->PyPiProject {:status req-status-error
+                           :requirement requirement-with-version
+                           :api-response nil
+                           :license (license/get-license-error nil)
+                           :error (format "[%s] Version not found" logger-pypi)}))))
 
 ;; Helpers to get license name and description
 
@@ -162,7 +150,7 @@
         license-name (or name (:name gh-license))
         license (license/license-with-type license-name)
         error-chain (exception/join-ex-info (:error license) gh-error)
-        license-joined (license/->License (:name license) (:type license) error-chain)]
+        license-joined (d/->License (:name license) (:type license) error-chain)]
     license-joined))
 
 ;; Get license data from API JSON
@@ -176,7 +164,7 @@
         specifiers-str (subs requirement-line (count package-name))
         specifiers-vec (version/parse-specifiers specifiers-str)
         specifiers (if (= specifiers-vec [nil]) nil specifiers-vec)
-        result (->Requirement package-name nil specifiers)]
+        result (d/->Requirement package-name nil specifiers)]
     result))
 
 (defn requirement-rec->project-with-license
@@ -185,10 +173,10 @@
   (let [api-response (api-get-project requirement-rec options rate-limiter)
         {:keys [status requirement api-response error]} api-response
         license (if (= status req-status-error)
-                  (license/->License license/name-error license/type-error error)
+                  (d/->License license/name-error license/type-error error)
                   (api-response->license-map api-response options rate-limiter))
         error-chain (exception/join-ex-info error (:error license))
-        project (map->PyPiProject
+        project (d/map->PyPiProject
                  {:status status
                   :requirement requirement
                   :api-response api-response

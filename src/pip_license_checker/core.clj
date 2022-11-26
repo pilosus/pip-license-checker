@@ -42,8 +42,8 @@
         ordered-freqs (into (sorted-map) freqs)]
     ordered-freqs))
 
-(defn process-requirements
-  "Print parsed requirements pretty"
+(defn process-deps
+  "Print parsed dependencies pretty"
   [packages requirements external options]
   (let [fail-opt (:fail options)
         with-fail (seq fail-opt)
@@ -218,4 +218,4 @@
   (let [{:keys [packages requirements external options exit-message ok?]} (validate-args args)]
     (if exit-message
       (exit (if ok? 0 1) exit-message)
-      (process-requirements packages requirements external options))))
+      (process-deps packages requirements external options))))

@@ -16,6 +16,7 @@
 (ns pip-license-checker.license-test
   (:require
    [clojure.test :refer [deftest is testing]]
+   [pip-license-checker.data :as d]
    [pip-license-checker.license :as license]))
 
 ;; license/is-type-valid?
@@ -55,117 +56,117 @@
 
 (def params-license-with-type
   [["MIT License"
-    (license/->License "MIT License" license/type-permissive nil)
+    (d/->License "MIT License" license/type-permissive nil)
     "Permissive"]
    ["Artistic license"
-    (license/->License "Artistic license" license/type-permissive nil)
+    (d/->License "Artistic license" license/type-permissive nil)
     "Permissive"]
    ["zope public license"
-    (license/->License "zope public license" license/type-permissive nil)
+    (d/->License "zope public license" license/type-permissive nil)
     "Permissive"]
    ["WTFPL"
-    (license/->License "WTFPL" license/type-permissive nil)
+    (d/->License "WTFPL" license/type-permissive nil)
     "Permissive"]
    ["CC0"
-    (license/->License "CC0" license/type-permissive nil)
+    (d/->License "CC0" license/type-permissive nil)
     "Permissive"]
    ["CC-BY-4.0"
-    (license/->License "CC-BY-4.0" license/type-permissive nil)
+    (d/->License "CC-BY-4.0" license/type-permissive nil)
     "Permissive"]
    ["CC BY 4.0"
-    (license/->License "CC BY 4.0" license/type-permissive nil)
+    (d/->License "CC BY 4.0" license/type-permissive nil)
     "Permissive"]
    ["cc  by 2.0"
-    (license/->License "cc  by 2.0" license/type-permissive nil)
+    (d/->License "cc  by 2.0" license/type-permissive nil)
     "Permissive"]
    ["ODC BY 1.0"
-    (license/->License "ODC BY 1.0" license/type-permissive nil)
+    (d/->License "ODC BY 1.0" license/type-permissive nil)
     "Permissive"]
    ["ODC-BY-1.0"
-    (license/->License "ODC-BY-1.0" license/type-permissive nil)
+    (d/->License "ODC-BY-1.0" license/type-permissive nil)
     "Permissive"]
    ["Open Data Commons Attribution License"
-    (license/->License "Open Data Commons Attribution License" license/type-permissive nil)
+    (d/->License "Open Data Commons Attribution License" license/type-permissive nil)
     "Permissive"]
    ["zlib"
-    (license/->License "zlib" license/type-permissive nil)
+    (d/->License "zlib" license/type-permissive nil)
     "Permissive"]
    ["zlib/libpng License with Acknowledgement"
-    (license/->License "zlib/libpng License with Acknowledgement" license/type-permissive nil)
+    (d/->License "zlib/libpng License with Acknowledgement" license/type-permissive nil)
     "Permissive"]
    ["ODbL-1.0"
-    (license/->License "ODbL-1.0" license/type-copyleft-weak nil)
+    (d/->License "ODbL-1.0" license/type-copyleft-weak nil)
     license/type-copyleft-weak
     "WeakCopyleft"]
    ["Open Data Commons Open Database License v1.0"
-    (license/->License
+    (d/->License
      "Open Data Commons Open Database License v1.0"
      license/type-copyleft-weak
      nil)
     "WeakCopyleft"]
    ["Mozilla Public License 2.0"
-    (license/->License "Mozilla Public License 2.0" license/type-copyleft-weak nil)
+    (d/->License "Mozilla Public License 2.0" license/type-copyleft-weak nil)
     "WeakCopyleft"]
    ["GPL with linking exception"
-    (license/->License "GPL with linking exception" license/type-copyleft-weak nil)
+    (d/->License "GPL with linking exception" license/type-copyleft-weak nil)
     "WeakCopyleft"]
    ["GPL Classpath"
-    (license/->License "GPL Classpath" license/type-copyleft-weak nil)
+    (d/->License "GPL Classpath" license/type-copyleft-weak nil)
     "WeakCopyleft"]
    ["GPL v2 or later with classpath exception"
-    (license/->License
+    (d/->License
      "GPL v2 or later with classpath exception"
      license/type-copyleft-weak
      nil)
     "WeakCopyleft"]
    ["GNU General Public License v2 or later (GPLv2+)"
-    (license/->License
+    (d/->License
      "GNU General Public License v2 or later (GPLv2+)"
      license/type-copyleft-strong
      nil)
     "StrongCopyleft"]
    ["GPLv3"
-    (license/->License "GPLv3" license/type-copyleft-strong nil)
+    (d/->License "GPLv3" license/type-copyleft-strong nil)
     "StrongCopyleft"]
    ["BSD-3-Clause OR GPL-2.0"
-    (license/->License "BSD-3-Clause OR GPL-2.0" license/type-copyleft-strong nil)
+    (d/->License "BSD-3-Clause OR GPL-2.0" license/type-copyleft-strong nil)
     "StrongCopyleft"]
    ["GNU General Public License version 3"
-    (license/->License
+    (d/->License
      "GNU General Public License version 3"
      license/type-copyleft-strong
      nil)
     "StrongCopyleft"]
    ["AGPLv3"
-    (license/->License "AGPLv3" license/type-copyleft-network nil)
+    (d/->License "AGPLv3" license/type-copyleft-network nil)
     license/type-copyleft-network
     "NetworkCopyleft"]
    ["GNU Affero GPL version 3"
-    (license/->License "GNU Affero GPL version 3" license/type-copyleft-network nil)
+    (d/->License "GNU Affero GPL version 3" license/type-copyleft-network nil)
     "NetworkCopyleft"]
    ["zlib/whatever-new"
-    (license/->License "zlib/whatever-new" license/type-other nil)
+    (d/->License "zlib/whatever-new" license/type-other nil)
     "Other"]
    ["CC-BY-SA"
-    (license/->License "CC-BY-SA" license/type-other nil)
+    (d/->License "CC-BY-SA" license/type-other nil)
     "Other"]
    ["CC BY-NC"
-    (license/->License "CC BY-NC" license/type-other nil)
+    (d/->License "CC BY-NC" license/type-other nil)
     "Other"]
    ["CC BY-ND"
-    (license/->License "CC BY-ND" license/type-other nil)
+    (d/->License "CC BY-ND" license/type-other nil)
     "Other"]
    ["CC BY-NC-ND"
-    (license/->License "CC BY-NC-ND" license/type-other nil)
+    (d/->License "CC BY-NC-ND" license/type-other nil)
     "Other"]
    ["CC BY-NC-SA-4.0"
-    (license/->License "CC BY-NC-SA-4.0" license/type-other nil)
+    (d/->License "CC BY-NC-SA-4.0" license/type-other nil)
     "Other"]
    ["EULA"
-    (license/->License "EULA" license/type-other nil)
+    (d/->License "EULA" license/type-other nil)
     "Other"]
    [nil
-    (license/->License license/name-error license/type-error nil)
+    (d/->License license/name-error license/type-error nil)
     "Exception catched"]])
 
 (deftest test-license-with-type

@@ -18,23 +18,23 @@
    [clj-http.client :as http]
    [clojure.test :refer [deftest is testing]]
    [indole.core :refer [make-rate-limiter]]
-   [pip-license-checker.github :as g]
-   [pip-license-checker.license :as l]))
+   [pip-license-checker.data :as d]
+   [pip-license-checker.github :as g]))
 
 (def rate-limits (make-rate-limiter 1000 100))
 
 (def params-api-get-license
   [[["" "owner" "repo"]
     (constantly {:body "{\"license\": {\"name\": \"MIT License\"}}"})
-    (l/map->License {:name "MIT License" :type nil :error nil})
+    (d/map->License {:name "MIT License" :type nil :error nil})
     "Ok"]
    [["" "owner" "repo"]
     (constantly {:body "{\"errors\": {\"message\": \"No License Found\"}}"})
-    (l/map->License {:name nil :type nil :error nil})
+    (d/map->License {:name nil :type nil :error nil})
     "Fallback"]
    [["" "owner" "repo"]
     (fn [& _] (throw (ex-info "Boom!" {:status 404 :reason-phrase "License not found"})))
-    (l/map->License {:name nil :type nil :error "[GitHub] 404 License not found"})
+    (d/map->License {:name nil :type nil :error "[GitHub] 404 License not found"})
     "Exception"]])
 
 (deftest test-api-get-license
@@ -47,19 +47,19 @@
 (def params-homepage->license
   [["http://example.com"
     "{\"license\": {\"name\": \"MIT License\"}}"
-    (l/map->License {:name nil :type nil :error nil})
+    (d/map->License {:name nil :type nil :error nil})
     "Not a GitHub URL"]
    ["https://github.com/pilosus"
     "{\"license\": {\"name\": \"MIT License\"}}"
-    (l/map->License {:name nil :type nil :error nil})
+    (d/map->License {:name nil :type nil :error nil})
     "Malformed GitHub URL"]
    ["https://github.com/pilosus/piny/"
     "{\"license\": {\"name\": \"MIT License\"}}"
-    (l/map->License {:name "MIT License" :type nil :error nil})
+    (d/map->License {:name "MIT License" :type nil :error nil})
     "Ok GitHub URL"]
    [nil
     "{\"license\": {\"name\": \"MIT License\"}}"
-    (l/map->License {:name nil :type nil :error nil})
+    (d/map->License {:name nil :type nil :error nil})
     "nil URL"]])
 
 (deftest test-homepage->license

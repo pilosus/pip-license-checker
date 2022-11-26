@@ -255,7 +255,7 @@
         (is
          (= expected (core/get-license-type-totals licenses)))))))
 
-(def params-process-requirements
+(def params-process-deps
   [[[]
     []
     {:fail #{} :with-totals false :totals-only false :table-headers false}
@@ -320,13 +320,13 @@
 
 (deftest test-process-requirements
   (testing "Print results"
-    (doseq [[mock-pypi mock-external options expected description] params-process-requirements]
+    (doseq [[mock-pypi mock-external options expected description] params-process-deps]
       (testing description
         (with-redefs
          [pypi/get-parsed-requiements (constantly mock-pypi)
           external/get-parsed-requiements (constantly mock-external)
           core/exit #(println (format "Exit code: %s" %))]
-          (let [actual (with-out-str (core/process-requirements [] [] [] options))]
+          (let [actual (with-out-str (core/process-deps [] [] [] options))]
             (is (= expected actual))))))))
 
 (def params-options
