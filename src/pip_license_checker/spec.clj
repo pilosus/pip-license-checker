@@ -21,38 +21,10 @@
    [clojure.test.check.generators :as g]))
 
 ;;
-;; Macros
-;;
-;; (require '[pip-license-checker.spec :as sp])
-;; (def ->int (sp/with-conformer [val] (Integer/parseInt val)))
-;; (s/def ::->int ->int)
-;; (s/conform ::->int "123")
-
-(defmacro with-conformer
-  [[bind] & body]
-  `(s/conformer
-    (fn [~bind]
-      (try
-        ~@body
-        (catch Exception e#
-          ::s/invalid)))))
-
-;;
 ;; Specs
 ;;
 ;; (require '[pip-license-checker.spec :as sp])
 ;; (s/valid? ::sp/requirement "abc")
-
-;; requirement strings
-
-(s/def ::requirement string?)
-(s/def ::requirements (s/coll-of ::requirement))
-
-(defn regex?
-  [object]
-  (= (type object) java.util.regex.Pattern))
-
-(s/def ::opt-pattern (s/nilable regex?))
 
 ;; Versions
 
@@ -102,59 +74,6 @@
 
 (s/def ::specifiers
   (s/nilable (s/coll-of ::specifier)))
-
-;; License
-
-(s/def ::requirement-map
-  (s/cat :name ::requirement :specifiers ::specifiers))
-
-(s/def ::license-str string?)
-
-;; HTTP response
-
-(s/def ::requirement-response
-  (s/cat
-   :ok? boolean?
-   :requirement (s/cat
-                 :name ::requirement
-                 :version ::version-str)
-   :response (s/?
-              (s/map-of string? string?))))
-
-(s/def ::requirement-response-data
-  (s/cat
-   :ok? boolean?
-   :requirement (s/cat
-                 :name ::requirement
-                 :version ::version-str)
-   :data (s/?
-          (s/map-of string? any?))))
-
-(s/def ::requirement-response-license
-  (s/cat
-   :ok? boolean?
-   :requirement (s/cat
-                 :name ::requirement
-                 :version ::version-str)
-   :license (s/cat
-             :name string?
-             :type string?)))
-
-
-;; CLI
-
-
-(s/def ::requirements-cli-arg (s/nilable (s/coll-of string?)))
-(s/def ::packages-cli-arg (s/nilable (s/coll-of string?)))
-(s/def ::options-cli-arg (s/nilable (s/map-of string? string?)))
-(s/def ::options-fail (s/nilable (s/coll-of set?)))
-
-
-;; Core
-
-
-(s/def ::license-type-totals (s/map-of string? int?))
-
 
 ;;
 ;; Generators

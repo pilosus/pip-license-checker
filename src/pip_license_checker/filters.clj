@@ -17,9 +17,7 @@
   "Filters for requirements"
   (:gen-class)
   (:require
-   [clojure.spec.alpha :as s]
-   [clojure.string :as str]
-   [pip-license-checker.spec :as sp]))
+   [clojure.string :as str]))
 
 ;; Skip line with -r /--requirement/-e etc, URLs, blank lines, comments
 (def regex-skip-line-internal #"(\s*(?:https?:\/\/|#|-).*)|(^\s*$)")
@@ -29,10 +27,6 @@
 (def regex-remove-modifiers #"(;|@).*")
 (def regex-remove-extra #"\[.*\]")
 (def regex-remove-wildcard #"\.\*")
-
-(s/fdef remove-requirements-internal-rules
-  :args (s/cat :requirements ::sp/requirements)
-  :ret ::sp/requirements)
 
 (defn remove-requirements-internal-rules
   "Exclude requirements from sequence according to app's internal rules"
@@ -45,10 +39,6 @@
   (try
     (re-matches pattern requirement)
     (catch NullPointerException _ false)))
-
-(s/fdef remove-requirements-user-rules
-  :args (s/cat :pattern ::sp/opt-pattern :requirements ::sp/requirements)
-  :ret ::sp/requirements)
 
 (defn remove-requirements-user-rules
   "Exclude requirement strings from sequence according to user-defined pattern.

@@ -6,7 +6,7 @@
   :dependencies [
                  [org.clojure/clojure "1.10.1"]
                  [org.clojure/data.csv "1.0.1"]
-                 [org.clojure/tools.cli "1.0.206"]
+                 [org.clojure/tools.cli "1.0.214"]
                  [clj-http "3.12.3"]
                  [cheshire "5.11.0"]
                  [indole "1.0.0"]

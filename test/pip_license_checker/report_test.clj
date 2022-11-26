@@ -19,54 +19,63 @@
    [clojure.test :refer [deftest is testing]]
    [pip-license-checker.report :as report]))
 
+(def params-print-license-header
+  [[{:formatter report/table-formatter}
+    (format report/table-formatter
+            "Requirement"
+            "License Name"
+            "License Type")
+    "Normal output"]
+   [{:formatter report/table-formatter :verbose true}
+    (format (format "%s %s" report/table-formatter report/verbose-formatter)
+            "Requirement"
+            "License Name"
+            "License Type"
+            "Misc")
+    "Verbose output"]])
+
 (deftest test-print-license-header
   (testing "Printing license table header"
-    (let [actual
-          (with-out-str
-            (report/print-license-header {:formatter report/table-formatter}))
-          expected (str/join
-                    [(format report/table-formatter
-                             "Requirement"
-                             "License Name"
-                             "License Type")
-                     "\n"])]
-      (is (= expected actual)))))
+    (doseq [[options expected description] params-print-license-header]
+      (testing description
+        (let [actual (with-out-str (report/print-license-header options))
+              result (str/join [expected "\n"])]
+          (is (= result actual)))))))
 
 (def params-format-license
-  [["test"
-    "1.12.3"
-    "GPLv3"
-    "Copyleft"
+  [[{:requirement {:name "test" :version "1.12.3"}
+     :license {:name "GPLv3" :type "Copyleft"}}
+    {}
     (format report/table-formatter "test:1.12.3" "GPLv3" "Copyleft")
     "Example 1"]
-   ["aiohttp"
-    "3.7.4.post0"
-    "MIT"
-    "Permissive"
+   [{:requirement {:name "aiohttp" :version "3.7.4.post0"}
+     :license {:name "MIT" :type "Permissive"}}
+    {}
     (format report/table-formatter "aiohttp:3.7.4.post0" "MIT" "Permissive")
     "Example 2"]
-   ["aiohttp"
-    nil
-    "MIT"
-    "Permissive"
+   [{:requirement {:name "aiohttp" :version nil}
+     :license {:name "MIT" :type "Permissive"}}
+    {}
     (format report/table-formatter "aiohttp" "MIT" "Permissive")
     "Version is absent"]
-   ["aiohttp"
-    ""
-    "MIT"
-    "Permissive"
+   [{:requirement {:name "aiohttp" :version ""}
+     :license {:name "MIT" :type "Permissive"}}
+    {}
     (format report/table-formatter "aiohttp" "MIT" "Permissive")
-    "Version is a blank string"]])
+    "Version is a blank string"]
+   [{:requirement {:name "aiohttp" :version "777.1.2"}
+     :license {:name "Error" :type "Error" :error "[PyPI] Version not found"}}
+    {:verbose true}
+    (format
+     (format "%s %s" report/table-formatter report/verbose-formatter)
+     "aiohttp:777.1.2" "Error" "Error" "[PyPI] Version not found")
+    "Verbose output"]])
 
 (deftest test-format-license
   (testing "Printing a line of license table"
-    (doseq [[package version license-name license-type expected description] params-format-license]
+    (doseq [[license-data opts expected description] params-format-license]
       (testing description
-        (let [license-data
-              {:requirement {:name package :version version}
-               :license {:name license-name :type license-type}}
-              actual (report/format-license license-data {})]
-          (is (= expected actual)))))))
+        (is (= expected (report/format-license license-data opts)))))))
 
 (deftest test-format-total
   (testing "Formatting total table line"
