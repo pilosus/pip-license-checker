@@ -150,8 +150,8 @@
         license-name (or name (:name gh-license))
         license (license/license-with-type license-name)
         error-chain (exception/join-ex-info (:error license) gh-error)
-        license-joined (d/->License (:name license) (:type license) error-chain)]
-    license-joined))
+        result (d/->License (:name license) (:type license) error-chain)]
+    result))
 
 ;; Get license data from API JSON
 
@@ -167,19 +167,17 @@
         result (d/->Requirement package-name nil specifiers)]
     result))
 
-(defn requirement-rec->project-with-license
-  "Return license hash-map for requirement"
+(defn requirement->dep
+  "Return dependency object"
   [requirement-rec options rate-limiter]
-  (let [api-response (api-get-project requirement-rec options rate-limiter)
-        {:keys [status requirement api-response error]} api-response
+  (let [resp-data (api-get-project requirement-rec options rate-limiter)
+        {:keys [status requirement api-response error]} resp-data
         license (if (= status req-status-error)
-                  (d/->License license/name-error license/type-error error)
+                  (d/->License license/name-error license/type-error nil)
                   (api-response->license-map api-response options rate-limiter))
         error-chain (exception/join-ex-info error (:error license))
-        project (d/map->PyPiProject
-                 {:status status
-                  :requirement requirement
-                  :api-response api-response
+        project (d/map->Dependency
+                 {:requirement requirement
                   :license license
                   :error error-chain})]
     project))
@@ -192,8 +190,8 @@
 
 ;; Entrypoint
 
-(defn get-parsed-requiements
-  "Apply filters and get verdicts for all requirements"
+(defn get-parsed-deps
+  "Apply filters and get verdicts for all deps"
   [packages requirements options]
   (let [exclude-pattern (:exclude options)
         rate-limiter (make-rate-limiter
@@ -204,7 +202,7 @@
                       (filters/remove-requirements-user-rules exclude-pattern)
                       (map filters/sanitize-requirement)
                       (map requirement->rec)
-                      (pmap #(requirement-rec->project-with-license
+                      (pmap #(requirement->dep
                               %
                               options
                               rate-limiter)))]

@@ -70,15 +70,15 @@
 
 (defn format-license
   "Format license"
-  [license-data options]
-  (let [{:keys [requirement license]} license-data
+  [dep options]
+  (let [{:keys [requirement license error]} dep
         {:keys [formatter] :or {formatter table-formatter}} options
         formatter' (if (:verbose options)
                      (format "%s %s" formatter verbose-formatter)
                      formatter)
         {req-name :name req-version :version} requirement
         package (str/join ":" (remove str/blank? [req-name req-version]))
-        {lic-name :name lic-type :type error :error} license
+        {lic-name :name lic-type :type} license
         error' (or error "")]
     (format formatter' package lic-name lic-type error')))
 

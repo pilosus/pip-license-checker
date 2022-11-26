@@ -30,7 +30,7 @@
             ])
 
 (defrecord PyPiProject
-    ;; PyPI project as represented on https://pypi.org/project/<project-name>
+           ;; PyPI project as represented on https://pypi.org/project/<project-name>
            [status        ;; keyword
             requirement   ;; Requirement rec
             api-response  ;; nilable parsed JSON
@@ -39,7 +39,8 @@
             ])
 
 (defrecord Dependency
-    ;; General representation of dependency - PyPI project or external dep
+           ;; General representation of dependency - PyPI project or external dep
            [requirement ;; Requirement rec
             license     ;; License rec
+            error       ;; nilable String
             ])

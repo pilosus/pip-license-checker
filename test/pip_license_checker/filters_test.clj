@@ -158,10 +158,10 @@
         (is (= expected (filters/remove-licenses options licenses)))))))
 
 
-;; filters/filter-parsed-requirements
+;; filters/filter-parsed-deps
 
 
-(def params-filter-parsed-requirements
+(def params-filter-parsed-deps
   [[[{:ok? true,
       :requirement {:name "aiohttp", :version "3.7.2"},
       :license {:name "MIT License", :type "Permissive"}}
@@ -228,9 +228,9 @@
     "Exclude license"]])
 
 (deftest ^:integration ^:request
-  test-filter-parsed-requirements
+  test-filter-parsed-deps
   (testing "Integration testing for filtering parsed requirements"
     (doseq [[licenses options expected description]
-            params-filter-parsed-requirements]
+            params-filter-parsed-deps]
       (testing description
-        (is (= expected (filters/filter-parsed-requirements licenses options)))))))
+        (is (= expected (filters/filter-parsed-deps licenses options)))))))

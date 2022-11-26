@@ -99,7 +99,7 @@
       (remove #(license-name-matching? % exclude-license) licenses)
       licenses)))
 
-(defn filter-parsed-requirements
+(defn filter-parsed-deps
   "Post parsing filtering pipeline"
   [licenses options]
   (->> (filter-fails-only-licenses options licenses)

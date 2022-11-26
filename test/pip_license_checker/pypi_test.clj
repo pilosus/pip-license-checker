@@ -306,65 +306,61 @@
                (not (nil? (:name requirement-parsed)))
                (not (nil? (:specifiers requirement-parsed))))))))))
 
-;; get-parsed-requirements
+;; get-parsed-deps
 
-
-(def params-get-parsed-requirements
+(def params-get-parsed-deps
   [[[] [] {} "{}" [] "No input"]
    [["aiohttp==3.7.2"]
     ["test==3.7.2"]
     {}
     "{\"info\": {\"license\": \"MIT License\"}}"
-    [(d/map->PyPiProject
-      {:status :found
-       :requirement (d/map->Requirement
+    [(d/map->Dependency
+      {:requirement (d/map->Requirement
                      {:name "aiohttp"
                       :version "3.7.2"
                       :specifiers [[version/eq (version/parse-version "3.7.2")]]})
-       :api-response {"info" {"license" "MIT License"}}
        :license (d/map->License
                  {:name "MIT License"
                   :type "Permissive"
-                  :error nil})})
-     (d/map->PyPiProject
-      {:status :found
-       :requirement (d/map->Requirement
+                  :error nil})
+       :error nil})
+     (d/map->Dependency
+      {:requirement (d/map->Requirement
                      {:name "test"
                       :version "3.7.2"
                       :specifiers [[version/eq (version/parse-version "3.7.2")]]})
-       :api-response {"info" {"license" "MIT License"}}
        :license (d/map->License
                  {:name "MIT License"
                   :type "Permissive"
-                  :error nil})})]
+                  :error nil})
+       :error nil})]
     "Packages and requirements"]
    [["aiohttp==3.7.2"]
     ["test==3.7.2"]
     {:exclude #"aio.*" :rate-limits {:requests 1 :millis 60000}}
     "{\"info\": {\"license\": \"MIT License\"}}"
-    [(d/map->PyPiProject
-      {:status :found
-       :requirement (d/map->Requirement
+    [(d/map->Dependency
+      {:requirement (d/map->Requirement
                      {:name "test"
                       :version "3.7.2"
                       :specifiers [[version/eq (version/parse-version "3.7.2")]]})
-       :api-response {"info" {"license" "MIT License"}}
        :license (d/map->License
                  {:name "MIT License"
                   :type "Permissive"
-                  :error nil})})]
+                  :error nil})
+       :error nil})]
     "Exclude pattern"]])
 
 (deftest ^:integration ^:request
-  test-get-parsed-requirements
-  (testing "Integration testing of requirements parsing"
+  test-get-parsed-deps
+  (testing "Integration testing of deps parsing"
     (doseq [[packages requirements options mock-body expected description]
-            params-get-parsed-requirements]
+            params-get-parsed-deps]
       (testing description
         (with-redefs
           ;; Ugliest hack ever: core_test.clj runs before pypi_test.clj
           ;; and as a part of core/process-requirements testing we shutdown threadpool
-          ;; so that when pypi/get-parsed-requiements tries to use the threadpool for pmap
+          ;; so that when pypi/get-parsed-deps tries to use the threadpool for pmap
           ;; it's already gone and java.util.concurrent.RejectedExecutionException is thrown.
           ;; Since we are not testing concurrency itself, just monkey-patch pmap with simple map.
          [pmap map
@@ -374,5 +370,5 @@
           file/get-requirement-lines (fn [_] requirements)]
           (is
            (= expected
-              (vec (pypi/get-parsed-requiements
+              (vec (pypi/get-parsed-deps
                     packages requirements options)))))))))

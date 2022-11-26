@@ -64,7 +64,8 @@
     (format report/table-formatter "aiohttp" "MIT" "Permissive")
     "Version is a blank string"]
    [{:requirement {:name "aiohttp" :version "777.1.2"}
-     :license {:name "Error" :type "Error" :error "[PyPI] Version not found"}}
+     :license {:name "Error" :type "Error" :error nil}
+     :error "[PyPI] Version not found"}
     {:verbose true}
     (format
      (format "%s %s" report/table-formatter report/verbose-formatter)

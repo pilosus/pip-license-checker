@@ -51,10 +51,10 @@
         totals-only-opt (:totals-only options)
         show-totals (or with-totals-opt totals-only-opt)
         table-headers (:table-headers options)
-        parsed-external-licenses (external/get-parsed-requiements external options)
-        parsed-pypi-licenses (pypi/get-parsed-requiements packages requirements options)
+        parsed-external-licenses (external/get-parsed-deps external options)
+        parsed-pypi-licenses (pypi/get-parsed-deps packages requirements options)
         parsed-licenses (concat parsed-pypi-licenses parsed-external-licenses)
-        licenses (filters/filter-parsed-requirements parsed-licenses options)
+        licenses (filters/filter-parsed-deps parsed-licenses options)
         totals
         (if (or show-totals with-fail)
           (get-license-type-totals licenses)

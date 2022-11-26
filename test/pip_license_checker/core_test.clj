@@ -323,8 +323,8 @@
     (doseq [[mock-pypi mock-external options expected description] params-process-deps]
       (testing description
         (with-redefs
-         [pypi/get-parsed-requiements (constantly mock-pypi)
-          external/get-parsed-requiements (constantly mock-external)
+         [pypi/get-parsed-deps (constantly mock-pypi)
+          external/get-parsed-deps (constantly mock-external)
           core/exit #(println (format "Exit code: %s" %))]
           (let [actual (with-out-str (core/process-deps [] [] [] options))]
             (is (= expected actual))))))))
