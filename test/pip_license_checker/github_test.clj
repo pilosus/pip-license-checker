@@ -18,55 +18,56 @@
    [clj-http.client :as http]
    [clojure.test :refer [deftest is testing]]
    [indole.core :refer [make-rate-limiter]]
-   [pip-license-checker.github :as github]))
+   [pip-license-checker.github :as g]
+   [pip-license-checker.license :as l]))
 
 (def rate-limits (make-rate-limiter 1000 100))
 
-(def params-get-license-name
+(def params-api-get-license
   [[["" "owner" "repo"]
     (constantly {:body "{\"license\": {\"name\": \"MIT License\"}}"})
-    "MIT License"
+    (l/map->License {:name "MIT License" :type nil :error nil})
     "Ok"]
    [["" "owner" "repo"]
     (constantly {:body "{\"errors\": {\"message\": \"No License Found\"}}"})
-    nil
+    (l/map->License {:name nil :type nil :error nil})
     "Fallback"]
    [["" "owner" "repo"]
-    (fn [& _] (throw (Exception. "Boom!")))
-    nil
-    "Expcetion"]])
+    (fn [& _] (throw (ex-info "Boom!" {:status 404 :reason-phrase "License not found"})))
+    (l/map->License {:name nil :type nil :error "[GitHub] 404 License not found"})
+    "Exception"]])
 
-(deftest test-get-license-name
+(deftest test-api-get-license
   (testing "Get license name from GitHub API"
-    (doseq [[path-parts body-mock expected description] params-get-license-name]
+    (doseq [[path-parts body-mock expected description] params-api-get-license]
       (testing description
         (with-redefs [http/get body-mock]
-          (is (= expected (github/get-license-name path-parts {} rate-limits))))))))
+          (is (= expected (g/api-get-license path-parts {} rate-limits))))))))
 
-(def params-homepage->license-name
+(def params-homepage->license
   [["http://example.com"
     "{\"license\": {\"name\": \"MIT License\"}}"
-    nil
+    (l/map->License {:name nil :type nil :error nil})
     "Not a GitHub URL"]
    ["https://github.com/pilosus"
     "{\"license\": {\"name\": \"MIT License\"}}"
-    nil
+    (l/map->License {:name nil :type nil :error nil})
     "Malformed GitHub URL"]
    ["https://github.com/pilosus/piny/"
     "{\"license\": {\"name\": \"MIT License\"}}"
-    "MIT License"
+    (l/map->License {:name "MIT License" :type nil :error nil})
     "Ok GitHub URL"]
    [nil
     "{\"license\": {\"name\": \"MIT License\"}}"
-    nil
+    (l/map->License {:name nil :type nil :error nil})
     "nil URL"]])
 
-(deftest test-homepage->license-name
+(deftest test-homepage->license
   (testing "Get license name from project url if it is GitHub"
-    (doseq [[url response expected description] params-homepage->license-name]
+    (doseq [[url response expected description] params-homepage->license]
       (testing description
         (with-redefs [http/get (constantly {:body response})]
-          (is (= expected (github/homepage->license-name url {} rate-limits))))))))
+          (is (= expected (g/homepage->license url {} rate-limits))))))))
 
 (def params-get-headers
   [[{} nil "No options"]
@@ -78,4 +79,4 @@
   (testing "Test HTTP request headers generation"
     (doseq [[options expected description] params-get-headers]
       (testing description
-        (is (= expected (github/get-headers options)))))))
+        (is (= expected (g/get-headers options)))))))

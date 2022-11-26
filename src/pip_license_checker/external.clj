@@ -75,7 +75,7 @@
 (defn license-name->map
   "Format license name into a license record"
   [name]
-  (license/name->type name))
+  (license/license-with-type name))
 
 (defn external-obj->requirement
   "Format object parsed from external file into requirement object"

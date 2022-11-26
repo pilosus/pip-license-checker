@@ -1,4 +1,4 @@
-;; Copyright © 2020, 2021 Vitaly Samigullin
+;; Copyright © 2020-2022 Vitaly Samigullin
 ;;
 ;; This program and the accompanying materials are made available under the
 ;; terms of the Eclipse Public License 2.0 which is available at
@@ -19,6 +19,7 @@
   (:require
    [cheshire.core :as json]
    [pip-license-checker.http :as http]
+   [pip-license-checker.license :as license]
    [clojure.string :as str]))
 
 (def url-github-base "https://api.github.com/repos")
@@ -40,32 +41,39 @@
   "Get error message from GitHub API"
   [resp]
   (let [data (ex-data resp)
-        status (:status data)
-        reason (:reason-phrase data)
-        error (format "[%s] %s %s" logger-github status reason)]
+        error (format
+               "[%s] %s %s"
+               logger-github
+               (:status data)
+               (:reason-phrase data))]
     error))
 
-(defn get-license-name
+(defn api-get-license
   "Get response from GitHub API"
   [path-parts options rate-limiter]
   (let [[_ owner repo] path-parts
         url (str/join "/" [url-github-base owner repo "license"])
         settings (merge settings-http-client (get-headers options))
-        resp (try (http/request-get url settings rate-limiter) (catch Exception e e))
+        resp (try
+               (http/request-get url settings rate-limiter)
+               (catch Exception e e))
         error (when (instance? Exception resp) (get-error-message resp))
         resp-data (when (nil? error) resp)
-        data (if resp-data (json/parse-string (:body resp-data)) {})
-        license-obj (get data "license")
-        license-name (get license-obj "name")]
-    {:name license-name :error error}))
+        license-name (-> resp-data
+                         :body
+                         json/parse-string
+                         (get-in ["license" "name"]))]
+    (license/map->License {:name license-name :type nil :error error})))
 
-(defn homepage->license-name
-  "Get license name from homepage if it is GitHub url"
+(defn homepage->license
+  "Get license name from homepage if it's a GitHub URL"
   [url options rate-limiter]
   (let [url-sanitized (if url (str/replace url #"/$" "") nil)
         github-url
         (try (re-find #"^(?:https://github.com)/(.*)/(.*)" url-sanitized)
              (catch Exception _ nil))
-        is-github-url (= 3 (count github-url))
-        license (if is-github-url (get-license-name github-url options rate-limiter) {:name nil :error nil})]
+        url-valid? (= 3 (count github-url))
+        license (if url-valid?
+                  (api-get-license github-url options rate-limiter)
+                  (license/->License nil nil nil))]
     license))

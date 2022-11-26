@@ -16,8 +16,9 @@
 (ns pip-license-checker.external-test
   (:require
    [clojure.test :refer [deftest is testing]]
+   [pip-license-checker.external :as external]
    [pip-license-checker.file :as file]
-   [pip-license-checker.external :as external]))
+   [pip-license-checker.license :as license]))
 
 (def params-package-name->requirement-map
   [[nil {:name nil :version nil} "No package"]
@@ -34,9 +35,18 @@
         (is (= expected (external/package-name->requirement-map package)))))))
 
 (def params-license-name->map
-  [["MIT License" {:name "MIT License" :type "Permissive"} "Permissive license"]
-   ["GPL v3 or any later" {:name "GPL v3 or any later" :type "StrongCopyleft"} "Copyleft license"]
-   ["Imaginary License" {:name "Imaginary License" :type "Other"} "Unknown license"]])
+  [["MIT License"
+    (license/map->License
+     {:name "MIT License" :type "Permissive"})
+    "Permissive license"]
+   ["GPL v3 or any later"
+    (license/map->License
+     {:name "GPL v3 or any later" :type "StrongCopyleft" :error nil})
+    "Copyleft license"]
+   ["Imaginary License"
+    (license/map->License
+     {:name "Imaginary License" :type "Other" :error nil})
+    "Unknown license"]])
 
 (deftest test-license-name->map
   (testing "Test license name formatting"
@@ -48,12 +58,14 @@
   [[{:package "test-package@0.1.2" :license "MIT License"}
     {:ok? true
      :requirement {:name "test-package" :version "0.1.2"}
-     :license {:name "MIT License" :type "Permissive"}}
+     :license (license/map->License
+               {:name "MIT License" :type "Permissive" :error nil})}
     "Test 1"]
    [{:package "test-package" :license "LGPL"}
     {:ok? true
      :requirement {:name "test-package" :version nil}
-     :license {:name "LGPL" :type "WeakCopyleft"}}
+     :license (license/map->License
+               {:name "LGPL" :type "WeakCopyleft" :error nil})}
     "Test 2"]])
 
 (deftest test-external-obj->requirement
@@ -69,10 +81,12 @@
     {:external-options {:skip-header true}}
     [{:ok? true
       :requirement {:name "test-package" :version "0.1.2"}
-      :license {:name "MIT License" :type "Permissive"}}
+      :license (license/map->License
+                {:name "MIT License" :type "Permissive" :error nil})}
      {:ok? true
       :requirement {:name "another-package" :version "21.04"}
-      :license {:name "GPLv2" :type "StrongCopyleft"}}]
+      :license (license/map->License
+                {:name "GPLv2" :type "StrongCopyleft" :error nil})}]
     "No headers"]
    [[["package name" "license name"]
      ["test-package@0.1.2" "MIT License"]
@@ -80,7 +94,8 @@
     {:external-options {:skip-header true} :exclude #"another-.*"}
     [{:ok? true
       :requirement {:name "test-package" :version "0.1.2"}
-      :license {:name "MIT License" :type "Permissive"}}]
+      :license (license/map->License
+                {:name "MIT License" :type "Permissive" :error nil})}]
     "Exclude pattern"]])
 
 (deftest test-get-parsed-requiements-csv
@@ -97,31 +112,36 @@
     {:external-format external/format-cocoapods}
     [{:ok? true
       :requirement {:name "test-package" :version nil}
-      :license {:name "MIT License" :type "Permissive"}}
+      :license (license/map->License
+                {:name "MIT License" :type "Permissive" :error nil})}
      {:ok? true
       :requirement {:name "another-package" :version nil}
-      :license {:name "GPLv2" :type "StrongCopyleft"}}]
+      :license (license/map->License
+                {:name "GPLv2" :type "StrongCopyleft" :error nil})}]
     "No headers"]
    [[{:package "test-package" :license "MIT License"}
      {:package "another-package" :license "GPLv2"}]
     {:external-format external/format-cocoapods :exclude #"another-.*"}
     [{:ok? true
       :requirement {:name "test-package" :version nil}
-      :license {:name "MIT License" :type "Permissive"}}]
+      :license (license/map->License
+                {:name "MIT License" :type "Permissive" :error nil})}]
     "Exclude pattern"]
    [[{:package "test-package" :license "MIT License"}
      {:package "another-package" :license "GPLv2"}]
     {:external-format external/format-gradle :exclude #"another-.*"}
     [{:ok? true
       :requirement {:name "test-package" :version nil}
-      :license {:name "MIT License" :type "Permissive"}}]
+      :license (license/map->License
+                {:name "MIT License" :type "Permissive" :error nil})}]
     "Gradle license plugin"]
    [[{:package "test-package" :license "MIT License"}
      {:package "another-package" :license "GPLv2"}]
     {:external-format external/format-edn :exclude #"another-.*"}
     [{:ok? true
       :requirement {:name "test-package" :version nil}
-      :license {:name "MIT License" :type "Permissive"}}]
+      :license (license/map->License
+                {:name "MIT License" :type "Permissive" :error nil})}]
     "EDN plugin"]])
 
 (deftest test-get-parsed-requiements-external-plugins

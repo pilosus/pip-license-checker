@@ -136,7 +136,6 @@
 
 ;; Helpers to get license name and description
 
-
 (defn classifiers->license
   "Get first most detailed license name from PyPI trove classifiers list"
   [classifiers]
@@ -158,7 +157,7 @@
         name (or
               classifiers-license
               license-license)
-        gh-license (when (nil? name) (github/homepage->license-name home_page options rate-limiter))
+        gh-license (when (nil? name) (github/homepage->license home_page options rate-limiter))
         gh-error (:error gh-license)
         license-name (or name (:name gh-license))
         license (license/license-with-type license-name)
@@ -217,5 +216,8 @@
                       (filters/remove-requirements-user-rules exclude-pattern)
                       (map filters/sanitize-requirement)
                       (map requirement->rec)
-                      (pmap #(requirement-rec->project-with-license % options rate-limiter)))]
+                      (pmap #(requirement-rec->project-with-license
+                              %
+                              options
+                              rate-limiter)))]
     licenses))

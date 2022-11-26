@@ -29,4 +29,5 @@
 (defn join-ex-info
   "Join exception messages"
   [& args]
-  (str/join "; " (concat (filter some? args))))
+  (let [ex (str/join "; " (concat (filter some? args)))]
+    (if (str/blank? ex) nil ex)))
