@@ -5,6 +5,22 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 
 ## [Unreleased]
 
+## [0.38.0] - 2022-11-27
+
+Release **breaks backward compatibility** if you use the tool as a
+library in your Clojure code (see `Changed` section).
+
+### Added
+- CLI option `--verbose` (or `-v` for short) to make output
+  verbose. Options adds `Misc` column for error messages to the
+  report.
+  ([#105](https://github.com/pilosus/pip-license-checker/issues/105))
+
+### Changed
+- Massive code refactoring: multiple functions renamed, a few removed,
+  some function arguments order changed
+  (see [PR 115](https://github.com/pilosus/pip-license-checker/pull/115/files)).
+
 ## [0.37.0] - 2022-11-23
 ### Changed
 - Docker base image switched over vendor-agnostic Eclipse Temurin JRE 17.
@@ -297,7 +313,8 @@ weak copyleft types.
 ### Added
 - Structure for Leiningen app project
 
-[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.37.0...HEAD
+[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.38.0...HEAD
+[0.38.0]: https://github.com/pilosus/pip-license-checker/compare/0.37.0...0.38.0
 [0.37.0]: https://github.com/pilosus/pip-license-checker/compare/0.36.0...0.37.0
 [0.36.0]: https://github.com/pilosus/pip-license-checker/compare/0.35.0...0.36.0
 [0.35.0]: https://github.com/pilosus/pip-license-checker/compare/0.34.0...0.35.0

@@ -17,15 +17,15 @@
   "External files adapters"
   (:gen-class)
   (:require
-   [clojure.string :as str]
    [clojure.edn :as edn]
+   [clojure.string :as str]
+   [cocoapods-acknowledgements-licenses.core :refer [plist->data]]
+   [gradle-licenses.core :refer [gradle-json->data]]
+   [pip-license-checker.data :as d]
    [pip-license-checker.file :as file]
    [pip-license-checker.filters :as filters]
-   [pip-license-checker.license :as license]
-   [cocoapods-acknowledgements-licenses.core :refer [plist->data]]
-   [gradle-licenses.core :refer [gradle-json->data]]))
+   [pip-license-checker.license :as license]))
 
-(def prefetched-correctly true)
 (def regex-version-separator #"(@|:)")
 
 (def default-options {:skip-header true :skip-footer true})
@@ -53,36 +53,34 @@
 
 ;; EDN string to Clojure data structure
 
-
 (defn opts-str->map
   "Parse options string in EDN format into Clojure map"
   [options-str]
   (edn/read-string options-str))
 
-
 ;; Formatting and extensing package names
 
-
-(defn package-name->requirement-map
+(defn package-name->requirement
   "Format package string into requirement map"
   [package]
   (let [split (if package (str/split package regex-version-separator) [])
         splitted? (> (count split) 1)
         version (if splitted? (last split) nil)
         name (if splitted? (str/join (butlast split)) (first split))]
-    {:name name :version version}))
+    (d/map->Requirement {:name name :version version})))
 
 (defn license-name->map
-  "Format license name into license map"
-  [license]
-  {:name license :type (license/name->type license)})
+  "Format license name into a license record"
+  [name]
+  (license/license-with-type name))
 
-(defn external-obj->requirement
-  "Format object parsed from external file into requirement object"
+(defn external-obj->dep
+  "Format object parsed from external file into dependency object"
   [{:keys [package license]}]
-  {:ok? prefetched-correctly
-   :requirement (package-name->requirement-map package)
-   :license (license-name->map license)})
+  (d/map->Dependency
+   {:requirement (package-name->requirement package)
+    :license (license-name->map license)
+    :error (:error license)}))
 
 ;; External file format to function
 
@@ -97,13 +95,12 @@
 
 ;; Entrypoint
 
-(defn get-parsed-requiements
-  "Apply filters and get verdicts for all requirements"
+(defn get-parsed-deps
+  "Apply filters and get verdicts for all deps"
   [external options]
-  (let [exclude-pattern (:exclude options)
-        external-options (:external-options options)
-        parse-fn (get-extenal-package-parse-fn options)
-        packages (file/get-all-extenal-files-content parse-fn external external-options)
-        requirements (map external-obj->requirement packages)
-        result (filters/remove-requiment-maps-user-rules exclude-pattern requirements)]
-    result))
+  (->> external
+       (file/get-all-extenal-files-content
+        (get-extenal-package-parse-fn options)
+        (:external-options options))
+       (map external-obj->dep)
+       (filters/remove-requiment-maps-user-rules (:exclude options))))

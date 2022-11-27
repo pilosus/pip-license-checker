@@ -18,8 +18,7 @@
    [clojure.spec.gen.alpha :as gen]
    [clojure.test :refer [deftest is testing]]
    [pip-license-checker.spec :as sp]
-   [pip-license-checker.filters :as filters]
-   [pip-license-checker.version :as version]))
+   [pip-license-checker.filters :as filters]))
 
 ;; filters/remove-requirements-internal-rules
 
@@ -131,73 +130,6 @@
         (is (= expected (filters/sanitize-requirement requirement)))))))
 
 
-;; filters/requirement->map
-
-
-(def params-requirement->map
-  [["aiohttp==3.7.2"
-    {:name "aiohttp"
-     :specifiers [[version/eq (version/parse-version "3.7.2")]]}
-    "Equal =="]
-   ["aiohttp===3.7.2"
-    {:name "aiohttp"
-     :specifiers [[version/arbitrary-eq (version/parse-version "3.7.2")]]}
-    "Equal ==="]
-   ["aiohttp!=3.7.2"
-    {:name "aiohttp"
-     :specifiers [[version/neq (version/parse-version "3.7.2")]]}
-    "Not equal to !="]
-   ["aiohttp~=3.7.2"
-    {:name "aiohttp"
-     :specifiers [[version/compatible (version/parse-version "3.7.2")]]}
-    "Compatible ~="]
-   ["aiohttp>3.7.2"
-    {:name "aiohttp"
-     :specifiers [[version/gt (version/parse-version "3.7.2")]]}
-    "Greater than >"]
-   ["aiohttp>=3.7.2"
-    {:name "aiohttp"
-     :specifiers [[version/ge (version/parse-version "3.7.2")]]}
-    "Greater or equal to >="]
-   ["aiohttp<3.7.2"
-    {:name "aiohttp"
-     :specifiers [[version/lt (version/parse-version "3.7.2")]]}
-    "Less than <"]
-   ["aiohttp<=3.7.2"
-    {:name "aiohttp"
-     :specifiers [[version/le (version/parse-version "3.7.2")]]}
-    "Less than equal to <="]
-   ["aiohttp>=3.7,<4,!=3.7.2"
-    {:name "aiohttp"
-     :specifiers
-     [[version/ge (version/parse-version "3.7")]
-      [version/lt (version/parse-version "4")]
-      [version/neq (version/parse-version "3.7.2")]]}
-    "Multiple specifiers"]
-   ["aiohttp"
-    {:name "aiohttp"
-     :specifiers nil}
-    "No specifiers"]])
-
-(deftest test-requirement->map
-  (testing "Requirement string to a map of name and specifiers"
-    (doseq [[requirement expected description] params-requirement->map]
-      (testing description
-        (is (= expected (filters/requirement->map requirement)))))))
-
-(def params-generators-requirement->map (gen/sample sp/requirement-str-gen 1000))
-
-(deftest test-generators-requirement->map
-  (testing "Use test.check for generative testing"
-    (doseq [requirement params-generators-requirement->map]
-      (testing requirement
-        (let [requirement-parsed (filters/requirement->map requirement)]
-          (is (and
-               (map? requirement-parsed)
-               (not (nil? (:name requirement-parsed)))
-               (not (nil? (:specifiers requirement-parsed))))))))))
-
-
 ;; filters/remove-licenses
 
 
@@ -226,10 +158,10 @@
         (is (= expected (filters/remove-licenses options licenses)))))))
 
 
-;; filters/filter-parsed-requirements
+;; filters/filter-parsed-deps
 
 
-(def params-filter-parsed-requirements
+(def params-filter-parsed-deps
   [[[{:ok? true,
       :requirement {:name "aiohttp", :version "3.7.2"},
       :license {:name "MIT License", :type "Permissive"}}
@@ -296,9 +228,9 @@
     "Exclude license"]])
 
 (deftest ^:integration ^:request
-  test-filter-parsed-requirements
+  test-filter-parsed-deps
   (testing "Integration testing for filtering parsed requirements"
     (doseq [[licenses options expected description]
-            params-filter-parsed-requirements]
+            params-filter-parsed-deps]
       (testing description
-        (is (= expected (filters/filter-parsed-requirements licenses options)))))))
+        (is (= expected (filters/filter-parsed-deps licenses options)))))))

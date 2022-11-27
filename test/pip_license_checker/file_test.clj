@@ -31,9 +31,7 @@
       (testing description
         (is (= expected (file/exists? path)))))))
 
-
 ;; file/get-requirement-lines
-
 
 (def mock-path-lines ["a" "b"])
 
@@ -44,9 +42,7 @@
       (is (= ["a" "b" "a" "b"]
              (file/get-requirement-lines ["f1.txt" "f2.txt"]))))))
 
-
 ;; file/path->lines
-
 
 (def params-simple-txt-file ["1" "2" "3"])
 
@@ -55,9 +51,7 @@
     (is (= params-simple-txt-file
            (file/path->lines "resources/simple.txt")))))
 
-
 ;; file/csv->lines
-
 
 (def params-simple-csv-file [["package" "license"] ["a" "MIT"] ["b" "BSD"]])
 
@@ -66,9 +60,7 @@
     (is (= params-simple-csv-file
            (file/csv->lines "resources/simple.csv")))))
 
-
 ;; file/take-csv-columns
-
 
 (def params-take-csv-columns
   [[["a" "b" "c" "d"]
@@ -90,9 +82,7 @@
       (testing description
         (is (= expected (file/take-csv-columns columns indices)))))))
 
-
 ;; file/csv->data
-
 
 (def params-csv->data
   [[[["test-package@0.1.2" "MIT License"]
@@ -145,9 +135,7 @@
           (is (= expected
                  (file/csv->data "fake/path.csv" options))))))))
 
-
 ;; file/edn->data
-
 
 (def params-edn-item->data-item
   [[[["org.clojars.vrs/gradle-licenses" "0.2.0"] "EPL-2.0"]

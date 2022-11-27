@@ -95,11 +95,14 @@ docker's `-v` option:
 
 ```bash
 docker run -v `pwd`:/volume \
+    -e GITHUB_TOKEN=your-gh-token \
     -it --rm pilosus/pip-license-checker \
     java -jar app.jar --exclude 'pylint.*' \
     --requirements '/volume/requirements.txt' \
     --external '/volume/licenses.csv' \
-    --fail StrongCopyleft --fails-only
+    --fail StrongCopyleft \
+    --fails-only \
+    --verbose
 ```
 
 ### Command line tool
@@ -160,6 +163,7 @@ pip-license-checker [options]... [package]...
 Description:
   package	List of package names in format `name[specifier][version]`
 
+  -v, --verbose                           false                                   Make output verbose
   -r, --requirements REQUIREMENT_NAME     []                                      Requirement file name to read
   -x, --external FILE_NAME                []                                      File containing package names and license names
       --external-format FILE_FORMAT       csv                                     External file format: csv, cocoapods, edn, gradle

@@ -17,11 +17,7 @@
   "Filters for requirements"
   (:gen-class)
   (:require
-   [clojure.spec.alpha :as s]
-   [clojure.string :as str]
-   ;;[clojure.spec.test.alpha :refer [instrument]]
-   [pip-license-checker.spec :as sp]
-   [pip-license-checker.version :as version]))
+   [clojure.string :as str]))
 
 ;; Skip line with -r /--requirement/-e etc, URLs, blank lines, comments
 (def regex-skip-line-internal #"(\s*(?:https?:\/\/|#|-).*)|(^\s*$)")
@@ -31,16 +27,12 @@
 (def regex-remove-modifiers #"(;|@).*")
 (def regex-remove-extra #"\[.*\]")
 (def regex-remove-wildcard #"\.\*")
-(def regex-split-specifier-ops #"(===|==|~=|!=|>=|<=|<|>)")
-
-(s/fdef remove-requirements-internal-rules
-  :args (s/cat :requirements ::sp/requirements)
-  :ret ::sp/requirements)
 
 (defn remove-requirements-internal-rules
   "Exclude requirements from sequence according to app's internal rules"
   [requirements]
-  (remove #(re-matches regex-skip-line-internal %) requirements))
+  (->> requirements
+       (remove #(re-matches regex-skip-line-internal %))))
 
 (defn- requirement-matching?
   "Match requirement against regex, catch NPE in case of null values"
@@ -49,16 +41,13 @@
     (re-matches pattern requirement)
     (catch NullPointerException _ false)))
 
-(s/fdef remove-requirements-user-rules
-  :args (s/cat :pattern ::sp/opt-pattern :requirements ::sp/requirements)
-  :ret ::sp/requirements)
-
 (defn remove-requirements-user-rules
   "Exclude requirement strings from sequence according to user-defined pattern.
   Used for requirements pre-processing"
   [pattern requirements]
   (if pattern
-    (remove #(requirement-matching? % pattern) requirements)
+    (->> requirements
+         (remove #(requirement-matching? % pattern)))
     requirements))
 
 (defn- requirement-name-matching?
@@ -73,7 +62,8 @@
   Used for requirements post-processing"
   [pattern packages]
   (if pattern
-    (remove #(requirement-name-matching? % pattern) packages)
+    (->> packages
+         (remove #(requirement-name-matching? % pattern)))
     packages))
 
 (defn sanitize-requirement
@@ -87,29 +77,14 @@
    (str/replace regex-remove-extra "")
    (str/replace regex-remove-wildcard "")))
 
-(s/fdef requirement->map
-  :args (s/cat :requirement ::sp/requirement)
-  :ret ::sp/requirement-map)
-
-(defn requirement->map
-  "Parse requirement string into map with package name and its specifiers parsed"
-  [requirement]
-  (let [package-name (first (str/split requirement regex-split-specifier-ops))
-        specifiers-str (subs requirement (count package-name))
-        specifiers-vec (version/parse-specifiers specifiers-str)
-        specifiers (if (= specifiers-vec [nil]) nil specifiers-vec)
-        result {:name package-name :specifiers specifiers}]
-    result))
-
 (defn filter-fails-only-licenses
   "Filter license types specified with --failed flag(s) if needed"
   [options licenses]
   (let [{:keys [fail fails-only]} options]
-    (if (or
-         (not fails-only)
-         (not (seq fail)))
+    (if (or (not fails-only) (not (seq fail)))
       licenses
-      (filter #(contains? fail (get-in % [:license :type])) licenses))))
+      (->> licenses
+           (filter #(contains? fail (get-in % [:license :type])))))))
 
 (defn- license-name-matching?
   "Match license name against regex, catch NPE in case of null values"
@@ -123,19 +98,13 @@
   [options licenses]
   (let [{:keys [exclude-license]} options]
     (if exclude-license
-      (remove #(license-name-matching? % exclude-license) licenses)
+      (->> licenses
+           (remove #(license-name-matching? % exclude-license)))
       licenses)))
 
-(defn filter-parsed-requirements
+(defn filter-parsed-deps
   "Post parsing filtering pipeline"
   [licenses options]
-  (->> (filter-fails-only-licenses options licenses)
+  (->> licenses
+       (filter-fails-only-licenses options)
        (remove-licenses options)))
-
-;;
-;; Instrumented functions - uncomment only while testing
-;;
-
-;; (instrument `remove-requirements-internal-rules)
-;; (instrument `remove-requirements-user-rules)
-;; (instrument `requirement->map)

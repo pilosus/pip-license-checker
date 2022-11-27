@@ -17,7 +17,6 @@
   "Version parsing and comparing"
   (:gen-class)
   (:require
-   ;;[clojure.spec.test.alpha :refer [instrument]]
    [clojure.spec.alpha :as s]
    [clojure.string :as str]
    [pip-license-checker.spec :as sp]))
@@ -473,18 +472,3 @@
         version-latest (last versions-sorted)
         version (:orig version-latest)]
     version))
-
-;;
-;; Instrumented functions - uncomment only while testing
-;;
-
-;; (instrument `parse-letter-version)
-;; (instrument `parse-local-version)
-;; (instrument `parse-version)
-;; (instrument `parse-specifier)
-;; (instrument `parse-specifiers)
-;; (instrument `version-ok?)
-;; (instrument `version-stable?)
-;; (instrument `filter-versions)
-;; (instrument `sort-versions)
-;; (instrument `get-version)

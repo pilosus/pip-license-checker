@@ -24,7 +24,6 @@ tramp
 # Org-mode
 .org-id-locations
 *_archive
-todo.org
 
 # flymake-mode
 *_flymake.*
@@ -60,3 +59,6 @@ flycheck_*.el
 
 # network security
 /network-security.data
+
+# misc
+scratch.md

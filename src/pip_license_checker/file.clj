@@ -41,9 +41,7 @@
   [requirements]
   (apply concat (for [path requirements] (path->lines path))))
 
-
 ;; EDN files
-
 
 (defn path->string
   "Return a string with the file contents"
@@ -59,7 +57,9 @@
         package-str (str package)
         result
         (cond
-          (and (not fully-qualified-names) (not-empty package-str)) (last (str/split package-str #"/"))
+          (and (not fully-qualified-names)
+               (not-empty package-str))
+          (last (str/split package-str #"/"))
           :else (not-empty package-str))]
     result))
 
@@ -68,9 +68,11 @@
   [[[package version] license] options]
   (let [package-formatted (format-edn-package-name package options)
         version-formatted (not-empty version)
-        parts (cond (and package-formatted version-formatted) [package-formatted version-formatted]
-                    package-formatted [package-formatted]
-                    :else nil)
+        parts (cond
+                (and package-formatted version-formatted)
+                [package-formatted version-formatted]
+                package-formatted [package-formatted]
+                :else nil)
         package-with-version (not-empty (str/join ":" parts))
         result {:package package-with-version :license license}]
     result))
@@ -118,5 +120,5 @@
 
 (defn get-all-extenal-files-content
   "Concatenates all parsed external files"
-  [parse-fn paths external-options]
+  [parse-fn external-options paths]
   (apply concat (for [path paths] (parse-fn path external-options))))

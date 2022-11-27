@@ -1,4 +1,4 @@
-;; Copyright © 2020, 2021 Vitaly Samigullin
+;; Copyright © 2020-2022 Vitaly Samigullin
 ;;
 ;; This program and the accompanying materials are made available under the
 ;; terms of the Eclipse Public License 2.0 which is available at
@@ -17,8 +17,8 @@
   "Licenses constants"
   (:gen-class)
   (:require
-   [clojure.string :as str]))
-
+   [clojure.string :as str]
+   [pip-license-checker.data :as d]))
 
 ;; Lincense regex
 
@@ -247,9 +247,7 @@
    #"WTFPL"
    #"Do What the Fuck You Want To Public License"])
 
-
 ;; Const
-
 
 (def name-error "Error")
 
@@ -279,11 +277,14 @@
   (format "Invalid license type. Use one of: %s"
           (str/join ", " types)))
 
-(def data-error {:name name-error :type type-error})
-
+(def license-error (d/->License name-error type-error nil))
 
 ;; Functions
 
+(defn get-license-error
+  "Get license object of error type"
+  [ex]
+  (d/->License name-error type-error ex))
 
 (defn is-type-valid?
   "Return true if license-type string is valid, false otherwise"
@@ -297,7 +298,7 @@
    (str regex-ignore-case
         (apply str (interpose "|" (map #(str "(?:" % ")") patterns))))))
 
-(defn name->type
+(defn license-with-type
   "Get license type by its name"
   [name]
   (try
@@ -311,10 +312,10 @@
           regex-permissive (strings->pattern regex-list-permissive)
           match-permissive (some? (re-find regex-permissive name))]
       (cond
-        match-copyleft-network type-copyleft-network
-        match-copyleft-strong type-copyleft-strong
-        match-copyleft-weak type-copyleft-weak
-        match-permissive type-permissive
-        :else type-other))
-    ;; in case license name is null, return error license type
-    (catch NullPointerException _ type-error)))
+        match-copyleft-network (d/->License name type-copyleft-network nil)
+        match-copyleft-strong (d/->License name type-copyleft-strong nil)
+        match-copyleft-weak (d/->License name type-copyleft-weak nil)
+        match-permissive (d/->License name type-permissive nil)
+        :else (d/->License name type-other nil)))
+    (catch NullPointerException _
+      license-error)))

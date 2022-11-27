@@ -18,7 +18,6 @@
   (:gen-class)
   (:require
    [clojure.set :refer [intersection]]
-   [clojure.spec.alpha :as s]
    [clojure.string :as str]
    [clojure.tools.cli :refer [parse-opts]]
    [pip-license-checker.external :as external]
@@ -26,8 +25,7 @@
    [pip-license-checker.filters :as filters]
    [pip-license-checker.license :as license]
    [pip-license-checker.pypi :as pypi]
-   [pip-license-checker.report :as report]
-   [pip-license-checker.spec :as sp]))
+   [pip-license-checker.report :as report]))
 
 (defn exit
   "Exit from the app with exit status"
@@ -37,41 +35,34 @@
    (println msg)
    (exit status)))
 
-(s/fdef get-license-type-totals
-  :args (s/coll-of ::sp/requirement-response-license)
-  :ret ::sp/license-type-totals)
-
 (defn get-license-type-totals
   "Return a frequency map of license types as keys and license types as values"
   [licenses]
-  (let [freqs (frequencies (map #(:type (:license %)) licenses))
-        ordered-freqs (into (sorted-map) freqs)]
-    ordered-freqs))
+  (->> licenses
+       (map #(:type (:license %)))
+       frequencies
+       (into (sorted-map))))
 
-(s/fdef process-requirements
-  :args (s/cat
-         :requirements ::sp/requirements-cli-arg
-         :packages ::sp/packages-cli-arg
-         :options ::sp/options-cli-arg))
-
-(defn process-requirements
-  "Print parsed requirements pretty"
+(defn process-deps
+  "Print parsed dependencies pretty"
   [packages requirements external options]
-  (let [fail-opt (:fail options)
+  (let [{table-headers :table-headers
+         fail-opt :fail
+         with-totals-opt :with-totals
+         totals-only-opt :totals-only} options
         with-fail (seq fail-opt)
-        with-totals-opt (:with-totals options)
-        totals-only-opt (:totals-only options)
         show-totals (or with-totals-opt totals-only-opt)
-        table-headers (:table-headers options)
-        parsed-external-licenses (external/get-parsed-requiements external options)
-        parsed-pypi-licenses (pypi/get-parsed-requiements packages requirements options)
-        parsed-licenses (concat parsed-pypi-licenses parsed-external-licenses)
-        licenses (filters/filter-parsed-requirements parsed-licenses options)
-        totals
-        (if (or show-totals with-fail)
-          (get-license-type-totals licenses)
-          nil)
-        totals-keys (into (sorted-set) (keys totals))
+
+        deps (concat
+              (pypi/get-parsed-deps packages requirements options)
+              (external/get-parsed-deps external options))
+        licenses (filters/filter-parsed-deps deps options)
+
+        totals (when (or show-totals with-fail) (get-license-type-totals licenses))
+        totals-keys (->> totals
+                         keys
+                         (into (sorted-set)))
+
         fail-types-found (intersection totals-keys fail-opt)
         fail? (seq fail-types-found)]
 
@@ -148,7 +139,8 @@
   "Rate limits must be positive integers in format REQUESTS/MILLISECONDS")
 
 (def cli-options
-  [["-r" "--requirements REQUIREMENTS_FILE" "Python pip requirement file name"
+  [["-v" "--verbose" "Make output verbose" :default false]
+   ["-r" "--requirements REQUIREMENTS_FILE" "Python pip requirement file name"
     :multi true
     :default []
     :update-fn conj
@@ -187,10 +179,6 @@
     :default (System/getenv "GITHUB_TOKEN")]
    ["-h" "--help" "Print this help message"]])
 
-(s/fdef extend-fail-opt
-  :args (s/? ::sp/options-fail)
-  :ret (s/? ::sp/options-fail))
-
 (defn extend-fail-opt
   "Try to substitute common fail option in set with specific parts it consist of"
   [fail-opts]
@@ -200,10 +188,6 @@
      #{license/type-copyleft-all})
     fail-opts))
 
-(s/fdef post-process-options
-  :args (s/? ::sp/options-cli-arg)
-  :ret (s/? ::sp/options-cli-arg))
-
 (defn post-process-options
   "Update option map"
   [options]
@@ -212,15 +196,6 @@
         fail-opt-exteded (extend-fail-opt fail-opt)
         updated-opts (assoc opts' :fail fail-opt-exteded)]
     updated-opts))
-
-(s/fdef validate-args
-  :args (s/cat :args (s/coll-of string?))
-  :ret (s/cat
-        :exit-message (s/? string?)
-        :ok? (s/? boolean?)
-        :requirements (s/? ::sp/requirements-cli-arg)
-        :packages (s/? ::sp/packages-cli-arg)
-        :options (s/? ::sp/options-cli-arg)))
 
 (defn validate-args
   "Parse and validate CLI arguments for entrypoint"
@@ -246,4 +221,4 @@
   (let [{:keys [packages requirements external options exit-message ok?]} (validate-args args)]
     (if exit-message
       (exit (if ok? 0 1) exit-message)
-      (process-requirements packages requirements external options))))
+      (process-deps packages requirements external options))))

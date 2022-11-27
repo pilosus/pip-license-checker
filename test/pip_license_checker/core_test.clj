@@ -28,7 +28,8 @@
     {:requirements ["resources/requirements.txt"]
      :external []
      :packages []
-     :options {:fail #{}
+     :options {:verbose false
+               :fail #{}
                :pre false
                :external-format "csv"
                :external-options external/default-options
@@ -45,7 +46,8 @@
     {:requirements []
      :external []
      :packages ["django" "aiohttp==3.7.1"]
-     :options {:fail #{}
+     :options {:verbose false
+               :fail #{}
                :pre false
                :external-format "csv"
                :external-options external/default-options
@@ -62,7 +64,8 @@
     {:requirements []
      :external ["resources/external.csv"]
      :packages []
-     :options {:fail #{}
+     :options {:verbose false
+               :fail #{}
                :pre false
                :external-format "csv"
                :external-options external/default-options
@@ -85,7 +88,8 @@
     {:requirements ["resources/requirements.txt" "README.md"]
      :external ["resources/external.csv"]
      :packages ["django" "aiohttp==3.7.1"]
-     :options {:fail #{}
+     :options {:verbose false
+               :fail #{}
                :pre false
                :external-format "csv"
                :external-options external/default-options
@@ -104,7 +108,8 @@
     {:requirements ["resources/requirements.txt"]
      :external []
      :packages []
-     :options {:fail #{}
+     :options {:verbose false
+               :fail #{}
                :pre false
                :external-format "csv"
                :external-options external/default-options
@@ -125,7 +130,8 @@
     {:requirements ["resources/requirements.github.txt"]
      :external []
      :packages []
-     :options {:fail #{}
+     :options {:verbose false
+               :fail #{}
                :pre false
                :external-format "csv"
                :external-options external/default-options
@@ -147,7 +153,8 @@
     {:requirements []
      :external ["resources/external.cocoapods"]
      :packages []
-     :options {:fail #{}
+     :options {:verbose false
+               :fail #{}
                :pre false
                :external-format "cocoapods"
                :external-options {:skip-header false :skip-footer true :int-opt 42 :str-opt "str-val"}
@@ -168,7 +175,8 @@
     {:requirements []
      :external ["resources/external.cocoapods"]
      :packages []
-     :options {:fail #{}
+     :options {:verbose false
+               :fail #{}
                :pre false
                :external-format "cocoapods"
                :external-options {:skip-header true, :skip-footer true}
@@ -180,6 +188,29 @@
                :github-token nil
                :rate-limits {:requests 120 :millis 60000}}}
     "Formatter string"]
+   [["-v"
+     "--external"
+     "resources/external.cocoapods"
+     "--external-format"
+     "cocoapods"
+     "--formatter"
+     "%-50s %-50s %-30s"]
+    {:requirements []
+     :external ["resources/external.cocoapods"]
+     :packages []
+     :options {:verbose true
+               :fail #{}
+               :pre false
+               :external-format "cocoapods"
+               :external-options {:skip-header true, :skip-footer true}
+               :formatter "%-50s %-50s %-30s"
+               :with-totals false
+               :totals-only false
+               :table-headers false
+               :fails-only false
+               :github-token nil
+               :rate-limits {:requests 120 :millis 60000}}}
+    "Verbose output"]
    [["--help"]
     {:exit-message "placeholder" :ok? true}
     "Help run"]])
@@ -224,7 +255,7 @@
         (is
          (= expected (core/get-license-type-totals licenses)))))))
 
-(def params-process-requirements
+(def params-process-deps
   [[[]
     []
     {:fail #{} :with-totals false :totals-only false :table-headers false}
@@ -289,13 +320,13 @@
 
 (deftest test-process-requirements
   (testing "Print results"
-    (doseq [[mock-pypi mock-external options expected description] params-process-requirements]
+    (doseq [[mock-pypi mock-external options expected description] params-process-deps]
       (testing description
         (with-redefs
-         [pypi/get-parsed-requiements (constantly mock-pypi)
-          external/get-parsed-requiements (constantly mock-external)
+         [pypi/get-parsed-deps (constantly mock-pypi)
+          external/get-parsed-deps (constantly mock-external)
           core/exit #(println (format "Exit code: %s" %))]
-          (let [actual (with-out-str (core/process-requirements [] [] [] options))]
+          (let [actual (with-out-str (core/process-deps [] [] [] options))]
             (is (= expected actual))))))))
 
 (def params-options

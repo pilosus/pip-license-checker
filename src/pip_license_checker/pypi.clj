@@ -17,17 +17,16 @@
   "Python PyPI API functions"
   (:gen-class)
   (:require
-   ;;[clojure.spec.test.alpha :refer [instrument]]
    [cheshire.core :as json]
-   [clojure.spec.alpha :as s]
    [clojure.string :as str]
    [indole.core :refer [make-rate-limiter]]
+   [pip-license-checker.data :as d]
+   [pip-license-checker.exception :as exception]
    [pip-license-checker.file :as file]
    [pip-license-checker.filters :as filters]
    [pip-license-checker.github :as github]
-   [pip-license-checker.license :as license]
-   [pip-license-checker.spec :as sp]
    [pip-license-checker.http :as http]
+   [pip-license-checker.license :as license]
    [pip-license-checker.version :as version]))
 
 (def settings-http-client
@@ -43,124 +42,145 @@
 (def regex-match-classifier #"License :: .*")
 (def regex-split-classifier #" :: ")
 
+(def regex-split-specifier-ops #"(===|==|~=|!=|>=|<=|<|>)")
+
+(def logger-pypi "PyPI")
+
+(def req-status-found :found)
+(def req-status-error :error)
+
 ;; Get API response, parse it
 
-(defn get-releases
+(defn get-error-message
+  "Get error message from PyPI API"
+  [resp]
+  (let [data (ex-data resp)
+        status (:status data)
+        reason (:reason-phrase data)
+        error (format "[%s] %s %s" logger-pypi status reason)]
+    error))
+
+(defn api-get-releases
   "Get seq of versions available for a package
   NB! versions are not sorted!"
   [package-name rate-limiter]
   (let [url (str/join "/" [url-pypi-base package-name "json"])
-        response (try (http/request-get url settings-http-client rate-limiter)
-                      (catch Exception _ nil))
-        body (:body response)
-        data (json/parse-string body)
-        releases (get data "releases")
-        versions (keys releases)
-        versions-parsed (map #(version/parse-version %) versions)
-        versions-valid (filter #(not (nil? %)) versions-parsed)]
-    versions-valid))
+        resp (try (http/request-get url settings-http-client rate-limiter)
+                  (catch Exception e e))
+        error (when (instance? Exception resp) (get-error-message resp))
+        data (when (nil? error) resp)
+        versions (-> data
+                     :body
+                     json/parse-string
+                     (get "releases")
+                     keys)
+        releases (->> versions
+                      (map #(version/parse-version %))
+                      (filter #(not (nil? %))))]
+    releases))
 
-(s/fdef get-requirement-version
-  :args (s/cat
-         :requirement ::sp/requirement
-         :options ::sp/options-cli-arg)
-  :ret ::sp/requirement-response)
-
-(defn get-requirement-version
+(defn api-get-project
   "Return respone of GET request to PyPI API for requirement"
   [requirement options rate-limiter]
   (let [{:keys [name specifiers]} requirement
-        pre (:pre options)
-        versions (get-releases name rate-limiter)
-        version (version/get-version specifiers versions :pre pre)
+        releases (api-get-releases name rate-limiter)
+        version (version/get-version specifiers releases :pre (:pre options))
         url
-        (if (= version nil)
+        (if (nil? version)
           (str/join "/" [url-pypi-base name "json"])
           (str/join "/" [url-pypi-base name version "json"]))
-        response (try
-                   (http/request-get url settings-http-client rate-limiter)
-                   (catch Exception _ nil))
-        origin {:name name
-                :version (or version (:orig (last (first specifiers))))}]
-    (if (and response version)
-      {:ok? true :requirement origin :response (:body response)}
-      {:ok? false :requirement origin})))
-
-(s/fdef requirement-response->data
-  :args ::sp/requirement-response
-  :ret ::sp/requirement-response-data)
-
-(defn requirement-response->data
-  "Return hash-map from PyPI API JSON response"
-  [response]
-  (let [{:keys [ok? response requirement]} response]
-    (if ok?
-      {:ok? true :requirement requirement :data (json/parse-string response)}
-      {:ok? false :requirement requirement})))
+        resp (try
+               (http/request-get url settings-http-client rate-limiter)
+               (catch Exception e e))
+        error (when (instance? Exception resp) (get-error-message resp))
+        resp-data (when (nil? error) resp)
+        requirement-with-version
+        (d/map->Requirement {:name name
+                             :version (or version (:orig (last (first specifiers))))
+                             :specifiers specifiers})]
+    (cond
+      (and resp-data version)
+      (d/map->PyPiProject {:status req-status-found
+                           :requirement requirement-with-version
+                           :api-response
+                           (->
+                            resp-data
+                            :body
+                            json/parse-string)
+                           :license nil
+                           :error error})
+      error
+      (d/map->PyPiProject {:status req-status-error
+                           :requirement requirement-with-version
+                           :api-response nil
+                           :license (license/get-license-error nil)
+                           :error error})
+      (nil? version)
+      (d/map->PyPiProject {:status req-status-error
+                           :requirement requirement-with-version
+                           :api-response nil
+                           :license (license/get-license-error nil)
+                           :error (format "[%s] Version not found" logger-pypi)}))))
 
 ;; Helpers to get license name and description
 
 (defn classifiers->license
   "Get first most detailed license name from PyPI trove classifiers list"
   [classifiers]
-  (let [license-classifiers
-        (filter #(re-matches regex-match-classifier %) classifiers)
-        specifict-classifiers
-        (remove #(contains? unspecific-license-classifiers %) license-classifiers)
-        license-names
-        (map #(last (str/split % regex-split-classifier)) specifict-classifiers)
-        classifier (str/join ", " license-names)
+  (let [classifier (->> classifiers
+                        (filter #(re-matches regex-match-classifier %))
+                        (remove #(contains? unspecific-license-classifiers %))
+                        (map #(last (str/split % regex-split-classifier)))
+                        (str/join ", "))
         result (if (= classifier "") nil classifier)]
     result))
 
-(defn data->license-map
+(defn api-response->license-map
   "Get license name from info.classifiers or info.license field of PyPI API data"
-  [data options rate-limiter]
-  (let [info (get data "info")
+  [api-response options rate-limiter]
+  (let [info (get api-response "info")
         {:strs [license classifiers home_page]} info
         license-license (if (contains? license-undefined license) nil license)
         classifiers-license (classifiers->license classifiers)
-        license-name (or
-                      classifiers-license
-                      license-license
-                      (github/homepage->license-name home_page options rate-limiter))
-        license-desc
-        (license/name->type (or license-name license/name-error))]
-    (if license-name
-      {:name license-name :type license-desc}
-      license/data-error)))
+        name (or
+              classifiers-license
+              license-license)
+        gh-license (when (nil? name) (github/homepage->license home_page options rate-limiter))
+        gh-error (:error gh-license)
+        license-name (or name (:name gh-license))
+        license (license/license-with-type license-name)
+        error-chain (exception/join-ex-info (:error license) gh-error)
+        result (d/->License (:name license) (:type license) error-chain)]
+    result))
 
 ;; Get license data from API JSON
 
-(s/fdef data->license
-  :args ::sp/requirement-response-data
-  :ret ::sp/requirement-response-license)
+(defn requirement->rec
+  "Parse requirement string into map with package name and its specifiers parsed"
+  [requirement-line]
+  (let [package-name (-> requirement-line
+                         (str/split regex-split-specifier-ops)
+                         first)
+        specifiers-str (subs requirement-line (count package-name))
+        specifiers-vec (version/parse-specifiers specifiers-str)
+        specifiers (if (= specifiers-vec [nil]) nil specifiers-vec)
+        result (d/->Requirement package-name nil specifiers)]
+    result))
 
-(defn data->license
-  "Return hash-map with license data"
-  [json-data options rate-limiter]
-  (let [{:keys [ok? requirement data]} json-data]
-    (if ok?
-      {:ok? true
-       :requirement requirement
-       :license (data->license-map data options rate-limiter)}
-      {:ok? false
-       :requirement requirement
-       :license license/data-error})))
-
-(s/fdef requirement->license
-  :args (s/cat
-         :requirement ::sp/requirement
-         :options ::sp/options-cli-arg)
-  :ret ::sp/requirement-response-license)
-
-(defn requirement->license
-  "Return license hash-map for requirement"
-  [requirement options rate-limiter]
-  (let [resp (get-requirement-version requirement options rate-limiter)
-        data (requirement-response->data resp)
-        license (data->license data options rate-limiter)]
-    license))
+(defn requirement->dep
+  "Return dependency object"
+  [requirement-rec options rate-limiter]
+  (let [resp-data (api-get-project requirement-rec options rate-limiter)
+        {:keys [status requirement api-response error]} resp-data
+        license (if (= status req-status-error)
+                  (d/->License license/name-error license/type-error nil)
+                  (api-response->license-map api-response options rate-limiter))
+        error-chain (exception/join-ex-info error (:error license))
+        project (d/map->Dependency
+                 {:requirement requirement
+                  :license license
+                  :error error-chain})]
+    project))
 
 (defn get-all-requirements
   "Get a sequence of all requirements"
@@ -170,15 +190,8 @@
 
 ;; Entrypoint
 
-(s/fdef get-parsed-requiements
-  :args (s/cat
-         :requirements ::sp/requirements-cli-arg
-         :packages ::sp/packages-cli-arg
-         :options ::sp/options-cli-arg)
-  :ret (s/coll-of ::sp/requirement-response-license))
-
-(defn get-parsed-requiements
-  "Apply filters and get verdicts for all requirements"
+(defn get-parsed-deps
+  "Apply filters and get verdicts for all deps"
   [packages requirements options]
   (let [exclude-pattern (:exclude options)
         rate-limiter (make-rate-limiter
@@ -188,15 +201,9 @@
                       (filters/remove-requirements-internal-rules)
                       (filters/remove-requirements-user-rules exclude-pattern)
                       (map filters/sanitize-requirement)
-                      (map filters/requirement->map)
-                      (pmap #(requirement->license % options rate-limiter)))]
+                      (map requirement->rec)
+                      (pmap #(requirement->dep
+                              %
+                              options
+                              rate-limiter)))]
     licenses))
-
-;;
-;; Instrumented functions - uncomment only while testing
-;;
-
-;; (instrument `get-requirement-version)
-;; (instrument `requirement-response->data)
-;; (instrument `data->license)
-;; (instrument `requirement->license)
