@@ -53,15 +53,12 @@
 
 ;; EDN string to Clojure data structure
 
-
 (defn opts-str->map
   "Parse options string in EDN format into Clojure map"
   [options-str]
   (edn/read-string options-str))
 
-
 ;; Formatting and extensing package names
-
 
 (defn package-name->requirement
   "Format package string into requirement map"
@@ -101,10 +98,9 @@
 (defn get-parsed-deps
   "Apply filters and get verdicts for all deps"
   [external options]
-  (let [exclude-pattern (:exclude options)
-        external-options (:external-options options)
-        parse-fn (get-extenal-package-parse-fn options)
-        packages (file/get-all-extenal-files-content parse-fn external external-options)
-        requirements (map external-obj->dep packages)
-        result (filters/remove-requiment-maps-user-rules exclude-pattern requirements)]
-    result))
+  (->> external
+       (file/get-all-extenal-files-content
+        (get-extenal-package-parse-fn options)
+        (:external-options options))
+       (map external-obj->dep)
+       (filters/remove-requiment-maps-user-rules (:exclude options))))

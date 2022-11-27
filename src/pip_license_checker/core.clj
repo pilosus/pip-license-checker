@@ -38,28 +38,31 @@
 (defn get-license-type-totals
   "Return a frequency map of license types as keys and license types as values"
   [licenses]
-  (let [freqs (frequencies (map #(:type (:license %)) licenses))
-        ordered-freqs (into (sorted-map) freqs)]
-    ordered-freqs))
+  (->> licenses
+       (map #(:type (:license %)))
+       frequencies
+       (into (sorted-map))))
 
 (defn process-deps
   "Print parsed dependencies pretty"
   [packages requirements external options]
-  (let [fail-opt (:fail options)
+  (let [{table-headers :table-headers
+         fail-opt :fail
+         with-totals-opt :with-totals
+         totals-only-opt :totals-only} options
         with-fail (seq fail-opt)
-        with-totals-opt (:with-totals options)
-        totals-only-opt (:totals-only options)
         show-totals (or with-totals-opt totals-only-opt)
-        table-headers (:table-headers options)
-        parsed-external-licenses (external/get-parsed-deps external options)
-        parsed-pypi-licenses (pypi/get-parsed-deps packages requirements options)
-        parsed-licenses (concat parsed-pypi-licenses parsed-external-licenses)
-        licenses (filters/filter-parsed-deps parsed-licenses options)
-        totals
-        (if (or show-totals with-fail)
-          (get-license-type-totals licenses)
-          nil)
-        totals-keys (into (sorted-set) (keys totals))
+
+        deps (concat
+              (pypi/get-parsed-deps packages requirements options)
+              (external/get-parsed-deps external options))
+        licenses (filters/filter-parsed-deps deps options)
+
+        totals (when (or show-totals with-fail) (get-license-type-totals licenses))
+        totals-keys (->> totals
+                         keys
+                         (into (sorted-set)))
+
         fail-types-found (intersection totals-keys fail-opt)
         fail? (seq fail-types-found)]
 

@@ -69,9 +69,9 @@
   "Get license name from homepage if it's a GitHub URL"
   [url options rate-limiter]
   (let [url-sanitized (if url (str/replace url #"/$" "") nil)
-        github-url
-        (try (re-find #"^(?:https://github.com)/(.*)/(.*)" url-sanitized)
-             (catch Exception _ nil))
+        github-url (try
+                     (re-find #"^(?:https://github.com)/(.*)/(.*)" url-sanitized)
+                     (catch Exception _ nil))
         url-valid? (= 3 (count github-url))
         license (if url-valid?
                   (api-get-license github-url options rate-limiter)

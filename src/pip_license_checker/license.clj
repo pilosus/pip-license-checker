@@ -20,7 +20,6 @@
    [clojure.string :as str]
    [pip-license-checker.data :as d]))
 
-
 ;; Lincense regex
 
 ;;

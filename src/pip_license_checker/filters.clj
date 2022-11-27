@@ -31,7 +31,8 @@
 (defn remove-requirements-internal-rules
   "Exclude requirements from sequence according to app's internal rules"
   [requirements]
-  (remove #(re-matches regex-skip-line-internal %) requirements))
+  (->> requirements
+       (remove #(re-matches regex-skip-line-internal %))))
 
 (defn- requirement-matching?
   "Match requirement against regex, catch NPE in case of null values"
@@ -45,7 +46,8 @@
   Used for requirements pre-processing"
   [pattern requirements]
   (if pattern
-    (remove #(requirement-matching? % pattern) requirements)
+    (->> requirements
+         (remove #(requirement-matching? % pattern)))
     requirements))
 
 (defn- requirement-name-matching?
@@ -60,7 +62,8 @@
   Used for requirements post-processing"
   [pattern packages]
   (if pattern
-    (remove #(requirement-name-matching? % pattern) packages)
+    (->> packages
+         (remove #(requirement-name-matching? % pattern)))
     packages))
 
 (defn sanitize-requirement
@@ -78,11 +81,10 @@
   "Filter license types specified with --failed flag(s) if needed"
   [options licenses]
   (let [{:keys [fail fails-only]} options]
-    (if (or
-         (not fails-only)
-         (not (seq fail)))
+    (if (or (not fails-only) (not (seq fail)))
       licenses
-      (filter #(contains? fail (get-in % [:license :type])) licenses))))
+      (->> licenses
+           (filter #(contains? fail (get-in % [:license :type])))))))
 
 (defn- license-name-matching?
   "Match license name against regex, catch NPE in case of null values"
@@ -96,11 +98,13 @@
   [options licenses]
   (let [{:keys [exclude-license]} options]
     (if exclude-license
-      (remove #(license-name-matching? % exclude-license) licenses)
+      (->> licenses
+           (remove #(license-name-matching? % exclude-license)))
       licenses)))
 
 (defn filter-parsed-deps
   "Post parsing filtering pipeline"
   [licenses options]
-  (->> (filter-fails-only-licenses options licenses)
+  (->> licenses
+       (filter-fails-only-licenses options)
        (remove-licenses options)))
