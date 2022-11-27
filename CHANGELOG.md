@@ -6,10 +6,20 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 ## [Unreleased]
 
 ## [0.38.0] - 2022-11-27
+
+Release **breaks backward compatibility** if you use the tool as a
+library in your Clojure code (see `Changed` section).
+
 ### Added
 - CLI option `--verbose` (or `-v` for short) to make output
-  verbose. Used for better errors visibility
+  verbose. Options adds `Misc` column for error messages to the
+  report.
   ([#105](https://github.com/pilosus/pip-license-checker/issues/105))
+
+### Changed
+- Massive code refactoring: multiple functions renamed, a few removed,
+  some function arguments order changed
+  (see [PR 115](https://github.com/pilosus/pip-license-checker/pull/115/files)).
 
 ## [0.37.0] - 2022-11-23
 ### Changed
