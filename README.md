@@ -95,11 +95,14 @@ docker's `-v` option:
 
 ```bash
 docker run -v `pwd`:/volume \
+    -e GITHUB_TOKEN=your-gh-token \
     -it --rm pilosus/pip-license-checker \
     java -jar app.jar --exclude 'pylint.*' \
     --requirements '/volume/requirements.txt' \
     --external '/volume/licenses.csv' \
-    --fail StrongCopyleft --fails-only
+    --fail StrongCopyleft \
+    --fails-only \
+    --verbose
 ```
 
 ### Command line tool
