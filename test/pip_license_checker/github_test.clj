@@ -33,8 +33,8 @@
     (d/map->License {:name nil :type nil :error nil})
     "Fallback"]
    [["" "owner" "repo"]
-    (fn [& _] (throw (ex-info "Boom!" {:status 404 :reason-phrase "License not found"})))
-    (d/map->License {:name nil :type nil :error "[GitHub] 404 License not found"})
+    (fn [& _] (throw (ex-info "Boom!" {:status 404 :reason-phrase "Page not found"})))
+    (d/map->License {:name nil :type nil :error "GitHub::license 404 Page not found"})
     "Exception"]])
 
 (deftest test-api-get-license
@@ -47,11 +47,11 @@
 (def params-homepage->license
   [["http://example.com"
     "{\"license\": {\"name\": \"MIT License\"}}"
-    (d/map->License {:name nil :type nil :error nil})
+    (d/map->License {:name nil :type nil :error g/meta-not-found})
     "Not a GitHub URL"]
    ["https://github.com/pilosus"
     "{\"license\": {\"name\": \"MIT License\"}}"
-    (d/map->License {:name nil :type nil :error nil})
+    (d/map->License {:name nil :type nil :error g/meta-not-found})
     "Malformed GitHub URL"]
    ["https://github.com/pilosus/piny/"
     "{\"license\": {\"name\": \"MIT License\"}}"
@@ -59,7 +59,7 @@
     "Ok GitHub URL"]
    [nil
     "{\"license\": {\"name\": \"MIT License\"}}"
-    (d/map->License {:name nil :type nil :error nil})
+    (d/map->License {:name nil :type nil :error g/meta-not-found})
     "nil URL"]])
 
 (deftest test-homepage->license

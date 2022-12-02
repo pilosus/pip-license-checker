@@ -18,21 +18,22 @@
    [clojure.test :refer [deftest is testing]]
    [pip-license-checker.exception :as ex]))
 
-(def params-get-ex-info
-  [["module 1"
-    (ex-info "test" {:cause "too bad"})
-    "[module 1] ExceptionInfo: test"
+(def params-get-error-message
+  [["PyPI::module"
+    (try (ex-info "test" {:status 429 :reason-phrase "Rate limits exceeded"})
+         (catch Exception e e))
+    "PyPI::module 429 Rate limits exceeded"
     "exception 1"]
-   ["module 2"
+   ["GitHub::fallback"
     (try (/ 1 0) (catch Exception e e))
-    "[module 2] ArithmeticException: Divide by zero"
+    "GitHub::fallback ArithmeticException Divide by zero"
     "exception 2"]])
 
-(deftest test-params-get-ex-info
+(deftest test-params-get-error-message
   (testing "Test getting info from exception"
-    (doseq [[logger exception expected description] params-get-ex-info]
+    (doseq [[prefix exception expected description] params-get-error-message]
       (testing description
-        (is (= expected (ex/get-ex-info logger exception)))))))
+        (is (= expected (ex/get-error-message prefix exception)))))))
 
 
 ;; join-ex-info

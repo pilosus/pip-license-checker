@@ -114,7 +114,7 @@
                                    {:name "Error"
                                     :type "Error"
                                     :error nil})
-                         :error "[PyPI] Version not found"})
+                         :error "PyPI::version Not found"})
     "Version not found"]
    [{:name "aiohttp"
      :specifiers [[version/eq (version/parse-version "3.7.2")]]}
@@ -131,7 +131,7 @@
                                    {:name "Error"
                                     :type "Error"
                                     :error nil})
-                         :error "[PyPI] 429 Rate limits exceeded"})
+                         :error "PyPI::project 429 Rate limits exceeded"})
     "Expection"]])
 
 (deftest test-api-get-project
@@ -372,3 +372,84 @@
            (= expected
               (vec (pypi/get-parsed-deps
                     packages requirements options)))))))))
+
+(def params-get-parsed-deps-exceptions
+  [[(constantly
+     {:body "{\"releases\": {\"3.7.1\": [], \"3.7.2\": []}}"})
+    (fn [& _] (throw (ex-info "Boom!" {:status 429 :reason-phrase "Rate limits exceeded"})))
+    (constantly {:body "{\"license\": {\"name\": \"MIT License\"}}"})
+    [(d/map->Dependency
+      {:requirement (d/map->Requirement
+                     {:name "aiohttp"
+                      :version "3.7.2"
+                      :specifiers [[version/eq (version/parse-version "3.7.2")]]})
+       :license (d/map->License
+                 {:name "Error"
+                  :type "Error"
+                  :error nil})
+       :error "PyPI::project 429 Rate limits exceeded"})]
+    "PyPI project request failed"]
+   [(fn [& _] (throw (ex-info "Boom!" {:status 404 :reason-phrase "Page not found"})))
+    (constantly {:body "{\"info\": {\"license\": \"MIT License\"}}"})
+    (constantly {:body "{\"license\": {\"name\": \"MIT License\"}}"})
+    [(d/map->Dependency
+      {:requirement (d/map->Requirement
+                     {:name "aiohttp"
+                      :version "3.7.2"
+                      :specifiers [[version/eq (version/parse-version "3.7.2")]]})
+       :license (d/map->License
+                 {:name "Error"
+                  :type "Error"
+                  :error nil})
+       :error "PyPI::version Not found"})]
+    "PyPI version not found"]
+   [(constantly
+     {:body "{\"releases\": {\"3.7.1\": [], \"3.7.2\": []}}"})
+    (constantly {:body "{\"info\": {\"home_page\": \"https://github.com/aio-libs/aiohttp\"}}"})
+    (fn [& _] (throw (ex-info "Boom!" {:status 429 :reason-phrase "Rate limits exceeded"})))
+    [(d/map->Dependency
+      {:requirement (d/map->Requirement
+                     {:name "aiohttp"
+                      :version "3.7.2"
+                      :specifiers [[version/eq (version/parse-version "3.7.2")]]})
+       :license (d/map->License
+                 {:name "Error"
+                  :type "Error"
+                  :error "GitHub::license 429 Rate limits exceeded"})
+       :error "GitHub::license 429 Rate limits exceeded"})]
+    "GitHub link found, but request failed"]
+   [(constantly
+     {:body "{\"releases\": {\"3.7.1\": [], \"3.7.2\": []}}"})
+    (constantly {:body "{\"info\": {\"author\": \"me\"}}"})
+    (fn [& _] (throw (ex-info "Boom!" {:status 429 :reason-phrase "Rate limits exceeded"})))
+    [(d/map->Dependency
+      {:requirement (d/map->Requirement
+                     {:name "aiohttp"
+                      :version "3.7.2"
+                      :specifiers [[version/eq (version/parse-version "3.7.2")]]})
+       :license (d/map->License
+                 {:name "Error"
+                  :type "Error"
+                  :error github/meta-not-found})
+       :error github/meta-not-found})]
+    "No data in PyPI, no link to GitHub either"]])
+
+(deftest ^:integration ^:request
+  test-get-parsed-deps-exceptions
+  (testing "Integration testing of deps parsing with exceptions"
+    (doseq [[pypi-releases-mock
+             pypi-project-mock
+             github-license-mock
+             expected
+             description]
+            params-get-parsed-deps-exceptions]
+      (testing description
+        (with-redefs
+         [pmap map
+          pypi/api-request-releases pypi-releases-mock
+          pypi/api-request-project pypi-project-mock
+          github/api-request-license github-license-mock]
+          (is
+           (= expected
+              (vec (pypi/get-parsed-deps
+                    ["aiohttp==3.7.2"] [] {:rate-limits {:requests 1 :millis 60000}})))))))))
