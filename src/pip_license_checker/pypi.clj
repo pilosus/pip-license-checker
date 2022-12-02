@@ -44,30 +44,25 @@
 
 (def regex-split-specifier-ops #"(===|==|~=|!=|>=|<=|<|>)")
 
-(def logger-pypi "PyPI")
-
 (def req-status-found :found)
 (def req-status-error :error)
 
 ;; Get API response, parse it
 
-(defn get-error-message
-  "Get error message from PyPI API"
-  [resp]
-  (let [data (ex-data resp)
-        status (:status data)
-        reason (:reason-phrase data)
-        error (format "[%s] %s %s" logger-pypi status reason)]
-    error))
+(defn api-request-releases
+  "Moved out as a standalone function for testing simplicity"
+  [url rate-limiter]
+  (http/request-get url settings-http-client rate-limiter))
 
 (defn api-get-releases
   "Get seq of versions available for a package
   NB! versions are not sorted!"
   [package-name rate-limiter]
   (let [url (str/join "/" [url-pypi-base package-name "json"])
-        resp (try (http/request-get url settings-http-client rate-limiter)
+        resp (try (api-request-releases url rate-limiter)
                   (catch Exception e e))
-        error (when (instance? Exception resp) (get-error-message resp))
+        error (when (instance? Exception resp)
+                (exception/get-error-message "PyPI::releases" resp))
         data (when (nil? error) resp)
         versions (-> data
                      :body
@@ -78,6 +73,11 @@
                       (map #(version/parse-version %))
                       (filter #(not (nil? %))))]
     releases))
+
+(defn api-request-project
+  "Moved out as a standalone function for testing simplicity"
+  [url rate-limiter]
+  (http/request-get url settings-http-client rate-limiter))
 
 (defn api-get-project
   "Return respone of GET request to PyPI API for requirement"
@@ -90,9 +90,10 @@
           (str/join "/" [url-pypi-base name "json"])
           (str/join "/" [url-pypi-base name version "json"]))
         resp (try
-               (http/request-get url settings-http-client rate-limiter)
+               (api-request-project url rate-limiter)
                (catch Exception e e))
-        error (when (instance? Exception resp) (get-error-message resp))
+        error (when (instance? Exception resp)
+                (exception/get-error-message "PyPI::project" resp))
         resp-data (when (nil? error) resp)
         requirement-with-version
         (d/map->Requirement {:name name
@@ -120,7 +121,7 @@
                            :requirement requirement-with-version
                            :api-response nil
                            :license (license/get-license-error nil)
-                           :error (format "[%s] Version not found" logger-pypi)}))))
+                           :error (format "PyPI::version Not found")}))))
 
 ;; Helpers to get license name and description
 

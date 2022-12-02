@@ -20,11 +20,12 @@
    [cheshire.core :as json]
    [clojure.string :as str]
    [pip-license-checker.data :as d]
-   [pip-license-checker.http :as http]))
+   [pip-license-checker.http :as http]
+   [pip-license-checker.exception :as exception]))
 
 (def url-github-base "https://api.github.com/repos")
 
-(def logger-github "GitHub")
+(def meta-not-found "Checker::meta License sources not found")
 
 (def settings-http-client
   {:socket-timeout 1000
@@ -37,16 +38,10 @@
     (when token
       {:headers {"Authorization" (format "Bearer %s" token)}})))
 
-(defn get-error-message
-  "Get error message from GitHub API"
-  [resp]
-  (let [data (ex-data resp)
-        error (format
-               "[%s] %s %s"
-               logger-github
-               (:status data)
-               (:reason-phrase data))]
-    error))
+(defn api-request-license
+  "Moved out to a separate function for testing simplicity"
+  [url settings rate-limiter]
+  (http/request-get url settings rate-limiter))
 
 (defn api-get-license
   "Get response from GitHub API"
@@ -55,9 +50,10 @@
         url (str/join "/" [url-github-base owner repo "license"])
         settings (merge settings-http-client (get-headers options))
         resp (try
-               (http/request-get url settings rate-limiter)
+               (api-request-license url settings rate-limiter)
                (catch Exception e e))
-        error (when (instance? Exception resp) (get-error-message resp))
+        error (when (instance? Exception resp)
+                (exception/get-error-message "GitHub::license" resp))
         resp-data (when (nil? error) resp)
         license-name (-> resp-data
                          :body
@@ -75,5 +71,5 @@
         url-valid? (= 3 (count github-url))
         license (if url-valid?
                   (api-get-license github-url options rate-limiter)
-                  (d/->License nil nil nil))]
+                  (d/->License nil nil meta-not-found))]
     license))

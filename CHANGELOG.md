@@ -5,6 +5,15 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 
 ## [Unreleased]
 
+## [0.39.0] - 2022-12-02
+
+### Changed
+- Verbose output imrpoved for Java-native exceptions with no
+  `clj-http` specific meta
+  ([#116](https://github.com/pilosus/pip-license-checker/issues/116))
+- Prefix format used in errors output changed from
+  `[System] status-code message` to `System::subsystem error message`
+
 ## [0.38.0] - 2022-11-27
 
 Release **breaks backward compatibility** if you use the tool as a
@@ -313,7 +322,8 @@ weak copyleft types.
 ### Added
 - Structure for Leiningen app project
 
-[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.38.0...HEAD
+[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.39.0...HEAD
+[0.39.0]: https://github.com/pilosus/pip-license-checker/compare/0.38.0...0.39.0
 [0.38.0]: https://github.com/pilosus/pip-license-checker/compare/0.37.0...0.38.0
 [0.37.0]: https://github.com/pilosus/pip-license-checker/compare/0.36.0...0.37.0
 [0.36.0]: https://github.com/pilosus/pip-license-checker/compare/0.35.0...0.36.0
