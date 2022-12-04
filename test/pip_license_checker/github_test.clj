@@ -69,11 +69,16 @@
         (with-redefs [http/get (constantly {:body response})]
           (is (= expected (g/homepage->license url {} rate-limits))))))))
 
+(def default-headers {:headers g/header-github-api-version})
+
 (def params-get-headers
-  [[{} nil "No options"]
-   [{:some 1 :options 2} nil "No github token option"]
-   [{:github-token nil} nil "Token provided but invalid"]
-   [{:github-token "hello"} {:headers {"Authorization" "Bearer hello"}} "Valid token provided"]])
+  [[{} default-headers "No options"]
+   [{:some 1 :options 2} default-headers "No github token option"]
+   [{:github-token nil} default-headers "Token provided but invalid"]
+   [{:github-token "hello"}
+    {:headers (merge {"Authorization" "Bearer hello"}
+                     g/header-github-api-version)}
+    "Valid token provided"]])
 
 (deftest test-get-headers
   (testing "Test HTTP request headers generation"
