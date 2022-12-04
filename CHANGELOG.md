@@ -5,6 +5,13 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 
 ## [Unreleased]
 
+## [0.40.0] - 2022-12-04
+
+### Added
+- GitHub API versioning header added to requests to prevent using
+  backward-incompatible API versions
+  ([#118](https://github.com/pilosus/pip-license-checker/issues/118))
+
 ## [0.39.0] - 2022-12-02
 
 ### Changed
@@ -322,7 +329,8 @@ weak copyleft types.
 ### Added
 - Structure for Leiningen app project
 
-[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.39.0...HEAD
+[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.40.0...HEAD
+[0.40.0]: https://github.com/pilosus/pip-license-checker/compare/0.39.0...0.40.0
 [0.39.0]: https://github.com/pilosus/pip-license-checker/compare/0.38.0...0.39.0
 [0.38.0]: https://github.com/pilosus/pip-license-checker/compare/0.37.0...0.38.0
 [0.37.0]: https://github.com/pilosus/pip-license-checker/compare/0.36.0...0.37.0

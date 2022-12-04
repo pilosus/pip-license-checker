@@ -25,6 +25,8 @@
 
 (def url-github-base "https://api.github.com/repos")
 
+(def header-github-api-version {"X-GitHub-API-Version" "2022-11-28"})
+
 (def meta-not-found "Checker::meta License sources not found")
 
 (def settings-http-client
@@ -34,9 +36,10 @@
 
 (defn get-headers
   [options]
-  (let [token (:github-token options)]
-    (when token
-      {:headers {"Authorization" (format "Bearer %s" token)}})))
+  (let [token (:github-token options)
+        header-token (when token {"Authorization" (format "Bearer %s" token)})
+        headers (merge header-token header-github-api-version)]
+    {:headers headers}))
 
 (defn api-request-license
   "Moved out to a separate function for testing simplicity"
@@ -48,7 +51,9 @@
   [path-parts options rate-limiter]
   (let [[_ owner repo] path-parts
         url (str/join "/" [url-github-base owner repo "license"])
-        settings (merge settings-http-client (get-headers options))
+        settings (merge
+                  settings-http-client
+                  (get-headers options))
         resp (try
                (api-request-license url settings rate-limiter)
                (catch Exception e e))
