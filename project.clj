@@ -8,7 +8,7 @@
                  [clj-http "3.12.3"]
                  [com.github.bdesham/clj-plist "0.10.0"]
                  [indole "1.0.0"]
-                 [org.clojure/clojure "1.10.1"]
+                 [org.clojure/clojure "1.11.1"]
                  [org.clojure/data.csv "1.0.1"]
                  [org.clojure/test.check "1.1.1"]
                  [org.clojure/tools.cli "1.0.214"]]
