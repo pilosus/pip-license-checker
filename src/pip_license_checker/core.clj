@@ -20,12 +20,15 @@
    [clojure.set :refer [intersection]]
    [clojure.string :as str]
    [clojure.tools.cli :refer [parse-opts]]
+   [pip-license-checker.data :as d]
    [pip-license-checker.external :as external]
    [pip-license-checker.file :as file]
    [pip-license-checker.filters :as filters]
    [pip-license-checker.license :as license]
    [pip-license-checker.pypi :as pypi]
    [pip-license-checker.report :as report]))
+
+;; helpers
 
 (defn exit
   "Exit from the app with exit status"
@@ -35,59 +38,62 @@
    (println msg)
    (exit status)))
 
-(defn get-license-type-totals
-  "Return a frequency map of license types as keys and license types as values"
+;; report generation and representation
+
+(defn get-totals
+  "Return a map of license types as keys and frequencies as values"
   [licenses]
   (->> licenses
-       (map #(:type (:license %)))
+       (map #(get-in % [:license :type]))
        frequencies
        (into (sorted-map))))
 
-(defn process-deps
-  "Print parsed dependencies pretty"
-  [packages requirements external options]
-  (let [{table-headers :table-headers
-         fail-opt :fail
-         with-totals-opt :with-totals
-         totals-only-opt :totals-only} options
-        with-fail (seq fail-opt)
-        show-totals (or with-totals-opt totals-only-opt)
+(defn repack-dep
+  "Remove unused keys from dependency record"
+  [dep]
+  (d/map->ReportItem
+   {:dependency (select-keys (:requirement dep) [:name :version])
+    :license (select-keys (:license dep) [:name :type])
+    :error (:error dep)}))
 
-        deps (concat
-              (pypi/get-parsed-deps packages requirements options)
-              (external/get-parsed-deps external options))
-        licenses (filters/filter-parsed-deps deps options)
+(defn get-deps
+  "Get a list of dependencies from various sources"
+  [arguments]
+  (let [{:keys [packages requirements external options]} arguments
+        python-deps (pypi/get-parsed-deps packages requirements options)
+        external-deps (external/get-parsed-deps external options)
+        deps (concat python-deps external-deps)
+        filtered (filters/filter-parsed-deps deps options)]
+    (map repack-dep filtered)))
 
-        totals (when (or show-totals with-fail) (get-license-type-totals licenses))
-        totals-keys (->> totals
-                         keys
-                         (into (sorted-set)))
+(defn get-report
+  "Get a formatted report"
+  [items options]
+  (let [totals (get-totals items)
+        fails (->> totals
+                   keys
+                   (into (sorted-set))
+                   (intersection (:fail options))
+                   seq)]
+    (d/map->Report {:headers report/report-headers
+                    :items items
+                    :totals totals
+                    :fails fails})))
 
-        fail-types-found (intersection totals-keys fail-opt)
-        fail? (seq fail-types-found)]
-
-    (when (not totals-only-opt)
-      (when table-headers
-        (report/print-license-header options))
-
-      (doseq [line licenses]
-        (println (report/format-license line options))))
-
-    (when with-totals-opt
-      (println))
-
-    (when show-totals
-      (when table-headers
-        (report/print-totals-header options))
-
-      (doseq [[license-type freq] totals]
-        (println (report/format-total license-type freq options))))
-
+(defn shutdown
+  "Shutdown the app gracefully"
+  [report options]
+  (let [{parallel-opt :parallel exit-opt :exit} options
+        {fails :fails} report]
     ;; shutdown a thread pool used by pmap to allow JVM shutdown
-    (shutdown-agents)
+    ;; pmap is used only with --parallel option
+    (when exit-opt
+      (when parallel-opt
+        (shutdown-agents))
+      (when fails
+        (exit 1)))))
 
-    (when fail?
-      (exit 1))))
+;; cli args
 
 (defn usage [options-summary]
   (->> ["pip-license-checker - license compliance tool to identify dependencies license names and types."
@@ -104,7 +110,7 @@
         "pip-license-checker django"
         "pip-license-checker aiohttp==3.7.2 piny==0.6.0 django"
         "pip-license-checker --pre 'aiohttp<4'"
-        "pip-license-checker --with-totals --table-headers --requirements resources/requirements.txt"
+        "pip-license-checker --totals --headers --requirements resources/requirements.txt"
         "pip-license-checker --totals-only -r file1.txt -r file2.txt -r file3.txt"
         "pip-license-checker -r resources/requirements.txt django aiohttp==3.7.1 --exclude 'aio.*'"
         "pip-license-checker -r resources/requirements.txt --rate-limits 10/1000"
@@ -157,7 +163,7 @@
     :default external/default-options
     :parse-fn external/opts-str->map]
    [nil "--formatter PRINTF_FMT" "Printf-style formatter string for report formatting"
-    :default report/table-formatter
+    :default report/report-formatter
     :validate [report/valid-formatter? report/invalid-formatter]]
    ["-f" "--fail LICENSE_TYPE" "Return non-zero exit code if license type is found"
     :default (sorted-set)
@@ -167,10 +173,14 @@
    ["-e" "--exclude REGEX" "PCRE to exclude packages with matching names" :parse-fn #(re-pattern %)]
    [nil "--exclude-license REGEX" "PCRE to exclude packages with matching license names" :parse-fn #(re-pattern %)]
    [nil "--[no-]pre" "Include pre-release and development versions. By default, use only stable versions" :default false]
-   [nil "--[no-]with-totals" "Print totals for license types" :default false]
+   [nil "--[no-]totals" "Print totals for license types" :default false]
+   [nil "--[no-]with-totals" "[deprecated '0.41.0'] Print totals for license types" :default nil]
    [nil "--[no-]totals-only" "Print only totals for license types" :default false]
-   [nil "--[no-]table-headers" "Print table headers" :default false]
+   [nil "--[no-]headers" "Print report headers" :default false]
+   [nil "--[no-]table-headers" "[deprecated '0.41.0'] Print table headers" :default nil]
    [nil "--[no-]fails-only" "Print only packages of license types specified with --fail flags" :default false]
+   [nil "--[no-]parallel" "Run requests in parallel" :default true]
+   [nil "--[no-]exit" "Exit program, used for CLI mode" :default true]
    [nil "--rate-limits REQUESTS/MILLISECONDS" "Rate limit requests to public APIs"
     :default {:requests 120 :millis 60000}
     :parse-fn parse-rate-limits
@@ -188,14 +198,32 @@
      #{license/type-copyleft-all})
     fail-opts))
 
-(defn post-process-options
-  "Update option map"
+(defn assoc-if
+  "Add key-value to a map if value is not nil"
+  [coll key value]
+  (if (some? value) (assoc coll key value) coll))
+
+(defn process-deprecated-options
+  "Route deprecated options to support backward compatibility"
+  [options]
+  (let [{:keys [with-totals table-headers]} options  ;; deprecated
+        {:keys [totals headers]} options  ;; new ones
+        totals-opt (if (some? with-totals) with-totals totals)
+        headers-opt (if (some? table-headers) table-headers headers)
+        opts' (dissoc options :with-totals :table-headers :totals :headers)
+        opts'' (assoc-if opts' :totals totals-opt)
+        opts''' (assoc-if opts'' :headers headers-opt)]
+    opts'''))
+
+(defn update-options
+  "Update options map"
   [options]
   (let [opts' (dissoc options :requirements :external)
         fail-opt (:fail opts')
-        fail-opt-exteded (extend-fail-opt fail-opt)
-        updated-opts (assoc opts' :fail fail-opt-exteded)]
-    updated-opts))
+        fail-opt-exteded (extend-fail-opt fail-opt)]
+    (-> opts'
+        (assoc :fail fail-opt-exteded)
+        process-deprecated-options)))
 
 (defn validate-args
   "Parse and validate CLI arguments for entrypoint"
@@ -211,14 +239,22 @@
       {:requirements (:requirements options)
        :external (:external options)
        :packages arguments
-       :options (post-process-options options)}
+       :options (update-options options)}
       :else
       {:exit-message (usage summary)})))
+
+;; entrypoint
 
 (defn -main
   "App entry point"
   [& args]
-  (let [{:keys [packages requirements external options exit-message ok?]} (validate-args args)]
-    (if exit-message
-      (exit (if ok? 0 1) exit-message)
-      (process-deps packages requirements external options))))
+  (let [arguments (validate-args args)
+        {:keys [options exit-message ok?]} arguments]
+    (when exit-message
+      (exit (if ok? 0 1) exit-message))
+
+    (-> arguments
+        get-deps
+        (get-report options)
+        (report/print-report options)
+        (shutdown options))))

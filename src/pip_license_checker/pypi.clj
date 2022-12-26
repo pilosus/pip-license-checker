@@ -195,6 +195,7 @@
   "Apply filters and get verdicts for all deps"
   [packages requirements options]
   (let [exclude-pattern (:exclude options)
+        map-fn (if (:parallel options) pmap map)
         rate-limiter (make-rate-limiter
                       (or (get-in options [:rate-limits :millis]) 60000)
                       (or (get-in options [:rate-limits :requests]) 120))
@@ -203,8 +204,8 @@
                       (filters/remove-requirements-user-rules exclude-pattern)
                       (map filters/sanitize-requirement)
                       (map requirement->rec)
-                      (pmap #(requirement->dep
-                              %
-                              options
-                              rate-limiter)))]
+                      (map-fn #(requirement->dep
+                                %
+                                options
+                                rate-limiter)))]
     licenses))

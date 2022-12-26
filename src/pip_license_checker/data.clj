@@ -44,3 +44,34 @@
             license     ;; License rec
             error       ;; nilable String
             ])
+
+;; Processed entities
+
+(defrecord ReportDependency
+           [name    ;; nilable String
+            version ;; nilable String
+            ])
+
+(defrecord ReportLicense
+           [name ;; nilable String
+            type ;; nilable String
+            ])
+
+(defrecord ReportItem
+           [dependency ;; ReportDependency
+            license    ;; ReportLicense
+            error      ;; nilable String
+            ])
+
+(defrecord ReportHeader
+    ;;
+           [items  ;; list of String
+            totals ;; list of String
+            ])
+
+(defrecord Report
+           [headers ;; nilable list of ReportHeader
+            items   ;; list of ReportItem
+            totals  ;; nilalbe Map of String (license types): Integer (frequencies)
+            fails   ;; nilable list of String (license types)
+            ])

@@ -162,7 +162,7 @@
       (testing description
         #_:clj-kondo/ignore
         (with-redefs
-         [cocoapods-acknowledgements-licenses.core/plist->data (constantly external-data)
-          gradle-licenses.core/gradle-json->data (constantly external-data)
+         [file/cocoapods-plist->data (constantly external-data)
+          file/gradle-json->data (constantly external-data)
           file/edn->data (constantly external-data)]
           (is (= expected (external/get-parsed-deps ["placeholder"] options))))))))

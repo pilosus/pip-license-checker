@@ -15,82 +15,8 @@
 
 (ns pip-license-checker.report-test
   (:require
-   [clojure.string :as str]
    [clojure.test :refer [deftest is testing]]
    [pip-license-checker.report :as report]))
-
-(def params-print-license-header
-  [[{:formatter report/table-formatter}
-    (format report/table-formatter
-            "Requirement"
-            "License Name"
-            "License Type")
-    "Normal output"]
-   [{:formatter report/table-formatter :verbose true}
-    (format (format "%s %s" report/table-formatter report/verbose-formatter)
-            "Requirement"
-            "License Name"
-            "License Type"
-            "Misc")
-    "Verbose output"]])
-
-(deftest test-print-license-header
-  (testing "Printing license table header"
-    (doseq [[options expected description] params-print-license-header]
-      (testing description
-        (let [actual (with-out-str (report/print-license-header options))
-              result (str/join [expected "\n"])]
-          (is (= result actual)))))))
-
-(def params-format-license
-  [[{:requirement {:name "test" :version "1.12.3"}
-     :license {:name "GPLv3" :type "Copyleft"}}
-    {}
-    (format report/table-formatter "test:1.12.3" "GPLv3" "Copyleft")
-    "Example 1"]
-   [{:requirement {:name "aiohttp" :version "3.7.4.post0"}
-     :license {:name "MIT" :type "Permissive"}}
-    {}
-    (format report/table-formatter "aiohttp:3.7.4.post0" "MIT" "Permissive")
-    "Example 2"]
-   [{:requirement {:name "aiohttp" :version nil}
-     :license {:name "MIT" :type "Permissive"}}
-    {}
-    (format report/table-formatter "aiohttp" "MIT" "Permissive")
-    "Version is absent"]
-   [{:requirement {:name "aiohttp" :version ""}
-     :license {:name "MIT" :type "Permissive"}}
-    {}
-    (format report/table-formatter "aiohttp" "MIT" "Permissive")
-    "Version is a blank string"]
-   [{:requirement {:name "aiohttp" :version "777.1.2"}
-     :license {:name "Error" :type "Error" :error nil}
-     :error "[PyPI] Version not found"}
-    {:verbose true}
-    (format
-     (format "%s %s" report/table-formatter report/verbose-formatter)
-     "aiohttp:777.1.2" "Error" "Error" "[PyPI] Version not found")
-    "Verbose output"]])
-
-(deftest test-format-license
-  (testing "Printing a line of license table"
-    (doseq [[license-data opts expected description] params-format-license]
-      (testing description
-        (is (= expected (report/format-license license-data opts)))))))
-
-(deftest test-format-total
-  (testing "Formatting total table line"
-    (let [expected (format report/totals-formatter "Permissive" 7)
-          actual (report/format-total "Permissive" 7 {})]
-      (is (= expected actual)))))
-
-(deftest test-print-totals-header
-  (testing "Printing totals table header"
-    (let [actual (with-out-str (report/print-totals-header {}))
-          expected (str/join
-                    [(format report/totals-formatter "License Type" "Found" {})
-                     "\n"])]
-      (is (= expected actual)))))
 
 (def params-valid-formatter?
   [["%s %s %s" ["A" "B" "C"] true "Valid"]
@@ -103,5 +29,165 @@
     (doseq [[fmt columns expected description] params-valid-formatter?]
       (testing description
         (with-redefs
-         [report/table-header columns]
+         [report/items-header columns]
           (is (= expected (report/valid-formatter? fmt))))))))
+
+(def params-get-totals-fmt
+  [[[] "%-35s %-55s" "No args"]
+   [["%-35s %-55s %-30s"] "%-35s %-55s" "Only fmt string"]
+   [["%-35s %-55s %-30s" 1] "%-35s" "Format string and length"]])
+
+(deftest test-get-totals-fmt
+  (testing "Get total formatter string"
+    (doseq [[args expected description] params-get-totals-fmt]
+      (testing description
+        (is (= expected (apply report/get-totals-fmt args)))))))
+
+(def params-get-fmt
+  [[{} :items "%-35s %-55s %-20s"
+    "items, no options"]
+   [{:verbose true} :items "%-35s %-55s %-20s %-40s"
+    "items, verbose"]
+   [{:verbose true :formatter "%s %s %s"} :items "%s %s %s %-40s"
+    "items, verbose, customer formatter"]
+   [{:verbose true :formatter "%s %s %s"} :totals "%s %s"
+    "totals, verbose, customer formatter"]
+   [{:verbose false :formatter "%s %s %s"} :totals "%s %s"
+    "totals, non-verbose, customer formatter"]
+   [{:verbose false} :totals "%-35s %-55s"
+    "totals, non-verbose, default formatter"]])
+
+(deftest test-get-fmt
+  (testing "Get formatter string"
+    (doseq [[opts entity expected description] params-get-fmt]
+      (testing description
+        (is (= expected (report/get-fmt opts entity)))))))
+
+(def params-get-items
+  [[{:dependency {:name "basilic", :version "0.1.3.4"},
+     :license
+     {:name "GNU General Public License v2 or later (GPLv2+)",
+      :type "StrongCopyleft"},
+     :error nil}
+    ["basilic:0.1.3.4" "GNU General Public License v2 or later (GPLv2+)"
+     "StrongCopyleft" ""]
+    "No errors"]
+   [{:dependency {:name "basilic", :version nil},
+     :license
+     {:name "GNU General Public License v2 or later (GPLv2+)",
+      :type "StrongCopyleft"},
+     :error nil}
+    ["basilic" "GNU General Public License v2 or later (GPLv2+)"
+     "StrongCopyleft" ""]
+    "Version is absent"]
+   [{:dependency {:name "aiopg", :version "122.3.5"},
+     :license {:name "Error", :type "Error"},
+     :error "PyPI::version Not found"}
+    ["aiopg:122.3.5" "Error" "Error" "PyPI::version Not found"]
+    "Error"]])
+
+(deftest test-get-items
+  (testing "Get items ready for printing"
+    (doseq [[dep expected description] params-get-items]
+      (testing description
+        (is (= expected (report/get-items dep)))))))
+
+(def params-print-line
+  [[["basilic" "GNU General Public License v2 or later (GPLv2+)"
+     "StrongCopyleft" ""]
+    "%s %s %s"
+    "basilic GNU General Public License v2 or later (GPLv2+) StrongCopyleft\n"
+    "Example 1"]
+   [["basilic" "GNU General Public License v2 or later (GPLv2+)"
+     "StrongCopyleft" ""]
+    "%-35s %-55s %-20s"
+    "basilic                             GNU General Public License v2 or later (GPLv2+)         StrongCopyleft      \n"
+    "Example 2"]])
+
+(deftest test-print-line
+  (testing "Print line"
+    (doseq [[items fmt expected description] params-print-line]
+      (testing description
+        (is (= expected (with-out-str (report/print-line items fmt))))))))
+
+(def report
+  {:headers {:items ["Dependency" "License Name" "License Type" "Misc"]
+             :totals ["License Type" "Found"]}
+   :items [{:dependency {:name "aiohttp" :version "3.7.2"}
+            :license {:name "Apache Software License" :type "Permissive"}
+            :error "Too many requests"}]
+   :totals
+   {"Permissive" 1}
+   :fails nil})
+
+(def params-report
+  [[report
+    {:verbose false
+     :totals false
+     :headers false
+     :formatter "%s %s %s"}
+    "aiohttp:3.7.2 Apache Software License Permissive\n"
+    "Non-verbose, no headers, no-totals"]
+   [report
+    {:verbose false
+     :totals false
+     :headers true
+     :formatter "%s %s %s"}
+    "Dependency License Name License Type\naiohttp:3.7.2 Apache Software License Permissive\n"
+    "Non-verbose, with headers, no-totals"]
+   [report
+    {:verbose false
+     :totals true
+     :headers true
+     :formatter "%s %s %s"}
+    "Dependency License Name License Type\naiohttp:3.7.2 Apache Software License Permissive\n\nLicense Type Found\nPermissive 1\n"
+    "Non-verbose, with headers, with totals"]
+   [report
+    {:verbose true
+     :totals true
+     :headers true
+     :formatter "%s %s %s"}
+    "Dependency License Name License Type Misc                                    \naiohttp:3.7.2 Apache Software License Permissive Too many requests                       \n\nLicense Type Found\nPermissive 1\n"
+    "Verbose, with headers, with totals"]
+   [{:headers
+     {:items ["Dependency" "License Name" "License Type" "Misc"]
+      :totals ["License Type" "Found"]}
+     :items []
+     :totals {}
+     :fails nil}
+    {:verbose false
+     :totals true
+     :headers true
+     :formatter "%s %s %s"}
+    "Dependency License Name License Type\n\nLicense Type Found\n"
+    "No items, with headers, with totals"]
+   [{:headers
+     {:items ["Dependency" "License Name" "License Type" "Misc"]
+      :totals ["License Type" "Found"]}
+     :items []
+     :totals {}
+     :fails nil}
+    {:verbose false
+     :totals true
+     :headers false
+     :formatter "%s %s %s"}
+    "\n"
+    "No items, no headers, with totals"]
+   [{:headers
+     {:items ["Dependency" "License Name" "License Type" "Misc"]
+      :totals ["License Type" "Found"]}
+     :items []
+     :totals {}
+     :fails nil}
+    {:verbose false
+     :totals false
+     :headers false
+     :formatter "%s %s %s"}
+    ""
+    "No items, no headers, no totals"]])
+
+(deftest test-print-report
+  (testing "Print report"
+    (doseq [[report options expected description] params-report]
+      (testing description
+        (is (= expected (with-out-str (report/print-report report options))))))))

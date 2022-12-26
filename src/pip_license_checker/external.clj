@@ -19,8 +19,6 @@
   (:require
    [clojure.edn :as edn]
    [clojure.string :as str]
-   [cocoapods-acknowledgements-licenses.core :refer [plist->data]]
-   [gradle-licenses.core :refer [gradle-json->data]]
    [pip-license-checker.data :as d]
    [pip-license-checker.file :as file]
    [pip-license-checker.filters :as filters]
@@ -88,8 +86,8 @@
   "Get parse function for given external file format"
   [{:keys [external-format]}]
   (cond
-    (= external-format format-cocoapods) plist->data
-    (= external-format format-gradle) gradle-json->data
+    (= external-format format-cocoapods) file/cocoapods-plist->data
+    (= external-format format-gradle) file/gradle-json->data
     (= external-format format-edn) file/edn->data
     :else file/csv->data))
 

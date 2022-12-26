@@ -33,12 +33,14 @@
                :pre false
                :external-format "csv"
                :external-options external/default-options
-               :formatter report/table-formatter
-               :with-totals false
+               :formatter report/report-formatter
+               :totals false
                :totals-only false
-               :table-headers false
+               :headers false
                :fails-only false
                :github-token nil
+               :parallel true
+               :exit true
                :rate-limits {:requests 120 :millis 60000}}}
     "Requirements only run"]
    [["django"
@@ -51,12 +53,14 @@
                :pre false
                :external-format "csv"
                :external-options external/default-options
-               :formatter report/table-formatter
-               :with-totals false
+               :formatter report/report-formatter
+               :totals false
                :totals-only false
-               :table-headers false
+               :headers false
                :fails-only false
                :github-token nil
+               :parallel true
+               :exit true
                :rate-limits {:requests 120 :millis 60000}}}
     "Packages only"]
    [["--external"
@@ -69,12 +73,14 @@
                :pre false
                :external-format "csv"
                :external-options external/default-options
-               :formatter report/table-formatter
-               :with-totals false
+               :formatter report/report-formatter
+               :totals false
                :totals-only false
-               :table-headers false
+               :headers false
                :fails-only false
                :github-token nil
+               :parallel true
+               :exit true
                :rate-limits {:requests 120 :millis 60000}}}
     "External only"]
    [["--requirements"
@@ -93,12 +99,14 @@
                :pre false
                :external-format "csv"
                :external-options external/default-options
-               :formatter report/table-formatter
-               :with-totals false
+               :formatter report/report-formatter
+               :totals false
                :totals-only false
-               :table-headers false
+               :headers false
                :fails-only false
                :github-token nil
+               :parallel true
+               :exit true
                :rate-limits {:requests 120 :millis 60000}}}
     "Requirements, packages and externals"]
    [["--requirements"
@@ -113,12 +121,14 @@
                :pre false
                :external-format "csv"
                :external-options external/default-options
-               :formatter report/table-formatter
-               :with-totals false
+               :formatter report/report-formatter
+               :totals false
                :totals-only false
-               :table-headers false
+               :headers false
                :fails-only false
                :github-token nil
+               :parallel true
+               :exit true
                :rate-limits {:requests 25 :millis 60000}}}
     "Requirements, rate limits"]
    [["--requirements"
@@ -135,12 +145,14 @@
                :pre false
                :external-format "csv"
                :external-options external/default-options
-               :formatter report/table-formatter
-               :with-totals false
+               :formatter report/report-formatter
+               :totals false
                :totals-only false
-               :table-headers false
+               :headers false
                :fails-only false
                :github-token "github-oauth-bearer-token"
+               :parallel true
+               :exit true
                :rate-limits {:requests 25 :millis 60000}}}
     "GitHub OAuth token"]
    [["--external"
@@ -149,7 +161,7 @@
      "{:skip-header false :skip-footer true :int-opt 42 :str-opt \"str-val\"}"
      "--external-format"
      "cocoapods"
-     "--with-totals"]
+     "--totals"]
     {:requirements []
      :external ["resources/external.cocoapods"]
      :packages []
@@ -158,12 +170,14 @@
                :pre false
                :external-format "cocoapods"
                :external-options {:skip-header false :skip-footer true :int-opt 42 :str-opt "str-val"}
-               :formatter report/table-formatter
-               :with-totals true
+               :formatter report/report-formatter
+               :totals true
                :totals-only false
-               :table-headers false
+               :headers false
                :fails-only false
                :github-token nil
+               :parallel true
+               :exit true
                :rate-limits {:requests 120 :millis 60000}}}
     "Externals with format and options specified"]
    [["--external"
@@ -181,11 +195,13 @@
                :external-format "cocoapods"
                :external-options {:skip-header true, :skip-footer true}
                :formatter "%-50s %-50s %-30s"
-               :with-totals false
+               :totals false
                :totals-only false
-               :table-headers false
+               :headers false
                :fails-only false
                :github-token nil
+               :parallel true
+               :exit true
                :rate-limits {:requests 120 :millis 60000}}}
     "Formatter string"]
    [["-v"
@@ -204,16 +220,25 @@
                :external-format "cocoapods"
                :external-options {:skip-header true, :skip-footer true}
                :formatter "%-50s %-50s %-30s"
-               :with-totals false
+               :totals false
                :totals-only false
-               :table-headers false
+               :headers false
                :fails-only false
                :github-token nil
+               :parallel true
+               :exit true
                :rate-limits {:requests 120 :millis 60000}}}
     "Verbose output"]
    [["--help"]
     {:exit-message "placeholder" :ok? true}
-    "Help run"]])
+    "Help run"]
+   [["--no-parallel"]
+    {:exit-message "placeholder"}
+    "No packages, no requirements, no external files"]
+   [["-r" "--resources/requirements.txt"
+     "--formatter" "%s %s %s %s %s %d"]
+    {:exit-message "The following errors occurred while parsing command arguments:\nFailed to validate \"-r --resources/requirements.txt\": Requirements file does not exist\nFailed to validate \"--formatter %s %s %s %s %s %d\": Invalid formatter string. Expected a printf-style formatter to cover 4 columns of string data, e.g. '%-35s %-55s %-20s'"}
+    "Invalid option"]])
 
 (deftest ^:cli ^:default
   test-validate-args
@@ -224,7 +249,7 @@
          [core/usage (constantly "placeholder")]
           (is (= expected (core/validate-args args))))))))
 
-(def params-get-license-type-totals
+(def params-get-totals
   [[[] {} "Empty vector"]
    [[{:ok? true,
       :requirement {:name "aiohttp", :version "3.7.2"},
@@ -247,55 +272,85 @@
     "Multiple types"]])
 
 (deftest
-  test-get-license-type-totals
+  test-get-totals
   (testing "Count totals"
     (doseq [[licenses expected description]
-            params-get-license-type-totals]
+            params-get-totals]
       (testing description
         (is
-         (= expected (core/get-license-type-totals licenses)))))))
+         (= expected (core/get-totals licenses)))))))
 
-(def params-process-deps
+(def params-main
   [[[]
     []
-    {:fail #{} :with-totals false :totals-only false :table-headers false}
+    ["-r" "resources/requirements.txt"
+     "-x" "resources/external.csv"
+     "--no-totals"
+     "--no-totals-only"
+     "--no-headers"
+     "--no-parallel"
+     "--no-exit"]
     ""
     "No licenses"]
    [[{:ok? true,
       :requirement {:name "test", :version "3.7.2"},
       :license {:name "MIT License", :type "Permissive"}}]
     []
-    {:fail #{} :with-totals false :totals-only false :table-headers false}
-    (str (format report/table-formatter "test:3.7.2" "MIT License" "Permissive") "\n")
+    ["-r" "resources/requirements.txt"
+     "-x" "resources/external.csv"
+     "--no-totals"
+     "--no-totals-only"
+     "--no-headers"
+     "--no-parallel"
+     "--no-exit"]
+    (str (format report/report-formatter "test:3.7.2" "MIT License" "Permissive") "\n")
     "No headers"]
    [[{:ok? true,
       :requirement {:name "test", :version "3.7.2"},
       :license {:name "MIT License", :type "Permissive"}}]
     []
-    {:fail #{} :with-totals false :totals-only false :table-headers true}
+    ["-r" "resources/requirements.txt"
+     "-x" "resources/external.csv"
+     "--no-totals"
+     "--no-totals-only"
+     "--headers"
+     "--no-parallel"
+     "--no-exit"]
     (str/join
-     [(str (format report/table-formatter "Requirement" "License Name" "License Type") "\n")
-      (str (format report/table-formatter "test:3.7.2" "MIT License" "Permissive") "\n")])
+     [(str (format report/report-formatter "Dependency" "License Name" "License Type") "\n")
+      (str (format report/report-formatter "test:3.7.2" "MIT License" "Permissive") "\n")])
     "With headers"]
    [[{:ok? true,
       :requirement {:name "test", :version "3.7.2"},
       :license {:name "MIT License", :type "Permissive"}}]
     []
-    {:fail #{} :with-totals true :totals-only false :table-headers true}
+    ["-r" "resources/requirements.txt"
+     "-x" "resources/external.csv"
+     "--totals"
+     "--no-totals-only"
+     "--headers"
+     "--no-parallel"
+     "--no-exit"]
     (str/join
-     [(str (format report/table-formatter "Requirement" "License Name" "License Type") "\n")
-      (str (format report/table-formatter "test:3.7.2" "MIT License" "Permissive") "\n")
+     [(str (format report/report-formatter "Dependency" "License Name" "License Type") "\n")
+      (str (format report/report-formatter "test:3.7.2" "MIT License" "Permissive") "\n")
       "\n"
-      (str (format report/totals-formatter "License Type" "Found") "\n")
-      (str (format report/totals-formatter "Permissive" 1) "\n")])
+      (str (format (report/get-totals-fmt) "License Type" "Found") "\n")
+      (str (format (report/get-totals-fmt) "Permissive" 1) "\n")])
     "With totals"]
    [[{:ok? true,
       :requirement {:name "test", :version "3.7.2"},
       :license {:name "MIT License", :type "Permissive"}}]
     []
-    {:fail #{} :with-totals false :totals-only true :table-headers false}
+    ["-r" "resources/requirements.txt"
+     "-x" "resources/external.csv"
+     "--no-totals"
+     "--totals-only"
+     "--no-headers"
+     "--no-parallel"
+     "--no-exit"]
     (str/join
-     [(str (format report/totals-formatter "Permissive" 1) "\n")])
+     [(str (format (report/get-totals-fmt) "Permissive" 1) "\n")])
     "Totals only"]
    [[{:ok? true,
       :requirement {:name "test", :version "3.7.2"},
@@ -303,31 +358,40 @@
     [{:ok? true,
       :requirement {:name "another", :version "0.1.2"},
       :license {:name "BSD License", :type "Permissive"}}]
-    {:fail #{} :with-totals false :totals-only false :table-headers false}
+    ["-r" "resources/requirements.txt"
+     "-x" "resources/external.csv"
+     "--no-totals"
+     "--no-totals-only"
+     "--no-headers"
+     "--no-parallel"
+     "--no-exit"]
     (str/join
-     [(str (format report/table-formatter "test:3.7.2" "MIT License" "Permissive") "\n")
-      (str (format report/table-formatter "another:0.1.2" "BSD License" "Permissive") "\n")])
-    "Requirements and external file"]
-   [[{:ok? true,
-      :requirement {:name "test", :version "3.7.2"},
-      :license {:name "MIT License", :type "Permissive"}}]
-    []
-    {:fail #{"Permissive"} :with-totals false :totals-only true :table-headers false}
-    (str/join
-     [(str (format report/totals-formatter "Permissive" 1) "\n")
-      "Exit code: 1\n"])
-    "License matched, exit with non-zero status code"]])
+     [(str (format report/report-formatter "test:3.7.2" "MIT License" "Permissive") "\n")
+      (str (format report/report-formatter "another:0.1.2" "BSD License" "Permissive") "\n")])
+    "Requirements and external file"]])
 
-(deftest test-process-requirements
-  (testing "Print results"
-    (doseq [[mock-pypi mock-external options expected description] params-process-deps]
+(deftest test-main
+  (testing "main function"
+    (doseq [[mock-pypi mock-external args expected description] params-main]
       (testing description
         (with-redefs
          [pypi/get-parsed-deps (constantly mock-pypi)
-          external/get-parsed-deps (constantly mock-external)
-          core/exit #(println (format "Exit code: %s" %))]
-          (let [actual (with-out-str (core/process-deps [] [] [] options))]
+          external/get-parsed-deps (constantly mock-external)]
+          (let [actual (with-out-str (apply core/-main args))]
             (is (= expected actual))))))))
+
+(def params-main-exit
+  [["error" false "Non-zero exit code"]
+   ["error" true "Zero exit code"]])
+
+(deftest test-main-exit
+  (testing "exit"
+    (doseq [[exit-message ok? description] params-main-exit]
+      (testing description
+        (with-redefs
+         [core/validate-args (constantly {:exit-message exit-message :ok? ok?})
+          core/exit (constantly true)]
+          (is (= nil (apply core/-main []))))))))
 
 (def params-options
   [[{:requirements ["test1" "test2"] :totals-only true :fail #{}}
@@ -342,13 +406,43 @@
    [{:requirements ["test1" "test2"]
      :fail #{"WeakCopyleft" "Other"}}
     {:fail #{"WeakCopyleft" "Other"}}
-    "Other copyleft types left unextended"]])
+    "Other copyleft types left unextended"]
+   [{:requirements ["test1" "test2"]
+     :with-totals true
+     :totals false}
+    {:totals true :fail nil}
+    "deprecated --with-totals backward compatible with --totals and still has priority"]
+   [{:requirements ["test1" "test2"]
+     :with-totals nil
+     :totals false}
+    {:totals false :fail nil}
+    "deprecated --with-totals defaults ignored in favour of --totals"]
+   [{:requirements ["test1" "test2"]
+     :with-totals nil
+     :totals true}
+    {:totals true :fail nil}
+    "deprecated --with-totals defaults ignored in favour of --totals for all values"]
+   [{:requirements ["test1" "test2"]
+     :table-headers true
+     :headers false}
+    {:headers true :fail nil}
+    "deprecated --table-headers backward compatible with --headers and still has priority"]
+   [{:requirements ["test1" "test2"]
+     :table-headers nil
+     :headers false}
+    {:headers false :fail nil}
+    "deprecated --table-headers defaults ignored in favour of --headers"]
+   [{:requirements ["test1" "test2"]
+     :table-headers nil
+     :headers true}
+    {:headers true :fail nil}
+    "deprecated --table-headers defaults ignored in favour of --headers for all values"]])
 
-(deftest test-post-process-options
+(deftest test-update-options
   (testing "Post process options"
     (doseq [[options expected description] params-options]
       (testing description
-        (is (= expected (core/post-process-options options)))))))
+        (is (= expected (core/update-options options)))))))
 
 (def params-parse-rate-limits
   [["120/60000" {:requests 120 :millis 60000} "Correct format"]
@@ -372,3 +466,25 @@
     (doseq [[limits-str expected description] params-validate-rate-limits]
       (testing description
         (is (= expected (core/validate-rate-limits limits-str)))))))
+
+(def params-shutdown
+  [[{:fails true}
+    {:exit true :parallel true}
+    "pool\nexit\n"
+    "Stop threads pool, exit"]
+   [{:fails false}
+    {:exit true :parallel true}
+    "pool\n"
+    "Stop threads pool, do not exit"]
+   [{:fails false}
+    {:exit false :parallel true}
+    ""
+    "Do not shutdown"]])
+
+(deftest test-shutdown
+  (testing "Shutdown function"
+    (doseq [[report options expected description] params-shutdown]
+      (testing description
+        (with-redefs [core/exit (fn [& _] (println "exit"))
+                      shutdown-agents (fn [& _] (println "pool"))]
+          (is (= expected (with-out-str (core/shutdown report options)))))))))
