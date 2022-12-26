@@ -34,9 +34,9 @@
                :external-format "csv"
                :external-options external/default-options
                :formatter report/table-formatter
-               :with-totals false
+               :totals false
                :totals-only false
-               :table-headers false
+               :headers false
                :fails-only false
                :github-token nil
                :parallel true
@@ -54,9 +54,9 @@
                :external-format "csv"
                :external-options external/default-options
                :formatter report/table-formatter
-               :with-totals false
+               :totals false
                :totals-only false
-               :table-headers false
+               :headers false
                :fails-only false
                :github-token nil
                :parallel true
@@ -74,9 +74,9 @@
                :external-format "csv"
                :external-options external/default-options
                :formatter report/table-formatter
-               :with-totals false
+               :totals false
                :totals-only false
-               :table-headers false
+               :headers false
                :fails-only false
                :github-token nil
                :parallel true
@@ -100,9 +100,9 @@
                :external-format "csv"
                :external-options external/default-options
                :formatter report/table-formatter
-               :with-totals false
+               :totals false
                :totals-only false
-               :table-headers false
+               :headers false
                :fails-only false
                :github-token nil
                :parallel true
@@ -122,9 +122,9 @@
                :external-format "csv"
                :external-options external/default-options
                :formatter report/table-formatter
-               :with-totals false
+               :totals false
                :totals-only false
-               :table-headers false
+               :headers false
                :fails-only false
                :github-token nil
                :parallel true
@@ -146,9 +146,9 @@
                :external-format "csv"
                :external-options external/default-options
                :formatter report/table-formatter
-               :with-totals false
+               :totals false
                :totals-only false
-               :table-headers false
+               :headers false
                :fails-only false
                :github-token "github-oauth-bearer-token"
                :parallel true
@@ -161,7 +161,7 @@
      "{:skip-header false :skip-footer true :int-opt 42 :str-opt \"str-val\"}"
      "--external-format"
      "cocoapods"
-     "--with-totals"]
+     "--totals"]
     {:requirements []
      :external ["resources/external.cocoapods"]
      :packages []
@@ -171,9 +171,9 @@
                :external-format "cocoapods"
                :external-options {:skip-header false :skip-footer true :int-opt 42 :str-opt "str-val"}
                :formatter report/table-formatter
-               :with-totals true
+               :totals true
                :totals-only false
-               :table-headers false
+               :headers false
                :fails-only false
                :github-token nil
                :parallel true
@@ -195,9 +195,9 @@
                :external-format "cocoapods"
                :external-options {:skip-header true, :skip-footer true}
                :formatter "%-50s %-50s %-30s"
-               :with-totals false
+               :totals false
                :totals-only false
-               :table-headers false
+               :headers false
                :fails-only false
                :github-token nil
                :parallel true
@@ -220,9 +220,9 @@
                :external-format "cocoapods"
                :external-options {:skip-header true, :skip-footer true}
                :formatter "%-50s %-50s %-30s"
-               :with-totals false
+               :totals false
                :totals-only false
-               :table-headers false
+               :headers false
                :fails-only false
                :github-token nil
                :parallel true
@@ -285,9 +285,9 @@
     []
     ["-r" "resources/requirements.txt"
      "-x" "resources/external.csv"
-     "--no-with-totals"
+     "--no-totals"
      "--no-totals-only"
-     "--no-table-headers"
+     "--no-headers"
      "--no-parallel"
      "--no-exit"]
     ""
@@ -298,9 +298,9 @@
     []
     ["-r" "resources/requirements.txt"
      "-x" "resources/external.csv"
-     "--no-with-totals"
+     "--no-totals"
      "--no-totals-only"
-     "--no-table-headers"
+     "--no-headers"
      "--no-parallel"
      "--no-exit"]
     (str (format report/table-formatter "test:3.7.2" "MIT License" "Permissive") "\n")
@@ -311,9 +311,9 @@
     []
     ["-r" "resources/requirements.txt"
      "-x" "resources/external.csv"
-     "--no-with-totals"
+     "--no-totals"
      "--no-totals-only"
-     "--table-headers"
+     "--headers"
      "--no-parallel"
      "--no-exit"]
     (str/join
@@ -326,9 +326,9 @@
     []
     ["-r" "resources/requirements.txt"
      "-x" "resources/external.csv"
-     "--with-totals"
+     "--totals"
      "--no-totals-only"
-     "--table-headers"
+     "--headers"
      "--no-parallel"
      "--no-exit"]
     (str/join
@@ -344,9 +344,9 @@
     []
     ["-r" "resources/requirements.txt"
      "-x" "resources/external.csv"
-     "--no-with-totals"
+     "--no-totals"
      "--totals-only"
-     "--no-table-headers"
+     "--no-headers"
      "--no-parallel"
      "--no-exit"]
     (str/join
@@ -360,9 +360,9 @@
       :license {:name "BSD License", :type "Permissive"}}]
     ["-r" "resources/requirements.txt"
      "-x" "resources/external.csv"
-     "--no-with-totals"
+     "--no-totals"
      "--no-totals-only"
-     "--no-table-headers"
+     "--no-headers"
      "--no-parallel"
      "--no-exit"]
     (str/join
@@ -406,13 +406,43 @@
    [{:requirements ["test1" "test2"]
      :fail #{"WeakCopyleft" "Other"}}
     {:fail #{"WeakCopyleft" "Other"}}
-    "Other copyleft types left unextended"]])
+    "Other copyleft types left unextended"]
+   [{:requirements ["test1" "test2"]
+     :with-totals true
+     :totals false}
+    {:totals true :fail nil}
+    "deprecated --with-totals backward compatible with --totals and still has priority"]
+   [{:requirements ["test1" "test2"]
+     :with-totals nil
+     :totals false}
+    {:totals false :fail nil}
+    "deprecated --with-totals defaults ignored in favour of --totals"]
+   [{:requirements ["test1" "test2"]
+     :with-totals nil
+     :totals true}
+    {:totals true :fail nil}
+    "deprecated --with-totals defaults ignored in favour of --totals for all values"]
+   [{:requirements ["test1" "test2"]
+     :table-headers true
+     :headers false}
+    {:headers true :fail nil}
+    "deprecated --table-headers backward compatible with --headers and still has priority"]
+   [{:requirements ["test1" "test2"]
+     :table-headers nil
+     :headers false}
+    {:headers false :fail nil}
+    "deprecated --table-headers defaults ignored in favour of --headers"]
+   [{:requirements ["test1" "test2"]
+     :table-headers nil
+     :headers true}
+    {:headers true :fail nil}
+    "deprecated --table-headers defaults ignored in favour of --headers for all values"]])
 
-(deftest test-post-process-options
+(deftest test-update-options
   (testing "Post process options"
     (doseq [[options expected description] params-options]
       (testing description
-        (is (= expected (core/post-process-options options)))))))
+        (is (= expected (core/update-options options)))))))
 
 (def params-parse-rate-limits
   [["120/60000" {:requests 120 :millis 60000} "Correct format"]

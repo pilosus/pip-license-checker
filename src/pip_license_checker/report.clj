@@ -81,22 +81,24 @@
 (defn print-report
   "Print report to standard output"
   [report options]
-  (let [{:keys [table-headers with-totals totals-only]} options
+  (let [{headers-opt :headers
+         totals-opt :totals
+         totals-only-opt :totals-only} options
         {:keys [items totals headers]} report
-        show-totals (or with-totals totals-only)]
+        show-totals (or totals-opt totals-only-opt)]
 
-    (when (not totals-only)
-      (when table-headers
+    (when (not totals-only-opt)
+      (when headers-opt
         (print-line (:items headers) (get-fmt options :items)))
 
       (doseq [i items]
         (print-line (get-items i) (get-fmt options :items)))
 
-      (when with-totals
+      (when totals-opt
         (println)))
 
     (when show-totals
-      (when table-headers
+      (when headers-opt
         (print-line (:totals headers) (get-fmt options :totals)))
 
       (doseq [t totals]

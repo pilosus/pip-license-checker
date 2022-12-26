@@ -1,0 +1,6 @@
+# ack is a CLI tool that is better than grep
+# https://beyondgrep.com/
+--ignore-dir=target/
+--ignore-dir=.github/
+--ignore-dir=.git/
+--ignore-file=match:\.lein\-

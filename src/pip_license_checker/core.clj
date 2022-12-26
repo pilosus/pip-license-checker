@@ -110,7 +110,7 @@
         "pip-license-checker django"
         "pip-license-checker aiohttp==3.7.2 piny==0.6.0 django"
         "pip-license-checker --pre 'aiohttp<4'"
-        "pip-license-checker --with-totals --table-headers --requirements resources/requirements.txt"
+        "pip-license-checker --totals --heading --requirements resources/requirements.txt"
         "pip-license-checker --totals-only -r file1.txt -r file2.txt -r file3.txt"
         "pip-license-checker -r resources/requirements.txt django aiohttp==3.7.1 --exclude 'aio.*'"
         "pip-license-checker -r resources/requirements.txt --rate-limits 10/1000"
@@ -173,9 +173,11 @@
    ["-e" "--exclude REGEX" "PCRE to exclude packages with matching names" :parse-fn #(re-pattern %)]
    [nil "--exclude-license REGEX" "PCRE to exclude packages with matching license names" :parse-fn #(re-pattern %)]
    [nil "--[no-]pre" "Include pre-release and development versions. By default, use only stable versions" :default false]
-   [nil "--[no-]with-totals" "Print totals for license types" :default false]
+   [nil "--[no-]with-totals" "[deprecated '0.41.0'] Print totals for license types" :default nil]
+   [nil "--[no-]totals" "Print totals for license types" :default false]
    [nil "--[no-]totals-only" "Print only totals for license types" :default false]
-   [nil "--[no-]table-headers" "Print table headers" :default false]
+   [nil "--[no-]table-headers" "[deprecated '0.41.0'] Print table headers" :default nil]
+   [nil "--[no-]headers" "Print report headers" :default false]
    [nil "--[no-]fails-only" "Print only packages of license types specified with --fail flags" :default false]
    [nil "--[no-]parallel" "Run requests in parallel" :default true]
    [nil "--[no-]exit" "Exit program, used for CLI mode" :default true]
@@ -196,14 +198,32 @@
      #{license/type-copyleft-all})
     fail-opts))
 
-(defn post-process-options
+(defn assoc-if
+  "Add key-value to a map if value is not nil"
+  [coll key value]
+  (if (some? value) (assoc coll key value) coll))
+
+(defn process-deprecated-options
+  "Route deprecated options to support backward compatibility"
+  [options]
+  (let [{:keys [with-totals table-headers]} options  ;; deprecated
+        {:keys [totals headers]} options  ;; new ones
+        totals-opt (if (some? with-totals) with-totals totals)
+        headers-opt (if (some? table-headers) table-headers headers)
+        opts' (dissoc options :with-totals :table-headers :totals :headers)
+        opts'' (assoc-if opts' :totals totals-opt)
+        opts''' (assoc-if opts'' :headers headers-opt)]
+    opts'''))
+
+(defn update-options
   "Update options map"
   [options]
   (let [opts' (dissoc options :requirements :external)
         fail-opt (:fail opts')
-        fail-opt-exteded (extend-fail-opt fail-opt)
-        updated-opts (assoc opts' :fail fail-opt-exteded)]
-    updated-opts))
+        fail-opt-exteded (extend-fail-opt fail-opt)]
+    (-> opts'
+        (assoc :fail fail-opt-exteded)
+        process-deprecated-options)))
 
 (defn validate-args
   "Parse and validate CLI arguments for entrypoint"
@@ -219,7 +239,7 @@
       {:requirements (:requirements options)
        :external (:external options)
        :packages arguments
-       :options (post-process-options options)}
+       :options (update-options options)}
       :else
       {:exit-message (usage summary)})))
 

@@ -123,29 +123,29 @@
 (def params-report
   [[report
     {:verbose false
-     :with-totals false
-     :table-headers false
+     :totals false
+     :headers false
      :formatter "%s %s %s"}
     "aiohttp:3.7.2 Apache Software License Permissive\n"
     "Non-verbose, no headers, no-totals"]
    [report
     {:verbose false
-     :with-totals false
-     :table-headers true
+     :totals false
+     :headers true
      :formatter "%s %s %s"}
     "Dependency License Name License Type\naiohttp:3.7.2 Apache Software License Permissive\n"
     "Non-verbose, with headers, no-totals"]
    [report
     {:verbose false
-     :with-totals true
-     :table-headers true
+     :totals true
+     :headers true
      :formatter "%s %s %s"}
     "Dependency License Name License Type\naiohttp:3.7.2 Apache Software License Permissive\n\nLicense Type Found\nPermissive 1\n"
     "Non-verbose, with headers, with totals"]
    [report
     {:verbose true
-     :with-totals true
-     :table-headers true
+     :totals true
+     :headers true
      :formatter "%s %s %s"}
     "Dependency License Name License Type Misc                                    \naiohttp:3.7.2 Apache Software License Permissive Too many requests                       \n\nLicense Type Found\nPermissive 1\n"
     "Verbose, with headers, with totals"]
@@ -156,8 +156,8 @@
      :totals {}
      :fails nil}
     {:verbose false
-     :with-totals true
-     :table-headers true
+     :totals true
+     :headers true
      :formatter "%s %s %s"}
     "Dependency License Name License Type\n\nLicense Type Found\n"
     "No items, with headers, with totals"]
@@ -168,8 +168,8 @@
      :totals {}
      :fails nil}
     {:verbose false
-     :with-totals true
-     :table-headers false
+     :totals true
+     :headers false
      :formatter "%s %s %s"}
     "\n"
     "No items, no headers, with totals"]
@@ -180,8 +180,8 @@
      :totals {}
      :fails nil}
     {:verbose false
-     :with-totals false
-     :table-headers false
+     :totals false
+     :headers false
      :formatter "%s %s %s"}
     ""
     "No items, no headers, no totals"]])

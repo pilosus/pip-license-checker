@@ -5,6 +5,37 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 
 ## [Unreleased]
 
+## [0.41.0] - 2022-12-26
+
+Release **breaks backward compatibility** if you use the tool as a
+library in your Clojure code (see `Changed` section).
+
+Release **deprecates** some command-line options in favour of the new
+ones. Deprecated options **will be removed in future releases**. Until
+removed, backward compatibility is supported for the deprecated
+options when used explicitly (see `Deprecated` section).
+
+### Added
+- Option `--[no-]parallel` (default true) to toggle parallel requests to
+  third-party APIs.
+- Option `--[no-]exit` (default true) to toggle explicit `System/exit` call
+  upon program completion. Used to avoid exit when calling `main` in
+  your Clojure code as opposed to CLI invocation.
+
+### Changed
+- Massive refactoring to change function names and signatures, add new
+  functions, remove unused to better separate report generation and
+  representation (see [PR 120](https://github.com/pilosus/pip-license-checker/pull/120)).
+- Dependencies `org.clojars.vrs/cocoapods-acknowledgements-licenses`
+  and `org.clojars.vrs/gradle-licenses` moved in to the projects code
+  base. See changes in namespaces `pip-license-checker.file` and
+  `pip-license-checker.external`.
+- Clojure version upgraded from `1.10.1` to `1.11.1`.
+
+### Deprecated
+- Option `--[no-]with-totals` deprecated in favour of `--[no-]totals`
+- Option `--[no-]table-headers` deprecated in favour of `--[no-]headers`
+
 ## [0.40.0] - 2022-12-04
 
 ### Added
@@ -329,7 +360,8 @@ weak copyleft types.
 ### Added
 - Structure for Leiningen app project
 
-[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.40.0...HEAD
+[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.41.0...HEAD
+[0.41.0]: https://github.com/pilosus/pip-license-checker/compare/0.40.0...0.41.0
 [0.40.0]: https://github.com/pilosus/pip-license-checker/compare/0.39.0...0.40.0
 [0.39.0]: https://github.com/pilosus/pip-license-checker/compare/0.38.0...0.39.0
 [0.38.0]: https://github.com/pilosus/pip-license-checker/compare/0.37.0...0.38.0

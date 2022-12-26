@@ -162,25 +162,27 @@ Usage:
 pip-license-checker [options]... [package]...
 
 Description:
-  package	List of package names in format `name[specifier][version]`
+  package	List of Python package names in format `name[specifier][version]`
 
-  -v, --verbose                           false                                   Make output verbose
-  -r, --requirements REQUIREMENT_NAME     []                                      Requirement file name to read
-  -x, --external FILE_NAME                []                                      File containing package names and license names
-      --external-format FILE_FORMAT       csv                                     External file format: csv, cocoapods, edn, gradle
-      --external-options OPTS_EDN_STRING  {:skip-header true, :skip-footer true}  String of options map in EDN format
-      --formatter PRINTF_FMT              %-35s %-55s %-30s                       Printf-style formatter string for report formatting
-  -f, --fail LICENSE_TYPE                 #{}                                     Return non-zero exit code if license type is found
-  -e, --exclude REGEX                                                             PCRE to exclude packages with matching names
-      --exclude-license REGEX                                                     PCRE to exclude packages with matching license names
-      --[no-]pre                                                                  Include pre-release and development versions. By default, use only stable versions
-      --[no-]with-totals                                                          Print totals for license types
-      --[no-]totals-only                                                          Print only totals for license types
-      --[no-]table-headers                                                        Print table headers
-      --[no-]fails-only                                                           Print only packages of license types specified with --fail flags
-      --rate-limits REQUESTS/MILLISECONDS  {:requests 120, :millis 60000}         Rate limit requests to public APIs
-      --github-token TOKEN                 nil                                    GitHub OAuth Token to increase rate-limits. Defaults to GITHUB_TOKEN env
-  -h, --help                                                                      Print this help message
+  -v, --verbose                            false                                   Make output verbose
+  -r, --requirements REQUIREMENTS_FILE     []                                      Python pip requirement file name
+  -x, --external FILE_NAME                 []                                      File containing package names and license names
+      --external-format FILE_FORMAT        csv                                     External file format: csv, cocoapods, gradle
+      --external-options OPTS_EDN_STRING   {:skip-header true, :skip-footer true}  String of options map in EDN format
+      --formatter PRINTF_FMT               %-35s %-55s %-20s                       Printf-style formatter string for report formatting
+  -f, --fail LICENSE_TYPE                  #{}                                     Return non-zero exit code if license type is found
+  -e, --exclude REGEX                                                              PCRE to exclude packages with matching names
+      --exclude-license REGEX                                                      PCRE to exclude packages with matching license names
+      --[no-]pre                           false                                   Include pre-release and development versions. By default, use only stable versions
+      --[no-]with-totals                   false                                   Print totals for license types
+      --[no-]totals-only                   false                                   Print only totals for license types
+      --[no-]table-headers                 false                                   Print table headers
+      --[no-]fails-only                    false                                   Print only packages of license types specified with --fail flags
+      --[no-]parallel                      true                                    Run requests in parallel
+      --[no-]exit                          true                                    Exit program, used for CLI mode
+      --rate-limits REQUESTS/MILLISECONDS  {:requests 120, :millis 60000}          Rate limit requests to public APIs
+      --github-token TOKEN                 nil                                     GitHub OAuth Token to increase rate-limits. Defaults to GITHUB_TOKEN env
+  -h, --help                                                                       Print this help message
 
 Examples:
 pip-license-checker django
