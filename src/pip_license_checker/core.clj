@@ -28,6 +28,8 @@
    [pip-license-checker.pypi :as pypi]
    [pip-license-checker.report :as report]))
 
+;; helpers
+
 (defn exit
   "Exit from the app with exit status"
   ([status]
@@ -35,6 +37,8 @@
   ([status msg]
    (println msg)
    (exit status)))
+
+;; report generation and representation
 
 (defn get-totals
   "Return a map of license types as keys and frequencies as values"
@@ -79,15 +83,17 @@
 (defn shutdown
   "Shutdown the app gracefully"
   [report options]
-  (let [{:keys [parallel exit]} options
-        {fail? :fails} report]
+  (let [{parallel-opt :parallel exit-opt :exit} options
+        {fails :fails} report]
     ;; shutdown a thread pool used by pmap to allow JVM shutdown
     ;; pmap is used only with --parallel option
-    (when parallel
-      (shutdown-agents))
+    (when exit-opt
+      (when parallel-opt
+        (shutdown-agents))
+      (when fails
+        (exit 1)))))
 
-    (when (and fail? exit)
-      (exit 1))))
+;; cli args
 
 (defn usage [options-summary]
   (->> ["pip-license-checker - license compliance tool to identify dependencies license names and types."
@@ -191,7 +197,7 @@
     fail-opts))
 
 (defn post-process-options
-  "Update option map"
+  "Update options map"
   [options]
   (let [opts' (dissoc options :requirements :external)
         fail-opt (:fail opts')
@@ -216,6 +222,8 @@
        :options (post-process-options options)}
       :else
       {:exit-message (usage summary)})))
+
+;; entrypoint
 
 (defn -main
   "App entry point"

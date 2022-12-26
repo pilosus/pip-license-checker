@@ -148,7 +148,43 @@
      :table-headers true
      :formatter "%s %s %s"}
     "Dependency License Name License Type Misc                                    \naiohttp:3.7.2 Apache Software License Permissive Too many requests                       \n\nLicense Type Found\nPermissive 1\n"
-    "Verbose, with headers, with totals"]])
+    "Verbose, with headers, with totals"]
+   [{:headers
+     {:items ["Dependency" "License Name" "License Type" "Misc"]
+      :totals ["License Type" "Found"]}
+     :items []
+     :totals {}
+     :fails nil}
+    {:verbose false
+     :with-totals true
+     :table-headers true
+     :formatter "%s %s %s"}
+    "Dependency License Name License Type\n\nLicense Type Found\n"
+    "No items, with headers, with totals"]
+   [{:headers
+     {:items ["Dependency" "License Name" "License Type" "Misc"]
+      :totals ["License Type" "Found"]}
+     :items []
+     :totals {}
+     :fails nil}
+    {:verbose false
+     :with-totals true
+     :table-headers false
+     :formatter "%s %s %s"}
+    "\n"
+    "No items, no headers, with totals"]
+   [{:headers
+     {:items ["Dependency" "License Name" "License Type" "Misc"]
+      :totals ["License Type" "Found"]}
+     :items []
+     :totals {}
+     :fails nil}
+    {:verbose false
+     :with-totals false
+     :table-headers false
+     :formatter "%s %s %s"}
+    ""
+    "No items, no headers, no totals"]])
 
 (deftest test-print-report
   (testing "Print report"

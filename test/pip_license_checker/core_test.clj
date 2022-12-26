@@ -231,7 +231,14 @@
     "Verbose output"]
    [["--help"]
     {:exit-message "placeholder" :ok? true}
-    "Help run"]])
+    "Help run"]
+   [["--no-parallel"]
+    {:exit-message "placeholder"}
+    "No packages, no requirements, no external files"]
+   [["-r" "--resources/requirements.txt"
+     "--formatter" "%s %s %s %s %s %d"]
+    {:exit-message "The following errors occurred while parsing command arguments:\nFailed to validate \"-r --resources/requirements.txt\": Requirements file does not exist\nFailed to validate \"--formatter %s %s %s %s %s %d\": Invalid formatter string. Expected a printf-style formatter to cover 4 columns of string data, e.g. '%-35s %-55s %-20s'"}
+    "Invalid option"]])
 
 (deftest ^:cli ^:default
   test-validate-args
@@ -373,6 +380,19 @@
           (let [actual (with-out-str (apply core/-main args))]
             (is (= expected actual))))))))
 
+(def params-main-exit
+  [["error" false "Non-zero exit code"]
+   ["error" true "Zero exit code"]])
+
+(deftest test-main-exit
+  (testing "exit"
+    (doseq [[exit-message ok? description] params-main-exit]
+      (testing description
+        (with-redefs
+         [core/validate-args (constantly {:exit-message exit-message :ok? ok?})
+          core/exit (constantly true)]
+          (is (= nil (apply core/-main []))))))))
+
 (def params-options
   [[{:requirements ["test1" "test2"] :totals-only true :fail #{}}
     {:totals-only true :fail #{}}
@@ -416,3 +436,25 @@
     (doseq [[limits-str expected description] params-validate-rate-limits]
       (testing description
         (is (= expected (core/validate-rate-limits limits-str)))))))
+
+(def params-shutdown
+  [[{:fails true}
+    {:exit true :parallel true}
+    "pool\nexit\n"
+    "Stop threads pool, exit"]
+   [{:fails false}
+    {:exit true :parallel true}
+    "pool\n"
+    "Stop threads pool, do not exit"]
+   [{:fails false}
+    {:exit false :parallel true}
+    ""
+    "Do not shutdown"]])
+
+(deftest test-shutdown
+  (testing "Shutdown function"
+    (doseq [[report options expected description] params-shutdown]
+      (testing description
+        (with-redefs [core/exit (fn [& _] (println "exit"))
+                      shutdown-agents (fn [& _] (println "pool"))]
+          (is (= expected (with-out-str (core/shutdown report options)))))))))
