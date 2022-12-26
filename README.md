@@ -3,7 +3,7 @@
 [![codecov](https://codecov.io/gh/pilosus/pip-license-checker/branch/main/graph/badge.svg?token=MXN6PDETET)](https://codecov.io/gh/pilosus/pip-license-checker)
 [![Docker Pulls](https://img.shields.io/docker/pulls/pilosus/pip-license-checker)](https://hub.docker.com/r/pilosus/pip-license-checker/)
 [![Docker Image Version (latest semver)](https://img.shields.io/docker/v/pilosus/pip-license-checker?color=blue&label=docker%20image&sort=semver)](https://hub.docker.com/r/pilosus/pip-license-checker/)
-[![Clojars Project](https://img.shields.io/clojars/v/org.clojars.vrs/pip-license-checker.svg)](https://clojars.org/org.clojars.vrs/pip-license-checker)
+[![Clojars Version](https://img.shields.io/clojars/v/org.pilosus/pip-license-checker)](https://clojars.org/org.pilosus/pip-license-checker/)
 
 License compliance tool. Detect license names and types for Python
 PyPI packages. Identify license types for given license names obtained

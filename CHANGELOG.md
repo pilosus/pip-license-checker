@@ -5,6 +5,13 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 
 ## [Unreleased]
 
+## [0.41.1] - 2022-12-26
+
+### Changed
+- Clojars project moved to
+  [org.pilosus](https://clojars.org/org.pilosus/pip-license-checker/)
+  group.
+
 ## [0.41.0] - 2022-12-26
 
 Release **breaks backward compatibility** if you use the tool as a
@@ -361,7 +368,8 @@ weak copyleft types.
 ### Added
 - Structure for Leiningen app project
 
-[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.41.0...HEAD
+[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.41.1...HEAD
+[0.41.1]: https://github.com/pilosus/pip-license-checker/compare/0.41.0...0.41.1
 [0.41.0]: https://github.com/pilosus/pip-license-checker/compare/0.40.0...0.41.0
 [0.40.0]: https://github.com/pilosus/pip-license-checker/compare/0.39.0...0.40.0
 [0.39.0]: https://github.com/pilosus/pip-license-checker/compare/0.38.0...0.39.0
