@@ -29,7 +29,7 @@
     (doseq [[fmt columns expected description] params-valid-formatter?]
       (testing description
         (with-redefs
-         [report/table-header columns]
+         [report/items-header columns]
           (is (= expected (report/valid-formatter? fmt))))))))
 
 (def params-get-totals-fmt

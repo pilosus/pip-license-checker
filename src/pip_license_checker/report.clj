@@ -20,21 +20,21 @@
    [clojure.string :as str]
    [pip-license-checker.data :as d]))
 
-(def table-header ["Dependency" "License Name" "License Type" "Misc"])
+(def items-header ["Dependency" "License Name" "License Type" "Misc"])
 (def totals-header ["License Type" "Found"])
 (def report-headers
   (d/map->ReportHeader
-   {:items table-header
+   {:items items-header
     :totals totals-header}))
 
-(def table-formatter "%-35s %-55s %-20s")
+(def report-formatter "%-35s %-55s %-20s")
 (def verbose-formatter "%-40s")
 
 (defn valid-formatter?
   "Check if printf-style formatter string is valid"
   [s]
   (try
-    (boolean (apply format s table-header))
+    (boolean (apply format s items-header))
     (catch Exception _ false)))
 
 (def invalid-formatter
@@ -42,12 +42,12 @@
    (str "Invalid formatter string. "
         "Expected a printf-style formatter to cover %s columns of string data, "
         "e.g. '%s'")
-   (count table-header)
-   table-formatter))
+   (count items-header)
+   report-formatter))
 
 (defn get-totals-fmt
   "Get a substring of printf-style formatter string"
-  ([] (get-totals-fmt table-formatter 2))
+  ([] (get-totals-fmt report-formatter 2))
   ([s] (get-totals-fmt s 2))
   ([s n]
    (let [parts (str/split s #"\s+")
@@ -57,7 +57,7 @@
 (defn get-fmt
   "Get printf-style format string for given options and entity (:totals or :items)"
   [options entity]
-  (let [{:keys [formatter] :or {formatter table-formatter}} options
+  (let [{:keys [formatter] :or {formatter report-formatter}} options
         fmt (if (:verbose options)
               (format "%s %s" formatter verbose-formatter)
               formatter)

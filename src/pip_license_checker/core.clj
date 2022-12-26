@@ -163,7 +163,7 @@
     :default external/default-options
     :parse-fn external/opts-str->map]
    [nil "--formatter PRINTF_FMT" "Printf-style formatter string for report formatting"
-    :default report/table-formatter
+    :default report/report-formatter
     :validate [report/valid-formatter? report/invalid-formatter]]
    ["-f" "--fail LICENSE_TYPE" "Return non-zero exit code if license type is found"
     :default (sorted-set)

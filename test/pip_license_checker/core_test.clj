@@ -33,7 +33,7 @@
                :pre false
                :external-format "csv"
                :external-options external/default-options
-               :formatter report/table-formatter
+               :formatter report/report-formatter
                :totals false
                :totals-only false
                :headers false
@@ -53,7 +53,7 @@
                :pre false
                :external-format "csv"
                :external-options external/default-options
-               :formatter report/table-formatter
+               :formatter report/report-formatter
                :totals false
                :totals-only false
                :headers false
@@ -73,7 +73,7 @@
                :pre false
                :external-format "csv"
                :external-options external/default-options
-               :formatter report/table-formatter
+               :formatter report/report-formatter
                :totals false
                :totals-only false
                :headers false
@@ -99,7 +99,7 @@
                :pre false
                :external-format "csv"
                :external-options external/default-options
-               :formatter report/table-formatter
+               :formatter report/report-formatter
                :totals false
                :totals-only false
                :headers false
@@ -121,7 +121,7 @@
                :pre false
                :external-format "csv"
                :external-options external/default-options
-               :formatter report/table-formatter
+               :formatter report/report-formatter
                :totals false
                :totals-only false
                :headers false
@@ -145,7 +145,7 @@
                :pre false
                :external-format "csv"
                :external-options external/default-options
-               :formatter report/table-formatter
+               :formatter report/report-formatter
                :totals false
                :totals-only false
                :headers false
@@ -170,7 +170,7 @@
                :pre false
                :external-format "cocoapods"
                :external-options {:skip-header false :skip-footer true :int-opt 42 :str-opt "str-val"}
-               :formatter report/table-formatter
+               :formatter report/report-formatter
                :totals true
                :totals-only false
                :headers false
@@ -303,7 +303,7 @@
      "--no-headers"
      "--no-parallel"
      "--no-exit"]
-    (str (format report/table-formatter "test:3.7.2" "MIT License" "Permissive") "\n")
+    (str (format report/report-formatter "test:3.7.2" "MIT License" "Permissive") "\n")
     "No headers"]
    [[{:ok? true,
       :requirement {:name "test", :version "3.7.2"},
@@ -317,8 +317,8 @@
      "--no-parallel"
      "--no-exit"]
     (str/join
-     [(str (format report/table-formatter "Dependency" "License Name" "License Type") "\n")
-      (str (format report/table-formatter "test:3.7.2" "MIT License" "Permissive") "\n")])
+     [(str (format report/report-formatter "Dependency" "License Name" "License Type") "\n")
+      (str (format report/report-formatter "test:3.7.2" "MIT License" "Permissive") "\n")])
     "With headers"]
    [[{:ok? true,
       :requirement {:name "test", :version "3.7.2"},
@@ -332,8 +332,8 @@
      "--no-parallel"
      "--no-exit"]
     (str/join
-     [(str (format report/table-formatter "Dependency" "License Name" "License Type") "\n")
-      (str (format report/table-formatter "test:3.7.2" "MIT License" "Permissive") "\n")
+     [(str (format report/report-formatter "Dependency" "License Name" "License Type") "\n")
+      (str (format report/report-formatter "test:3.7.2" "MIT License" "Permissive") "\n")
       "\n"
       (str (format (report/get-totals-fmt) "License Type" "Found") "\n")
       (str (format (report/get-totals-fmt) "Permissive" 1) "\n")])
@@ -366,8 +366,8 @@
      "--no-parallel"
      "--no-exit"]
     (str/join
-     [(str (format report/table-formatter "test:3.7.2" "MIT License" "Permissive") "\n")
-      (str (format report/table-formatter "another:0.1.2" "BSD License" "Permissive") "\n")])
+     [(str (format report/report-formatter "test:3.7.2" "MIT License" "Permissive") "\n")
+      (str (format report/report-formatter "another:0.1.2" "BSD License" "Permissive") "\n")])
     "Requirements and external file"]])
 
 (deftest test-main
