@@ -39,6 +39,8 @@
                :table-headers false
                :fails-only false
                :github-token nil
+               :parallel true
+               :exit true
                :rate-limits {:requests 120 :millis 60000}}}
     "Requirements only run"]
    [["django"
@@ -57,6 +59,8 @@
                :table-headers false
                :fails-only false
                :github-token nil
+               :parallel true
+               :exit true
                :rate-limits {:requests 120 :millis 60000}}}
     "Packages only"]
    [["--external"
@@ -75,6 +79,8 @@
                :table-headers false
                :fails-only false
                :github-token nil
+               :parallel true
+               :exit true
                :rate-limits {:requests 120 :millis 60000}}}
     "External only"]
    [["--requirements"
@@ -99,6 +105,8 @@
                :table-headers false
                :fails-only false
                :github-token nil
+               :parallel true
+               :exit true
                :rate-limits {:requests 120 :millis 60000}}}
     "Requirements, packages and externals"]
    [["--requirements"
@@ -119,6 +127,8 @@
                :table-headers false
                :fails-only false
                :github-token nil
+               :parallel true
+               :exit true
                :rate-limits {:requests 25 :millis 60000}}}
     "Requirements, rate limits"]
    [["--requirements"
@@ -141,6 +151,8 @@
                :table-headers false
                :fails-only false
                :github-token "github-oauth-bearer-token"
+               :parallel true
+               :exit true
                :rate-limits {:requests 25 :millis 60000}}}
     "GitHub OAuth token"]
    [["--external"
@@ -164,6 +176,8 @@
                :table-headers false
                :fails-only false
                :github-token nil
+               :parallel true
+               :exit true
                :rate-limits {:requests 120 :millis 60000}}}
     "Externals with format and options specified"]
    [["--external"
@@ -186,6 +200,8 @@
                :table-headers false
                :fails-only false
                :github-token nil
+               :parallel true
+               :exit true
                :rate-limits {:requests 120 :millis 60000}}}
     "Formatter string"]
    [["-v"
@@ -209,6 +225,8 @@
                :table-headers false
                :fails-only false
                :github-token nil
+               :parallel true
+               :exit true
                :rate-limits {:requests 120 :millis 60000}}}
     "Verbose output"]
    [["--help"]
@@ -224,7 +242,7 @@
          [core/usage (constantly "placeholder")]
           (is (= expected (core/validate-args args))))))))
 
-(def params-get-license-type-totals
+(def params-get-totals
   [[[] {} "Empty vector"]
    [[{:ok? true,
       :requirement {:name "aiohttp", :version "3.7.2"},
@@ -247,55 +265,85 @@
     "Multiple types"]])
 
 (deftest
-  test-get-license-type-totals
+  test-get-totals
   (testing "Count totals"
     (doseq [[licenses expected description]
-            params-get-license-type-totals]
+            params-get-totals]
       (testing description
         (is
-         (= expected (core/get-license-type-totals licenses)))))))
+         (= expected (core/get-totals licenses)))))))
 
-(def params-process-deps
+(def params-main
   [[[]
     []
-    {:fail #{} :with-totals false :totals-only false :table-headers false}
+    ["-r" "resources/requirements.txt"
+     "-x" "resources/external.csv"
+     "--no-with-totals"
+     "--no-totals-only"
+     "--no-table-headers"
+     "--no-parallel"
+     "--no-exit"]
     ""
     "No licenses"]
    [[{:ok? true,
       :requirement {:name "test", :version "3.7.2"},
       :license {:name "MIT License", :type "Permissive"}}]
     []
-    {:fail #{} :with-totals false :totals-only false :table-headers false}
+    ["-r" "resources/requirements.txt"
+     "-x" "resources/external.csv"
+     "--no-with-totals"
+     "--no-totals-only"
+     "--no-table-headers"
+     "--no-parallel"
+     "--no-exit"]
     (str (format report/table-formatter "test:3.7.2" "MIT License" "Permissive") "\n")
     "No headers"]
    [[{:ok? true,
       :requirement {:name "test", :version "3.7.2"},
       :license {:name "MIT License", :type "Permissive"}}]
     []
-    {:fail #{} :with-totals false :totals-only false :table-headers true}
+    ["-r" "resources/requirements.txt"
+     "-x" "resources/external.csv"
+     "--no-with-totals"
+     "--no-totals-only"
+     "--table-headers"
+     "--no-parallel"
+     "--no-exit"]
     (str/join
-     [(str (format report/table-formatter "Requirement" "License Name" "License Type") "\n")
+     [(str (format report/table-formatter "Dependency" "License Name" "License Type") "\n")
       (str (format report/table-formatter "test:3.7.2" "MIT License" "Permissive") "\n")])
     "With headers"]
    [[{:ok? true,
       :requirement {:name "test", :version "3.7.2"},
       :license {:name "MIT License", :type "Permissive"}}]
     []
-    {:fail #{} :with-totals true :totals-only false :table-headers true}
+    ["-r" "resources/requirements.txt"
+     "-x" "resources/external.csv"
+     "--with-totals"
+     "--no-totals-only"
+     "--table-headers"
+     "--no-parallel"
+     "--no-exit"]
     (str/join
-     [(str (format report/table-formatter "Requirement" "License Name" "License Type") "\n")
+     [(str (format report/table-formatter "Dependency" "License Name" "License Type") "\n")
       (str (format report/table-formatter "test:3.7.2" "MIT License" "Permissive") "\n")
       "\n"
-      (str (format report/totals-formatter "License Type" "Found") "\n")
-      (str (format report/totals-formatter "Permissive" 1) "\n")])
+      (str (format (report/get-totals-fmt) "License Type" "Found") "\n")
+      (str (format (report/get-totals-fmt) "Permissive" 1) "\n")])
     "With totals"]
    [[{:ok? true,
       :requirement {:name "test", :version "3.7.2"},
       :license {:name "MIT License", :type "Permissive"}}]
     []
-    {:fail #{} :with-totals false :totals-only true :table-headers false}
+    ["-r" "resources/requirements.txt"
+     "-x" "resources/external.csv"
+     "--no-with-totals"
+     "--totals-only"
+     "--no-table-headers"
+     "--no-parallel"
+     "--no-exit"]
     (str/join
-     [(str (format report/totals-formatter "Permissive" 1) "\n")])
+     [(str (format (report/get-totals-fmt) "Permissive" 1) "\n")])
     "Totals only"]
    [[{:ok? true,
       :requirement {:name "test", :version "3.7.2"},
@@ -303,30 +351,26 @@
     [{:ok? true,
       :requirement {:name "another", :version "0.1.2"},
       :license {:name "BSD License", :type "Permissive"}}]
-    {:fail #{} :with-totals false :totals-only false :table-headers false}
+    ["-r" "resources/requirements.txt"
+     "-x" "resources/external.csv"
+     "--no-with-totals"
+     "--no-totals-only"
+     "--no-table-headers"
+     "--no-parallel"
+     "--no-exit"]
     (str/join
      [(str (format report/table-formatter "test:3.7.2" "MIT License" "Permissive") "\n")
       (str (format report/table-formatter "another:0.1.2" "BSD License" "Permissive") "\n")])
-    "Requirements and external file"]
-   [[{:ok? true,
-      :requirement {:name "test", :version "3.7.2"},
-      :license {:name "MIT License", :type "Permissive"}}]
-    []
-    {:fail #{"Permissive"} :with-totals false :totals-only true :table-headers false}
-    (str/join
-     [(str (format report/totals-formatter "Permissive" 1) "\n")
-      "Exit code: 1\n"])
-    "License matched, exit with non-zero status code"]])
+    "Requirements and external file"]])
 
-(deftest test-process-requirements
-  (testing "Print results"
-    (doseq [[mock-pypi mock-external options expected description] params-process-deps]
+(deftest test-main
+  (testing "main function"
+    (doseq [[mock-pypi mock-external args expected description] params-main]
       (testing description
         (with-redefs
          [pypi/get-parsed-deps (constantly mock-pypi)
-          external/get-parsed-deps (constantly mock-external)
-          core/exit #(println (format "Exit code: %s" %))]
-          (let [actual (with-out-str (core/process-deps [] [] [] options))]
+          external/get-parsed-deps (constantly mock-external)]
+          (let [actual (with-out-str (apply core/-main args))]
             (is (= expected actual))))))))
 
 (def params-options

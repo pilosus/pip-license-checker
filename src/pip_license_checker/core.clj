@@ -20,6 +20,7 @@
    [clojure.set :refer [intersection]]
    [clojure.string :as str]
    [clojure.tools.cli :refer [parse-opts]]
+   [pip-license-checker.data :as d]
    [pip-license-checker.external :as external]
    [pip-license-checker.file :as file]
    [pip-license-checker.filters :as filters]
@@ -35,58 +36,57 @@
    (println msg)
    (exit status)))
 
-(defn get-license-type-totals
-  "Return a frequency map of license types as keys and license types as values"
+(defn get-totals
+  "Return a map of license types as keys and frequencies as values"
   [licenses]
   (->> licenses
-       (map #(:type (:license %)))
+       (map #(get-in % [:license :type]))
        frequencies
        (into (sorted-map))))
 
-(defn process-deps
-  "Print parsed dependencies pretty"
-  [packages requirements external options]
-  (let [{table-headers :table-headers
-         fail-opt :fail
-         with-totals-opt :with-totals
-         totals-only-opt :totals-only} options
-        with-fail (seq fail-opt)
-        show-totals (or with-totals-opt totals-only-opt)
+(defn repack-dep
+  "Remove unused keys from dependency record"
+  [dep]
+  (d/map->ReportItem
+   {:dependency (select-keys (:requirement dep) [:name :version])
+    :license (select-keys (:license dep) [:name :type])
+    :error (:error dep)}))
 
-        deps (concat
-              (pypi/get-parsed-deps packages requirements options)
-              (external/get-parsed-deps external options))
-        licenses (filters/filter-parsed-deps deps options)
+(defn get-deps
+  "Get a list of dependencies from various sources"
+  [arguments]
+  (let [{:keys [packages requirements external options]} arguments
+        python-deps (pypi/get-parsed-deps packages requirements options)
+        external-deps (external/get-parsed-deps external options)
+        deps (concat python-deps external-deps)
+        filtered (filters/filter-parsed-deps deps options)]
+    (map repack-dep filtered)))
 
-        totals (when (or show-totals with-fail) (get-license-type-totals licenses))
-        totals-keys (->> totals
-                         keys
-                         (into (sorted-set)))
+(defn get-report
+  "Get a formatted report"
+  [items options]
+  (let [totals (get-totals items)
+        fails (->> totals
+                   keys
+                   (into (sorted-set))
+                   (intersection (:fail options))
+                   seq)]
+    (d/map->Report {:headers report/report-headers
+                    :items items
+                    :totals totals
+                    :fails fails})))
 
-        fail-types-found (intersection totals-keys fail-opt)
-        fail? (seq fail-types-found)]
-
-    (when (not totals-only-opt)
-      (when table-headers
-        (report/print-license-header options))
-
-      (doseq [line licenses]
-        (println (report/format-license line options))))
-
-    (when with-totals-opt
-      (println))
-
-    (when show-totals
-      (when table-headers
-        (report/print-totals-header options))
-
-      (doseq [[license-type freq] totals]
-        (println (report/format-total license-type freq options))))
-
+(defn shutdown
+  "Shutdown the app gracefully"
+  [report options]
+  (let [{:keys [parallel exit]} options
+        {fail? :fails} report]
     ;; shutdown a thread pool used by pmap to allow JVM shutdown
-    (shutdown-agents)
+    ;; pmap is used only with --parallel option
+    (when parallel
+      (shutdown-agents))
 
-    (when fail?
+    (when (and fail? exit)
       (exit 1))))
 
 (defn usage [options-summary]
@@ -171,6 +171,8 @@
    [nil "--[no-]totals-only" "Print only totals for license types" :default false]
    [nil "--[no-]table-headers" "Print table headers" :default false]
    [nil "--[no-]fails-only" "Print only packages of license types specified with --fail flags" :default false]
+   [nil "--[no-]parallel" "Run requests in parallel" :default true]
+   [nil "--[no-]exit" "Exit program, used for CLI mode" :default true]
    [nil "--rate-limits REQUESTS/MILLISECONDS" "Rate limit requests to public APIs"
     :default {:requests 120 :millis 60000}
     :parse-fn parse-rate-limits
@@ -218,7 +220,13 @@
 (defn -main
   "App entry point"
   [& args]
-  (let [{:keys [packages requirements external options exit-message ok?]} (validate-args args)]
-    (if exit-message
-      (exit (if ok? 0 1) exit-message)
-      (process-deps packages requirements external options))))
+  (let [arguments (validate-args args)
+        {:keys [options exit-message ok?]} arguments]
+    (when exit-message
+      (exit (if ok? 0 1) exit-message))
+
+    (-> arguments
+        get-deps
+        (get-report options)
+        (report/print-report options)
+        (shutdown options))))
