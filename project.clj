@@ -4,15 +4,15 @@
   :license {:name "Eclipse Public License 2.0 OR GNU GPL v2+ with Classpath exception"
             :url "https://github.com/pilosus/pip-license-checker/blob/main/LICENSE"}
   :dependencies [
+                 [cheshire "5.11.0"]
+                 [clj-http "3.12.3"]
+                 [com.github.bdesham/clj-plist "0.10.0"]
+                 [indole "1.0.0"]
+                 [org.clojars.vrs/gradle-licenses "0.2.0"]
                  [org.clojure/clojure "1.10.1"]
                  [org.clojure/data.csv "1.0.1"]
-                 [org.clojure/tools.cli "1.0.214"]
-                 [clj-http "3.12.3"]
-                 [cheshire "5.11.0"]
-                 [indole "1.0.0"]
                  [org.clojure/test.check "1.1.1"]
-                 [org.clojars.vrs/cocoapods-acknowledgements-licenses "0.1.0"]
-                 [org.clojars.vrs/gradle-licenses "0.2.0"]]
+                 [org.clojure/tools.cli "1.0.214"]]
   :plugins [[lein-cljfmt "0.7.0"]
             [lein-cloverage "1.2.1"]
             [lein-licenses "0.2.2"]

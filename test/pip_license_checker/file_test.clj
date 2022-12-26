@@ -210,3 +210,31 @@
     (doseq [[path options description] params-edn->data-integration]
       (testing description
         (is (seq? (file/edn->data path options)))))))
+
+;; Cocoapods
+
+(def cocoapods-default-path "resources/external.cocoapods")
+
+(def cocoapods-default-plist-data
+  [{:package "Acknowledgements" :license nil}
+   {:package "FBSDKCoreKit" :license "Facebook Platform License"}
+   {:package "FirebaseAnalytics" :license "Copyright"}
+   {:package "Swinject" :license "MIT"}
+   {:package "lottie-ios" :license "Apache"}
+   {:package "nanopb" :license "zlib"}
+   {:package nil :license nil}])
+
+(def params-cocoapods-plist->data-integration
+  [[{} (butlast (rest cocoapods-default-plist-data)) "No options provided, use defaults"]
+   [{:skip-header true :skip-footer true} (butlast (rest cocoapods-default-plist-data)) "Skip header explicitly, skip footer explicitly"]
+   [{:skip-header false :skip-footer true} (butlast cocoapods-default-plist-data) "Keep header explicitly, skip footer explicitly"]
+   [{:skip-header true :skip-footer false} (rest cocoapods-default-plist-data) "Skip header explicitly, keep footer explicitly"]
+   [{:skip-footer false} (rest cocoapods-default-plist-data) "Skip header implicitly, keep footer explicitly"]
+   [{:skip-header false} (butlast cocoapods-default-plist-data) "Keep header explicitly, skip footer explicitly"]
+   [{:skip-header false :skip-footer false} cocoapods-default-plist-data "Keep header explicitly, keep footer explicitly"]])
+
+(deftest test-cocoapods-plist->data-integration
+  (testing "Test convertng plist file into clojure map"
+    (doseq [[options expected description] params-cocoapods-plist->data-integration]
+      (testing description
+        (is (= expected (file/cocoapods-plist->data cocoapods-default-path options)))))))

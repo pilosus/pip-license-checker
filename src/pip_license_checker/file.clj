@@ -20,7 +20,8 @@
    [clojure.data.csv :as csv]
    [clojure.edn :as edn]
    [clojure.java.io :as io]
-   [clojure.string :as str]))
+   [clojure.string :as str]
+   [com.github.bdesham.clj-plist :refer [parse-plist]]))
 
 (defn exists?
   "Return true if file exists"
@@ -115,6 +116,34 @@
         selected-columns (map #(take-csv-columns % csv-column-indecies-to-read) data)
         result (map zipmap (repeat csv-header) selected-columns)]
     result))
+
+;; Cocoapods
+
+(def cocoapods-key-specifiers "PreferenceSpecifiers")
+(def cocoapods-key-package-name "Title")
+(def cocoapods-key-license-name "License")
+
+(defn- cocoapods-plist-item->map
+  "Convert plist item map to proper format"
+  [item]
+  (let [package (get item cocoapods-key-package-name)
+        license (get item cocoapods-key-license-name)]
+    {:package package :license license}))
+
+(defn cocoapods-plist->data
+  "Parse Plist into vector of {:package PACKAGE :license LICENSE} maps"
+  [path options]
+  (let [{:keys [skip-header skip-footer] :or {skip-header true skip-footer true}} options
+        parsed-plist (parse-plist path)
+        deps (get parsed-plist cocoapods-key-specifiers)
+        formatted (map cocoapods-plist-item->map deps)
+        formatted' (if skip-header (rest formatted) formatted)
+        formatted'' (if skip-footer (butlast formatted') formatted')]
+    formatted''))
+
+;; Gradle JSON
+
+
 
 ;; Universal, used with external files adapters
 
