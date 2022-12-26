@@ -17,6 +17,7 @@
   "Reading and parsing files"
   (:gen-class)
   (:require
+   [cheshire.core :as json]
    [clojure.data.csv :as csv]
    [clojure.edn :as edn]
    [clojure.java.io :as io]
@@ -27,6 +28,11 @@
   "Return true if file exists"
   [path]
   (.exists (io/file path)))
+
+(defn path->string
+  "Return a string with the file contents"
+  [path]
+  (slurp path))
 
 ;; requirements.txt files
 
@@ -43,11 +49,6 @@
   (apply concat (for [path requirements] (path->lines path))))
 
 ;; EDN files
-
-(defn path->string
-  "Return a string with the file contents"
-  [path]
-  (slurp path))
 
 (defn- format-edn-package-name
   "Apply options to format EDN package name"
@@ -143,7 +144,53 @@
 
 ;; Gradle JSON
 
+(def gradle-json-key-dependency "dependency")
+(def gradle-json-key-licenses "licenses")
+(def gradle-json-key-license "license")
+(def gradle-json-key-project "project")
+(def gradle-json-key-version "version")
 
+(defn gradle-json-license-vec->license
+  "Convert a vector of licenses into nilable license string"
+  [license-vec]
+  (let [license-names (map #(get % gradle-json-key-license) license-vec)
+        license-str (str/join ", " license-names)
+        result (not-empty license-str)]
+    result))
+
+(defn gradle-json-dependency->package
+  "Get package name nilable string from a map"
+  [dependency options]
+  (let [{:keys [fully-qualified-names] :or {fully-qualified-names true}} options
+        project (not-empty (get dependency gradle-json-key-project))
+        version (not-empty (get dependency gradle-json-key-version))
+        parts
+        (cond
+          (and project version) [project version]
+          project [project]
+          :else nil)
+        package
+        (if fully-qualified-names
+          (get dependency gradle-json-key-dependency)
+          (not-empty (str/join ":" parts)))]
+    package))
+
+(defn gradle-json-dependency->map
+  "Convert dependency item from the parsed JSON into a map"
+  [dependency options]
+  (let [package-str (gradle-json-dependency->package dependency options)
+        license-vec (get dependency gradle-json-key-licenses)
+        license-str (gradle-json-license-vec->license license-vec)]
+    {:package package-str :license license-str}))
+
+(defn gradle-json->data
+  "Parse gradle-license-plugin JSON into vector of {:package PACKAGE :license LICENSE} maps"
+  #_:clj-kondo/ignore
+  [path options]
+  (let [content (path->string path)
+        dependencies (json/parse-string content)
+        result (map #(gradle-json-dependency->map % options) dependencies)]
+    result))
 
 ;; Universal, used with external files adapters
 
