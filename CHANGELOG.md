@@ -30,6 +30,7 @@ options when used explicitly (see `Deprecated` section).
   and `org.clojars.vrs/gradle-licenses` moved in to the projects code
   base. See changes in namespaces `pip-license-checker.file` and
   `pip-license-checker.external`.
+- Report headers renamed
 - Clojure version upgraded from `1.10.1` to `1.11.1`.
 
 ### Deprecated

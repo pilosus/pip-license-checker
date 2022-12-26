@@ -174,9 +174,11 @@ Description:
   -e, --exclude REGEX                                                              PCRE to exclude packages with matching names
       --exclude-license REGEX                                                      PCRE to exclude packages with matching license names
       --[no-]pre                           false                                   Include pre-release and development versions. By default, use only stable versions
-      --[no-]with-totals                   false                                   Print totals for license types
+      --[no-]totals                        false                                   Print totals for license types
+      --[no-]with-totals                   nil                                     [deprecated '0.41.0'] Print totals for license types
       --[no-]totals-only                   false                                   Print only totals for license types
-      --[no-]table-headers                 false                                   Print table headers
+      --[no-]headers                       false                                   Print report headers
+      --[no-]table-headers                 nil                                     [deprecated '0.41.0'] Print table headers
       --[no-]fails-only                    false                                   Print only packages of license types specified with --fail flags
       --[no-]parallel                      true                                    Run requests in parallel
       --[no-]exit                          true                                    Exit program, used for CLI mode
@@ -188,14 +190,14 @@ Examples:
 pip-license-checker django
 pip-license-checker aiohttp==3.7.2 piny==0.6.0 django
 pip-license-checker --pre 'aiohttp<4'
-pip-license-checker --with-totals --table-headers --requirements resources/requirements.txt
+pip-license-checker --totals --headers --requirements resources/requirements.txt
 pip-license-checker --totals-only -r file1.txt -r file2.txt -r file3.txt
 pip-license-checker -r resources/requirements.txt django aiohttp==3.7.1 --exclude 'aio.*'
 pip-license-checker -r resources/requirements.txt --rate-limits 10/1000
 pip-license-checker -r resources/requirements.github.txt --github-token your-token
 pip-license-checker -x resources/external.csv --exclude-license '(?i).*(?:mit|bsd).*'
 pip-license-checker -x resources/external.csv --external-options '{:skip-header false}'
-pip-license-checker -x resources/external.cocoapods --external-format cocoapods
+pip-license-checker -x resources/external.cocoapods --external-format cocoapods'
 pip-license-checker -x resources/external.edn --external-format edn --formatter '%-70s %-60s %-35s'
 ```
 
