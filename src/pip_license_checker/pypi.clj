@@ -34,7 +34,11 @@
    :connection-timeout 3000
    :max-redirects 3})
 
-(def url-pypi-base "https://pypi.org/pypi")
+(def pypi-simple-api-headers
+  {:headers {"Accept" "application/vnd.pypi.simple.v1+json"}})
+
+(def pypi-json-api-url "https://pypi.org/pypi")
+(def pypi-simple-api-url "https://pypi.org/simple")
 
 (def license-undefined #{"" "UNKNOWN" [] ["UNKNOWN"]})
 (def unspecific-license-classifiers #{"License :: OSI Approved"})
@@ -50,15 +54,19 @@
 ;; Get API response, parse it
 
 (defn api-request-releases
-  "Moved out as a standalone function for testing simplicity"
+  "DEPRECATED: Use `api-simple-request-releases` instead
+
+  Moved out as a standalone function for testing simplicity"
   [url rate-limiter]
   (http/request-get url settings-http-client rate-limiter))
 
 (defn api-get-releases
-  "Get seq of versions available for a package
+  "DEPRECATED: Use `api-simple-get-releases` instead
+
+  Get seq of versions available for a package
   NB! versions are not sorted!"
   [package-name rate-limiter]
-  (let [url (str/join "/" [url-pypi-base package-name "json"])
+  (let [url (str/join "/" [pypi-json-api-url package-name "json"])
         resp (try (api-request-releases url rate-limiter)
                   (catch Exception e e))
         error (when (instance? Exception resp)
@@ -74,6 +82,36 @@
                       (filter #(not (nil? %))))]
     releases))
 
+(defn api-simple-request-releases
+  "Moved out as a standalone function for testing simplicity"
+  [url rate-limiter]
+  (let [settings (merge settings-http-client pypi-simple-api-headers)]
+    (http/request-get url settings rate-limiter)))
+
+(defn api-simple-get-releases
+  "Get seq of versions available for a project in PyPI Simple API"
+  [package-name rate-limiter]
+  (let [url (str/join "/" [pypi-simple-api-url package-name])
+        resp (try (api-simple-request-releases url rate-limiter)
+                  (catch Exception e e))
+        error (when (instance? Exception resp)
+                (exception/get-error-message "PyPI::releases" resp))
+        data (when (nil? error) resp)
+        files (-> data
+                  :body
+                  json/parse-string
+                  (get "files"))
+        versions (->>
+                  files
+                  (filter #(= (get % "yanked") false))
+                  (map #(version/get-dist-version (get % "filename") package-name))
+                  distinct)
+        releases (->>
+                  versions
+                  (map #(version/parse-version %))
+                  (filter #(not (nil? %))))]
+    releases))
+
 (defn api-request-project
   "Moved out as a standalone function for testing simplicity"
   [url rate-limiter]
@@ -83,12 +121,12 @@
   "Return respone of GET request to PyPI API for requirement"
   [requirement options rate-limiter]
   (let [{:keys [name specifiers]} requirement
-        releases (api-get-releases name rate-limiter)
+        releases (api-simple-get-releases name rate-limiter)
         version (version/get-version specifiers releases :pre (:pre options))
         url
         (if (nil? version)
-          (str/join "/" [url-pypi-base name "json"])
-          (str/join "/" [url-pypi-base name version "json"]))
+          (str/join "/" [pypi-json-api-url name "json"])
+          (str/join "/" [pypi-json-api-url name version "json"]))
         resp (try
                (api-request-project url rate-limiter)
                (catch Exception e e))

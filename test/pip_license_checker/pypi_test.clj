@@ -15,6 +15,7 @@
 
 (ns pip-license-checker.pypi-test
   (:require
+   [cheshire.core :as json]
    [clojure.spec.gen.alpha :as gen]
    [clojure.test :refer [deftest is testing]]
    [pip-license-checker.data :as d]
@@ -26,9 +27,7 @@
    [pip-license-checker.spec :as sp]
    [pip-license-checker.version :as version]))
 
-
 ;; pypi/api-get-releases
-
 
 (def mock-pypi-api-request (constantly {:status 200 :body "{}"}))
 
@@ -68,6 +67,78 @@
         (with-redefs
          [http/request-get mock]
           (is (= (set expected) (set (pypi/api-get-releases package-name nil)))))))))
+
+;; api-simple-get-releases
+
+(def params-api-simple-get-releases
+  [["pydantic"
+    {"files" [{"filename" "pydantic-1.0.2.tar.gz" "yanked" false} {"filename" "pydantic-1.0.3.tar.gz" "yanked" false}]}
+    ["1.0.2" "1.0.3"]
+    "sdist"]
+   ["pydantic"
+    {"files"
+     [{"filename" "pydantic-1.0.2-py39-none-manylinux_1_1.whl" "yanked" false}
+      {"filename" "pydantic-1.0.3-py39-none-manylinux_1_1.whl" "yanked" false}]}
+    ["1.0.2" "1.0.3"]
+    "wheel"]
+   ["aiohttp"
+    {"files"
+     [{"filename" "aiohttp-3.8.1.tar.gz",
+       "hashes"
+       {"sha256"
+        "fc5471e1a54de15ef71c1bc6ebe80d4dc681ea600e68bfd1cbce40427f0b7578"},
+       "requires-python" ">=3.6",
+       "url"
+       "https://files.pythonhosted.org/packages/5a/86/5f63de7a202550269a617a5d57859a2961f3396ecd1739a70b92224766bc/aiohttp-3.8.1.tar.gz",
+       "yanked" false}
+      {"filename" "aiohttp-3.8.2-cp310-cp310-macosx_10_9_x86_64.whl",
+       "hashes"
+       {"sha256"
+        "66da9965d78206444640fb34364677564b77286463d6aa461a9ae67e09479366"},
+       "requires-python" ">=3.6",
+       "url"    "https://files.pythonhosted.org/packages/35/61/b15ebc8bc7c274a1b090cf0b638e4140a971bc52ec20bf0cfb00793ee65f/aiohttp-3.8.2-cp310-cp310-macosx_10_9_universal2.whl",
+       "yanked" "This version includes overly restrictive multidict upper boundary disallowing multidict v6+. The previous patch version didn't have that and this is now causing dependency resolution problems for the users who have an \"incompatible\" version pinned. This is not really necessary anymore and will be addressed in the next release v3.8.3\r\n\r\nhttps://github.com/aio-libs/aiohttp/pull/6950"}
+
+      {"filename" "aiohttp-3.8.3-cp310-cp310-macosx_10_9_universal2.whl",
+       "hashes"
+       {"sha256"
+        "ba71c9b4dcbb16212f334126cc3d8beb6af377f6703d9dc2d9fb3874fd667ee9"},
+       "requires-python" ">=3.6",
+       "url"
+       "https://files.pythonhosted.org/packages/80/90/e7d60427dfa15b0f3748d6fbb50cc6b0f29112f4f04d8354ac02f65683e1/aiohttp-3.8.3-cp310-cp310-macosx_10_9_universal2.whl",
+       "yanked" false}
+      {"filename" "aiohttp-3.8.3-cp310-cp310-manylinux_1_1.whl",
+       "hashes"
+       {"sha256"
+        "ea71c9b4dcbb16212f334126cc3d8beb6af377f6703d9dc2d9fb3874fd667ee2"},
+       "requires-python" ">=3.6",
+       "url"
+       "https://files.pythonhosted.org/packages/80/90/e7d60427dfa15b0f3748d6fbb50cc6b0f29112f4f04d8354ac02f65683e1/aiohttp-3.8.3-cp310-cp310-manylinux_1_1.whl",
+       "yanked" false}
+      {"filename" "aiohttp-4.0.0a1-cp37-cp37m-win_amd64.whl",
+       "hashes"
+       {"sha256"
+        "c94770383e49f9cc5912b926364ad022a6c8a5dbf5498933ca3a5713c6daf738"},
+       "requires-python" ">=3.6",
+       "url"
+       "https://files.pythonhosted.org/packages/8a/fb/7ba4c3fdafa052fe5f2d389261f282ac2190d1a09b25a61621eb6e41c430/aiohttp-4.0.0a1-cp37-cp37m-win_amd64.whl",
+       "yanked" false}]}
+    ["3.8.1" "3.8.3" "4.0.0a1"]
+    "sdist and wheels, exclude yanked versions, ignore duplicates"]])
+
+(deftest ^:request
+  test-api-simple-get-releases
+  (testing "Get a seq of releases from Simple API"
+    (doseq [[package files expected description] params-api-simple-get-releases]
+      (let [body (-> files
+                     json/generate-string)
+            api-mock (constantly {:body body})]
+        (testing description
+          (with-redefs
+           [http/request-get api-mock]
+            (let [expected-result (set (map #(version/parse-version %) expected))
+                  actual-result (set (pypi/api-simple-get-releases package nil))]
+              (is (= expected-result actual-result)))))))))
 
 ;; pypi/api-get-project
 
@@ -141,7 +212,7 @@
       (testing description
         (with-redefs
          [http/request-get http-get-mock
-          pypi/api-get-releases (constantly releases)]
+          pypi/api-simple-get-releases (constantly releases)]
           (is (= expected (pypi/api-get-project requirement {} nil))))))))
 
 
@@ -375,7 +446,7 @@
 
 (def params-get-parsed-deps-exceptions
   [[(constantly
-     {:body "{\"releases\": {\"3.7.1\": [], \"3.7.2\": []}}"})
+     {:body "{\"files\": [{\"filename\": \"aiohttp-3.7.1.tar.gz\", \"yanked\": false}, {\"filename\": \"aiohttp-3.7.2.tar.gz\", \"yanked\": false}]}"})
     (fn [& _] (throw (ex-info "Boom!" {:status 429 :reason-phrase "Rate limits exceeded"})))
     (constantly {:body "{\"license\": {\"name\": \"MIT License\"}}"})
     [(d/map->Dependency
@@ -404,7 +475,7 @@
        :error "PyPI::version Not found"})]
     "PyPI version not found"]
    [(constantly
-     {:body "{\"releases\": {\"3.7.1\": [], \"3.7.2\": []}}"})
+     {:body "{\"files\": [{\"filename\": \"aiohttp-3.7.1.win.zip\", \"yanked\": false}, {\"filename\": \"aiohttp-3.7.2-cp39-cp39-musllinux_1_1_x86_64.whl\", \"yanked\": false}]}"})
     (constantly {:body "{\"info\": {\"home_page\": \"https://github.com/aio-libs/aiohttp\"}}"})
     (fn [& _] (throw (ex-info "Boom!" {:status 429 :reason-phrase "Rate limits exceeded"})))
     [(d/map->Dependency
@@ -419,7 +490,7 @@
        :error "GitHub::license 429 Rate limits exceeded"})]
     "GitHub link found, but request failed"]
    [(constantly
-     {:body "{\"releases\": {\"3.7.1\": [], \"3.7.2\": []}}"})
+     {:body "{\"files\": [{\"filename\": \"aiohttp-3.7.1.tar.gz\", \"yanked\": false}, {\"filename\": \"aiohttp-3.7.2.tar.gz\", \"yanked\": false}]}"})
     (constantly {:body "{\"info\": {\"author\": \"me\"}}"})
     (fn [& _] (throw (ex-info "Boom!" {:status 429 :reason-phrase "Rate limits exceeded"})))
     [(d/map->Dependency
@@ -446,7 +517,7 @@
       (testing description
         (with-redefs
          [pmap map
-          pypi/api-request-releases pypi-releases-mock
+          pypi/api-simple-request-releases pypi-releases-mock
           pypi/api-request-project pypi-project-mock
           github/api-request-license github-license-mock]
           (is
