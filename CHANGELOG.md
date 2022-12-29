@@ -5,6 +5,14 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 
 ## [Unreleased]
 
+## [0.42.0-SNAPSHOT]
+
+### Changed
+- Python packages version resolution migrated to PyPI Simple API for
+  available versions as PyPI JSON API had deprecated releases
+  information
+  ([#108](https://github.com/pilosus/pip-license-checker/issues/108)).
+
 ## [0.41.1] - 2022-12-26
 
 ### Changed
@@ -368,7 +376,8 @@ weak copyleft types.
 ### Added
 - Structure for Leiningen app project
 
-[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.41.1...HEAD
+[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.42.0-SNAPSHOT...HEAD
+[0.42.0-SNAPSHOT]: https://github.com/pilosus/pip-license-checker/compare/0.42.0-SNAPSHOT...0.41.1
 [0.41.1]: https://github.com/pilosus/pip-license-checker/compare/0.41.0...0.41.1
 [0.41.0]: https://github.com/pilosus/pip-license-checker/compare/0.40.0...0.41.0
 [0.40.0]: https://github.com/pilosus/pip-license-checker/compare/0.39.0...0.40.0
