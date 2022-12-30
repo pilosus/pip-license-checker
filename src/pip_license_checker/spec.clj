@@ -80,7 +80,6 @@
 ;; https://clojure.github.io/test.check/clojure.test.check.generators.html
 ;;
 
-
 (def non-empty-str-gen
   "Generator for strings of length between 3 and 20 chars"
   (g/fmap #(apply str %) (g/vector g/char-alpha 3 20)))

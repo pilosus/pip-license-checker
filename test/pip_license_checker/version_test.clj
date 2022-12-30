@@ -340,9 +340,7 @@
              Exception
              expected-msg (v/compare-letter-version a b)))))))
 
-
 ;; version/version-stable?
-
 
 (def params-version-stable?
   [["1.7.0" true "Release only"]

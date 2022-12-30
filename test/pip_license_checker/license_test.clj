@@ -50,9 +50,7 @@
       (testing description
         (is (= expected (str (license/strings->pattern strings))))))))
 
-
 ;; license/license-with-type
-
 
 (def params-license-with-type
   [["MIT License"

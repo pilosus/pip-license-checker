@@ -239,9 +239,7 @@
       (testing description
         (is (= expected (file/cocoapods-plist->data cocoapods-default-path options)))))))
 
-
 ;; Gradle JSON
-
 
 (def gradle-json-default-path "resources/external.gradle")
 

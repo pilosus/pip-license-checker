@@ -52,9 +52,7 @@
         (let [result (filters/remove-requirements-internal-rules requirements)]
           (is (seq? result)))))))
 
-
 ;; filters/remove-requirements-user-rules
-
 
 (def params-remove-requirements-user-rules
   [[[] #"test" [] "No requirements"]
@@ -84,9 +82,7 @@
               (filters/remove-requirements-user-rules pattern requirements)]
           (is (seq? result)))))))
 
-
 ;; filters/remove-requiment-maps-user-rules
-
 
 (def params-remove-requiment-maps-user-rules
   [[[{:requirement {:name "test" :version "1.2.3"} :license {:name "MIT" :type "Permissive"}}]
@@ -114,9 +110,7 @@
          (= expected
             (filters/remove-requiment-maps-user-rules pattern packages)))))))
 
-
 ;; filters/sanitize-requirement
-
 
 (def params-sanitize-requirement
   [["  hello == 1.2.3" "hello==1.2.3" "Whitespaces"]
@@ -129,9 +123,7 @@
       (testing description
         (is (= expected (filters/sanitize-requirement requirement)))))))
 
-
 ;; filters/remove-licenses
-
 
 (def params-remove-licenses
   [[[{:license {:name "MIT" :type "Permissive"}}
@@ -157,9 +149,7 @@
       (testing description
         (is (= expected (filters/remove-licenses options licenses)))))))
 
-
 ;; filters/filter-parsed-deps
-
 
 (def params-filter-parsed-deps
   [[[{:ok? true,

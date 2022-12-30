@@ -66,7 +66,6 @@
 ;; Misc
 ;; https://opensource.stackexchange.com/
 
-
 (def regex-ignore-case #"(?i)")
 
 (def regex-list-copyleft-network

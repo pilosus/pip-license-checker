@@ -215,9 +215,7 @@
           pypi/api-simple-get-releases (constantly releases)]
           (is (= expected (pypi/api-get-project requirement {} nil))))))))
 
-
 ;; pypi/classifiers->license
-
 
 (def params-classifiers->license
   [[nil nil "No classifiers"]

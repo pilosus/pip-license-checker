@@ -205,11 +205,9 @@
           nil)]
     (validate-version version-map)))
 
-
 ;; Comparison of parsed versions
 ;; https://clojuredocs.org/clojure.core/compare
 ;; https://clojure.org/guides/comparators
-
 
 (defn truncate-release
   "Return release vector with trailing zero parts dropped"

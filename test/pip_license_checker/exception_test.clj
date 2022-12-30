@@ -35,9 +35,7 @@
       (testing description
         (is (= expected (ex/get-error-message prefix exception)))))))
 
-
 ;; join-ex-info
-
 
 (def params-join-ex-info
   [[[]
