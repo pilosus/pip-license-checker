@@ -12,7 +12,7 @@
                  [org.clojure/data.csv "1.0.1"]
                  [org.clojure/test.check "1.1.1"]
                  [org.clojure/tools.cli "1.0.214"]]
-  :plugins [[lein-cljfmt "0.7.0"]
+  :plugins [[lein-cljfmt "0.9.0"]
             [lein-cloverage "1.2.1"]
             [lein-licenses "0.2.2"]
             [lein-ancient "1.0.0-RC3"]]
