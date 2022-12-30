@@ -1,4 +1,4 @@
-;; Copyright © 2020-2022 Vitaly Samigullin
+;; Copyright © 2020-2023 Vitaly Samigullin
 ;;
 ;; This program and the accompanying materials are made available under the
 ;; terms of the Eclipse Public License 2.0 which is available at
@@ -215,9 +215,7 @@
           pypi/api-simple-get-releases (constantly releases)]
           (is (= expected (pypi/api-get-project requirement {} nil))))))))
 
-
 ;; pypi/classifiers->license
-
 
 (def params-classifiers->license
   [[nil nil "No classifiers"]

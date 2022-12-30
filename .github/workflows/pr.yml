@@ -9,17 +9,18 @@ env:
 
 jobs:
   build:
-
-    runs-on: ubuntu-latest
-
+    runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout the code
+      uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c  # v3, master on 29-12-2022
+      with:
+        fetch-depth: 0
     - name: Install dependencies
       run: lein deps
     - name: Code formatting check
       run: lein cljfmt check
     - name: Code linting
-      uses: DeLaGuardo/clojure-lint-action@06fdc0816fabc27f1e05208b68c7a59d9ab2d5d1  # master 21-05-2021
+      uses: DeLaGuardo/clojure-lint-action@2d6013175031096ae07bc9b90a07173029ad7dc9  # master 02-11-2021, uses cljkondo/clj-kondo:latest
       with:
         clj-kondo-args: --lint src test
         github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -37,10 +38,10 @@ jobs:
         ./codecov -t ${CODECOV_TOKEN} -f target/coverage/codecov.json
 
   license_check:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     steps:
     - name: Checkout the code
-      uses: actions/checkout@v2.3.4
+      uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c  # v3, master on 29-12-2022
       with:
         fetch-depth: 0
     - name: Get deps licenses
@@ -48,7 +49,7 @@ jobs:
         lein licenses :csv > licenses.csv
     - name: Check licenses
       id: license_check_report
-      uses: pilosus/action-pip-license-checker@v0.5.0
+      uses: pilosus/action-pip-license-checker@41a74340807e2809f38004ca7da04766da629036  # v0.8.0-rc1, master on 30-12-2022
       with:
         external: 'licenses.csv'
         external-format: 'csv'
