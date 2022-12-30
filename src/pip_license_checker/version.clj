@@ -21,13 +21,85 @@
    [clojure.string :as str]
    [pip-license-checker.spec :as sp]))
 
-;; Parse version
+;; const
 
 (def regex-number #"^\d+$")
 (def regex-split-comma #",")
 (def regex-specifier #"(?<op>(===|==|~=|!=|>=|<=|<|>))(?<version>(.*))")
 
 (def regex-version #"v?(?:(?:(?<epoch>[0-9]+)!)?(?<release>[0-9]+(?:\.[0-9]+)*)(?<pre>[-_\.]?(?<prel>(a|b|c|rc|alpha|beta|pre|preview))[-_\.]?(?<pren>[0-9]+)?)?(?<post>(?:-(?<postn1>[0-9]+))|(?:[-_\.]?(?<postl>post|rev|r)[-_\.]?(?<postn2>[0-9]+)?))?(?<dev>[-_\.]?(?<devl>dev)[-_\.]?(?<devn>[0-9]+)?)?)(?:\+(?<local>[a-z0-9]+(?:[-_\.][a-z0-9]+)*))?")
+
+(def extension-sdist ".tar.gz")
+(def extension-wheel ".whl")
+(def regex-extensions #"\.(tar\.gz|whl)")
+
+;; filename parsing
+
+(defn normalize-project
+  "Normalize project name"
+  [project]
+  (when project
+    (-> project
+        (str/replace #"[-_.]+" "-")
+        str/lower-case)))
+
+(defn get-project-regex
+  [project]
+  (let [normalized (normalize-project project)
+        replaced (str/replace normalized #"-" "[-_.]+")
+        case-insensitive (str "(?i)^" replaced "-")]
+    (re-pattern case-insensitive)))
+
+(defn trim-filename-version
+  "Remove project name and file extension from distribution filename
+
+  Expected output format depends on the distribution type:
+  - sdist:
+  `{version}
+  - wheel:
+  `{version}(-{build tag})?-{python tag}-{abi tag}-{platform tag}`"
+  [filename project]
+  (let [regex-project (get-project-regex project)]
+    (-> filename
+        str/lower-case
+        (str/replace regex-project "")
+        (str/replace regex-extensions ""))))
+
+(defmulti get-dist-version
+  "Get Python distribution version based on the format
+
+  The following formats are supported
+  - Source distibution (sdist)
+  https://packaging.python.org/en/latest/specifications/source-distribution-format/
+  sdist version parsing relies on packages to comply with PEP-625
+  https://peps.python.org/pep-0625/
+
+  - Binary distribution (wheel)
+  https://packaging.python.org/en/latest/specifications/binary-distribution-format/
+  wheel version parsing relies on packages to comply with PEP-427
+  https://peps.python.org/pep-0427/
+
+  Not supported formats:
+  - Built distribution (bdist) - legacy
+  https://docs.python.org/3/distutils/builtdist.html"
+  (fn [filename _]
+    (cond
+      (str/ends-with? filename extension-wheel) :wheel
+      (str/ends-with? filename extension-sdist) :sdist)))
+
+(defmethod get-dist-version :sdist [filename project]
+  (trim-filename-version filename project))
+
+(defmethod get-dist-version :wheel [filename project]
+  (let [tags (-> filename
+                 (trim-filename-version project)
+                 (str/split #"-"))]
+    (first tags)))
+
+(defmethod get-dist-version :default [filename _]
+  (first (re-find regex-version filename)))
+
+;; version parsing
 
 (defn parse-number
   "Parse number string into integer or return 0"

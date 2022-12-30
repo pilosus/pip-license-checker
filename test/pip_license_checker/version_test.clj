@@ -363,3 +363,57 @@
       (testing version-str
         (let [version (v/parse-version version-str)]
           (is (boolean? (v/version-stable? version))))))))
+
+;; filename
+
+(def params-get-dist-version
+  [["piny-0.5.2.tar.gz"
+    "piny"
+    "0.5.2"
+    "sdist, project name normalized, filename normalized"]
+   ["aiohttp-apispec-1.4.0rc0.tar.gz"
+    "AioHTTP_APISpec"
+    "1.4.0rc0"
+    "sdist, project name denormalized, filename normalized"]
+   ["aiohttp_apispec-1.4.0rc0.tar.gz"
+    "AioHTTP_APISpec"
+    "1.4.0rc0"
+    "sdist, project name denormalized, filename normalized"]
+   ["aiohttp-2.3.2b2.zip"
+    "Aiohttp"
+    "2.3.2b2"
+    "bdist, project name denormalized, filename normalized"]
+   ["Aiohttp-2.0.6-1.zip"
+    "AIOHTTP"
+    "2.0.6-1"
+    "bdist, project name denormalized, filename denormalized"]
+   ["Distutils-1.0.12.manilinux.rpm"
+    "distutils"
+    "1.0.12"
+    "bdist, project name normalized, filename denormalized"]
+   ["aiohttp-4.0.0a1-cp36-cp36m-macosx_10_13_x86_64.whl"
+    "aiohttp"
+    "4.0.0a1"
+    "wheel, project name normalized, filename normalized"]
+   ["py-torch-1.13.1-cp39-none-macosx_11_0_arm64.whl"
+    "PY_Torch"
+    "1.13.1"
+    "wheel, project name denormalized, filename normalized"]
+   ["PY.Torch-1.13.1-cp39-none-macosx_11_0_arm64.whl"
+    "PY-Torch"
+    "1.13.1"
+    "wheel, project name denormalized, filename denormalized"]
+   ["aiohttp-apispec-0.9.0rc1.macosx-10.9-x86_64.tar.gz"
+    "aiohttp-apispec"
+    "0.9.0rc1.macosx-10.9-x86_64"
+    "wheel, broken naming convention for binary distribution, in line with `pip index versions aiohttp-apispec` output for pip 22.3.1"]
+   ["test-0.1.2-build-python-abi-platform-nonsuchtag-evenmoretags.whl"
+    "test"
+    "0.1.2"
+    "wheel, broken naming convention"]])
+
+(deftest test-get-dist-version
+  (testing "Get distribution version from the filename"
+    (doseq [[filename project expected description] params-get-dist-version]
+      (testing description
+        (is (= expected (v/get-dist-version filename project)))))))
