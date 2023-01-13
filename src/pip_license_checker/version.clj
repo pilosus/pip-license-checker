@@ -96,8 +96,12 @@
                  (str/split #"-"))]
     (first tags)))
 
-(defmethod get-dist-version :default [filename _]
-  (first (re-find regex-version filename)))
+(defmethod get-dist-version :default [filename project]
+  (let [tags (-> filename
+                 (trim-filename-version project)
+                 (str/split #"-"))
+        version (first tags)]
+    (first (re-find regex-version version))))
 
 ;; version parsing
 
