@@ -90,17 +90,19 @@
 (defmethod get-dist-version :sdist [filename project]
   (trim-filename-version filename project))
 
-(defmethod get-dist-version :wheel [filename project]
+(defn- get-version-tag
+  "Get version tag from the filename for eggs and wheels filenames"
+  [filename project]
   (let [tags (-> filename
                  (trim-filename-version project)
                  (str/split #"-"))]
     (first tags)))
 
+(defmethod get-dist-version :wheel [filename project]
+  (get-version-tag filename project))
+
 (defmethod get-dist-version :default [filename project]
-  (let [tags (-> filename
-                 (trim-filename-version project)
-                 (str/split #"-"))
-        version (first tags)]
+  (let [version (get-version-tag filename project)]
     (first (re-find regex-version version))))
 
 ;; version parsing
