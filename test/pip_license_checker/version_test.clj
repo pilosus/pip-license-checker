@@ -383,7 +383,7 @@
     "bdist, project name denormalized, filename normalized"]
    ["Aiohttp-2.0.6-1.zip"
     "AIOHTTP"
-    "2.0.6-1"
+    "2.0.6"
     "bdist, project name denormalized, filename denormalized"]
    ["Distutils-1.0.12.manilinux.rpm"
     "distutils"
@@ -408,7 +408,23 @@
    ["test-0.1.2-build-python-abi-platform-nonsuchtag-evenmoretags.whl"
     "test"
     "0.1.2"
-    "wheel, broken naming convention"]])
+    "wheel, broken naming convention"]
+   ["pyasn1-0.4.8-py3.5.egg"
+    "pyasn1"
+    "0.4.8"
+    "egg, project name normilized, filename normalized"]
+   ["iso3166-0.7.zip"
+    "iso3166"
+    "0.7"
+    "zip, project name normilized, filename normalized"]
+   ["pyasn1_modules-0.0.1a-py2.4.egg"
+    "pyasn1-modules"
+    "0.0.1a"
+    "tar gzipped, project name normilized, filename denormalized"]
+   ["pyasn1-modules-0.0.1a.tar.gz"
+    "pyasn1-modules"
+    "0.0.1a"
+    "tar gzipped, project name normilized, filename normalized"]])
 
 (deftest test-get-dist-version
   (testing "Get distribution version from the filename"
