@@ -8,8 +8,8 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 ## [0.42.1] - 2023-01-15
 
 ### Fixed
-- Addressed a bug in version parsing for PEP517-non-compliant package
-  filenames
+- Addressed a bug in Python package version parsing for
+  PEP517-non-compliant package filenames
   [#123](https://github.com/pilosus/pip-license-checker/issues/123)
 
 ## [0.42.0] - 2023-01-10
