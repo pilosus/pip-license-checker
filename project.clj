@@ -1,4 +1,4 @@
-(defproject org.pilosus/pip-license-checker "0.42.1-SNAPSHOT"
+(defproject org.pilosus/pip-license-checker "0.42.1"
   :description "License compliance tool to identify dependencies license names and types: permissive, copyleft, proprietory, etc."
   :url "https://github.com/pilosus/pip-license-checker"
   :license {:name "Eclipse Public License 2.0 OR GNU GPL v2+ with Classpath exception"
