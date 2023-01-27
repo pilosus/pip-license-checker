@@ -171,7 +171,8 @@
             prel pren
             postn1 postl postn2
             devl devn
-            local]} version-map
+            local
+            meta]} version-map
           result
           {:orig orig
            :epoch (if epoch (Integer/parseInt epoch) 0)
@@ -179,7 +180,8 @@
            :pre (parse-letter-version prel pren)
            :post (parse-letter-version postl (or postn1 postn2))
            :dev (parse-letter-version devl devn)
-           :local (parse-local-version local)}]
+           :local (parse-local-version local)
+           :meta meta}]
       result)
     nil))
 
@@ -189,27 +191,30 @@
 
 (defn parse-version
   "Return a hash-map of regex groups"
-  [version-str]
-  (let [sanitized-version (str/lower-case version-str)
-        matcher (re-matcher regex-version sanitized-version)
-        version-map
-        (if (.matches matcher)
-          {:orig version-str
-           :epoch (.group matcher "epoch")
-           :release (.group matcher "release")
-           :pre (.group matcher "pre")
-           :prel (.group matcher "prel")
-           :pren (.group matcher "pren")
-           :post (.group matcher "post")
-           :postn1 (.group matcher "postn1")
-           :postl (.group matcher "postl")
-           :postn2 (.group matcher "postn2")
-           :dev (.group matcher "dev")
-           :devl (.group matcher "devl")
-           :devn (.group matcher "devn")
-           :local (.group matcher "local")}
-          nil)]
-    (validate-version version-map)))
+  ([version-str]
+   (parse-version version-str nil))
+  ([version-str meta]
+   (let [sanitized-version (str/lower-case version-str)
+         matcher (re-matcher regex-version sanitized-version)
+         version-map
+         (if (.matches matcher)
+           {:orig version-str
+            :epoch (.group matcher "epoch")
+            :release (.group matcher "release")
+            :pre (.group matcher "pre")
+            :prel (.group matcher "prel")
+            :pren (.group matcher "pren")
+            :post (.group matcher "post")
+            :postn1 (.group matcher "postn1")
+            :postl (.group matcher "postl")
+            :postn2 (.group matcher "postn2")
+            :dev (.group matcher "dev")
+            :devl (.group matcher "devl")
+            :devn (.group matcher "devn")
+            :local (.group matcher "local")
+            :meta meta}
+           nil)]
+     (validate-version version-map))))
 
 ;; Comparison of parsed versions
 ;; https://clojuredocs.org/clojure.core/compare
@@ -496,26 +501,24 @@
         result (and version-not-pre? version-not-dev?)]
     result))
 
-(s/def ::pre boolean?)
-(s/fdef filter-versions
-  :args (s/cat :specifiers ::sp/specifiers
-               :versions ::sp/versions
-               :pre (s/? keyword?)
-               :value (s/? boolean?))
-  :ret ::sp/versions)
+(defn remove-yanked-versions
+  "Remove yanked versions for non-exact specifiers"
+  [specifiers versions]
+  (if (some #(contains? #{eq arbitrary-eq} (first %)) specifiers)
+    versions
+    (remove #(= (get-in % [:meta :yanked]) true) versions)))
 
 (defn filter-versions
   "Return lazy seq of parsed versions that satisfy specifiers"
   [specifiers versions & {:keys [pre] :or {pre true}}]
-  (let [exclude-pre-releases (false? pre)
-        versions-with-pre (filter #(version-ok? specifiers %) versions)
-        versions-stable (filter version-stable? versions-with-pre)
-        result
-        (cond
-          pre versions-with-pre
-          (and exclude-pre-releases (seq versions-stable)) versions-stable
-          :else versions-with-pre)]
-    result))
+  (let [versions'
+        (->>
+         versions
+         (filter #(version-ok? specifiers %))
+         (remove-yanked-versions specifiers))]
+    (if pre
+      versions'
+      (filter version-stable? versions'))))
 
 (s/fdef sort-versions
   :args (s/cat :versions ::sp/versions

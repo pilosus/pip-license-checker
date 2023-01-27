@@ -102,7 +102,8 @@
      :pre nil
      :post nil
      :dev ["dev" 456]
-     :local nil}
+     :local nil
+     :meta nil}
     "Release and dev version"]
    ["1!1.0b2.post345.dev456"
     {:orig "1!1.0b2.post345.dev456"
@@ -111,7 +112,8 @@
      :pre ["b" 2]
      :post ["post" 345]
      :dev ["dev" 456]
-     :local nil}
+     :local nil
+     :meta nil}
     "Release, pre, post and dev version"]
    ["1.0.dev20160909030348"
     {:orig "1.0.dev20160909030348"
@@ -120,7 +122,8 @@
      :pre nil
      :post nil
      :dev ["dev" 20160909030348]
-     :local nil}
+     :local nil
+     :meta nil}
     "Make sure long numbers handled correctly"]
    ["1.0.dev(exploit-run)"
     nil
@@ -266,11 +269,6 @@
     false
     ["1.9.8" "1.9.9"]
     "Do not use pre-releases"]
-   [[[">=" "1.9"]]
-    ["2.0.0.a1" "2.0.0.a2"]
-    false
-    ["2.0.0.a1" "2.0.0.a2"]
-    "Do not use pre-releases, but only pre-releases available"]
    [[[">=" "1.2.3"] ["<" "2"] ["!=" "1.5.0"]]
     ["2" "2.0.1"]
     true

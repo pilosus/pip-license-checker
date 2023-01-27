@@ -53,40 +53,21 @@
 
 ;; Get API response, parse it
 
-(defn api-request-releases
-  "DEPRECATED: Use `api-simple-request-releases` instead
-
-  Moved out as a standalone function for testing simplicity"
-  [url rate-limiter]
-  (http/request-get url settings-http-client rate-limiter))
-
-(defn api-get-releases
-  "DEPRECATED: Use `api-simple-get-releases` instead
-
-  Get seq of versions available for a package
-  NB! versions are not sorted!"
-  [package-name rate-limiter]
-  (let [url (str/join "/" [pypi-json-api-url package-name "json"])
-        resp (try (api-request-releases url rate-limiter)
-                  (catch Exception e e))
-        error (when (instance? Exception resp)
-                (exception/get-error-message "PyPI::releases" resp))
-        data (when (nil? error) resp)
-        versions (-> data
-                     :body
-                     json/parse-string
-                     (get "releases")
-                     keys)
-        releases (->> versions
-                      (map #(version/parse-version %))
-                      (filter #(not (nil? %))))]
-    releases))
-
 (defn api-simple-request-releases
   "Moved out as a standalone function for testing simplicity"
   [url rate-limiter]
   (let [settings (merge settings-http-client pypi-simple-api-headers)]
     (http/request-get url settings rate-limiter)))
+
+(defn get-version-and-meta
+  "Get version and release meta"
+  [file-obj package-name]
+  (let [version (version/get-dist-version
+                 (get file-obj "filename")
+                 package-name)
+        yanked (if (= (get file-obj "yanked" false) false) false true)
+        result [version {:yanked yanked}]]
+    result))
 
 (defn api-simple-get-releases
   "Get seq of versions available for a project in PyPI Simple API"
@@ -101,14 +82,11 @@
                   :body
                   json/parse-string
                   (get "files"))
-        versions (->>
-                  files
-                  (filter #(= (get % "yanked") false))
-                  (map #(version/get-dist-version (get % "filename") package-name))
-                  distinct)
         releases (->>
-                  versions
-                  (map #(version/parse-version %))
+                  files
+                  (map #(get-version-and-meta % package-name))
+                  distinct
+                  (map #(apply version/parse-version %))
                   (filter #(not (nil? %))))]
     releases))
 
