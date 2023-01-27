@@ -5,6 +5,14 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 
 ## [Unreleased]
 
+### Fixed
+- Resolve versions for yanked Python packages for
+  [exact version matching](https://peps.python.org/pep-0440/#version-matching) and
+  [arbitrary equality](https://peps.python.org/pep-0440/#arbitrary-equality)
+  [#125](https://github.com/pilosus/pip-license-checker/issues/125)
+- Resolved pre-release versions only when `--pre` option is specified
+  [#126](https://github.com/pilosus/pip-license-checker/issues/126)
+
 ## [0.42.1] - 2023-01-15
 
 ### Fixed
