@@ -27,8 +27,6 @@
    [pip-license-checker.spec :as sp]
    [pip-license-checker.version :as version]))
 
-;; pypi/api-get-releases
-
 (def mock-pypi-api-request (constantly {:status 200 :body "{}"}))
 
 (def mock-pypi-api-throw-exception
@@ -37,49 +35,18 @@
             "Boom!"
             {:status 429 :reason-phrase "Rate limits exceeded"}))))
 
-(def params-api-get-releases
-  [["aiohttp"
-    (constantly
-     {:body "{\"releases\": {\"1.0.0\": [], \"2.1.3\": []}}"})
-    (map #(version/parse-version %) ["1.0.0" "2.1.3"])
-    "Ok"]
-   ["ipython"
-    (constantly
-     {:body "{\"releases\": {\"1.0.0\": [], \"0.7.4.svn.r2010\": []}}"})
-    (map #(version/parse-version %) ["1.0.0"])
-    "Skip invalid versions"]
-   ["no-such-package"
-    (constantly {:body "{\"releases\": {}}"})
-    (map #(version/parse-version %) [])
-    "No versions"]
-   ["aiohttp"
-    ;; cannot use constantly as it gets evaluated where defined
-    ;; use lambda expression instead
-    mock-pypi-api-throw-exception
-    (map #(version/parse-version %) [])
-    "Exception"]])
-
-(deftest ^:request
-  test-api-get-releases
-  (testing "Get a vec of release versions"
-    (doseq [[package-name mock expected description] params-api-get-releases]
-      (testing description
-        (with-redefs
-         [http/request-get mock]
-          (is (= (set expected) (set (pypi/api-get-releases package-name nil)))))))))
-
 ;; api-simple-get-releases
 
 (def params-api-simple-get-releases
   [["pydantic"
     {"files" [{"filename" "pydantic-1.0.2.tar.gz" "yanked" false} {"filename" "pydantic-1.0.3.tar.gz" "yanked" false}]}
-    ["1.0.2" "1.0.3"]
+    [["1.0.2" {:yanked false}] ["1.0.3" {:yanked false}]]
     "sdist"]
    ["pydantic"
     {"files"
      [{"filename" "pydantic-1.0.2-py39-none-manylinux_1_1.whl" "yanked" false}
       {"filename" "pydantic-1.0.3-py39-none-manylinux_1_1.whl" "yanked" false}]}
-    ["1.0.2" "1.0.3"]
+    [["1.0.2" {:yanked false}] ["1.0.3" {:yanked false}]]
     "wheel"]
    ["aiohttp"
     {"files"
@@ -123,7 +90,7 @@
        "url"
        "https://files.pythonhosted.org/packages/8a/fb/7ba4c3fdafa052fe5f2d389261f282ac2190d1a09b25a61621eb6e41c430/aiohttp-4.0.0a1-cp37-cp37m-win_amd64.whl",
        "yanked" false}]}
-    ["3.8.1" "3.8.3" "4.0.0a1"]
+    [["3.8.1" {:yanked false}] ["3.8.2" {:yanked true}] ["3.8.3" {:yanked false}] ["4.0.0a1" {:yanked false}]]
     "sdist and wheels, exclude yanked versions, ignore duplicates"]])
 
 (deftest ^:request
@@ -136,7 +103,7 @@
         (testing description
           (with-redefs
            [http/request-get api-mock]
-            (let [expected-result (set (map #(version/parse-version %) expected))
+            (let [expected-result (set (map #(apply version/parse-version %) expected))
                   actual-result (set (pypi/api-simple-get-releases package nil))]
               (is (= expected-result actual-result)))))))))
 
@@ -434,7 +401,6 @@
           ;; Since we are not testing concurrency itself, just monkey-patch pmap with simple map.
          [pmap map
           http/request-get (constantly {:body mock-body})
-          pypi/api-get-releases (constantly [])
           version/get-version (constantly "3.7.2")
           file/get-requirement-lines (fn [_] requirements)]
           (is
