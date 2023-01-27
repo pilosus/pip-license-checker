@@ -245,40 +245,76 @@
 
 (def params-specifiers-with-versions
   [[[["~=" "1.2.3"]]
-    ["0.1.2" "1.2.4" "1.2.99" "1.5.0" "1.9.8" "2" "2.0.1"]
+    [["0.1.2" nil] ["1.2.4" nil] ["1.2.99" nil] ["1.5.0" nil] ["1.9.8" nil] ["2" nil] ["2.0.1" nil]]
     true
     ["1.2.4" "1.2.99"]
     "Single specifier"]
    [[[">=" "1.2.3"] ["<" "2"] ["!=" "1.5.0"]]
-    ["0.1.2" "1.2.3" "1.5.0" "1.9.8" "2" "2.0.1"]
+    [["0.1.2" nil] ["1.2.3" nil] ["1.5.0" nil] ["1.9.8" nil] ["2" nil] ["2.0.1" nil]]
     true
     ["1.2.3" "1.9.8"]
     "Multiple specifiers"]
    [[["<" "2"]]
-    ["1.9.8" "1.9.9" "2.0.0.a1" "2.0.0.a2"]
+    [["1.9.8" nil] ["1.9.9" nil] ["2.0.0.a1" nil] ["2.0.0.a2" nil]]
     true
     ["1.9.8" "1.9.9"]
     "Pre-releases"]
    [[[">" "1.7"]]
-    ["1.7.0" "1.7.0.post1" "1.7.0.post2" "1.7.1" "1.7.2"]
+    [["1.7.0" nil] ["1.7.0.post1" nil] ["1.7.0.post2" nil] ["1.7.1" nil] ["1.7.2" nil]]
     true
     ["1.7.1" "1.7.2"]
     "Post-releases"]
    [[["<=" "2"]]
-    ["1.9.8" "1.9.9" "2.0.0.a1" "2.0.0.a2"]
+    [["1.9.8" nil] ["1.9.9" nil] ["2.0.0.a1" nil] ["2.0.0.a2" nil]]
     false
     ["1.9.8" "1.9.9"]
     "Do not use pre-releases"]
    [[[">=" "1.2.3"] ["<" "2"] ["!=" "1.5.0"]]
-    ["2" "2.0.1"]
+    [["2" nil] ["2.0.1" nil]]
     true
     []
     "Empty result"]
    [[]
-    ["0.1.2" "1.2.3" "1.5.0" "1.9.8" "2" "2.0.1"]
+    [["0.1.2" nil] ["1.2.3" nil] ["1.5.0" nil] ["1.9.8" nil] ["2" nil] ["2.0.1" nil]]
     true
     ["0.1.2" "1.2.3" "1.5.0" "1.9.8" "2" "2.0.1"]
-    "Empty specifiers"]])
+    "Empty specifiers"]
+   [[[">" "1.47.2"] ["<" "1.48.1"]]
+    [["1.47.2" {:yanked false}]
+     ["1.48.0rc1" {:yanked false}]
+     ["1.48.0" {:yanked true}]
+     ["1.48.1" {:yanked false}]
+     ["1.48.2" {:yanked false}]]
+    false
+    []
+    "skip yanked versions for non-exact specifiers"]
+   [[[">" "1.47.2"] ["<" "1.48.1"]]
+    [["1.47.2" {:yanked false}]
+     ["1.48.0rc1" {:yanked false}]
+     ["1.48.0" {:yanked true}]
+     ["1.48.1" {:yanked false}]
+     ["1.48.2" {:yanked false}]]
+    true
+    ["1.48.0rc1"]
+    "skip yanked versions for non-exact specifiers, use pre-release"]
+   [[["==" "1.48.0"]]
+    [["1.47.2" {:yanked false}]
+     ["1.48.0rc1" {:yanked false}]
+     ["1.48.0" {:yanked true}]
+     ["1.48.1" {:yanked false}]
+     ["1.48.2" {:yanked false}]]
+    false
+    ["1.48.0"]
+    "use yanked version for exact equal specifier"]
+   [[["===" "1.48.0"]]
+    [["1.47.2" {:yanked false}]
+     ["1.48.0rc1" {:yanked false}]
+     ["1.48.0" {:yanked true}]
+     ["1.48.1" {:yanked false}]
+     ["1.48.2" {:yanked false}]]
+    false
+    ["1.48.0"]
+    "use yanked version for arbitrary-string equal specifier"]])
 
 (deftest test-filter-versions
   (testing "Check versions filtering"
@@ -287,7 +323,7 @@
         (let [specs-parsed
               (vec (map (fn [[op ver]]
                           [(v/get-comparison-op op) (v/parse-version ver)]) specs))
-              versions-parsed (vec (map #(v/parse-version %) versions))
+              versions-parsed (vec (map #(apply v/parse-version %) versions))
               result
               (vec (map
                     #(:orig %)
