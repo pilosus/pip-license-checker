@@ -147,7 +147,7 @@
   "Rate limits must be positive integers in format REQUESTS/MILLISECONDS")
 
 (def cli-options
-  [["-v" "--verbose" "Verbosity level: error, info, debug"
+  [["-v" "--verbose" "Verbosity level: error (-v), info (-vv), debug (-vvv)"
     :default 0
     :update-fn inc]
    ["-r" "--requirements REQUIREMENTS_FILE" "Python pip requirement file name"

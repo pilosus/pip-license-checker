@@ -13,6 +13,14 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 - Resolved pre-release versions only when `--pre` option is specified
   [#126](https://github.com/pilosus/pip-license-checker/issues/126)
 
+### Changed
+- Verbosity level is defined by number of `-v` (or `--verbose`)
+  options: errors only `-v`; info and errors `-vv`; debug, info and
+  errors `-vvv`
+- Fallback to GitHub API for license detection is visible for info
+  verbosity level
+  ([#89](https://github.com/pilosus/pip-license-checker/issues/89))
+
 ## [0.42.1] - 2023-01-15
 
 ### Fixed
