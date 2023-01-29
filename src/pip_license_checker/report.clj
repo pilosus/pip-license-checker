@@ -58,7 +58,7 @@
   "Get printf-style format string for given options and entity (:totals or :items)"
   [options entity]
   (let [{:keys [formatter] :or {formatter report-formatter}} options
-        fmt (if (pos? (get options :verbosity))
+        fmt (if (pos? (get options :verbose))
               (format "%s %s" formatter verbose-formatter)
               formatter)
         fmt' (if (= entity :totals) (get-totals-fmt fmt) fmt)]
