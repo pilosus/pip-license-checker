@@ -17,10 +17,17 @@
   "Data structures and helper functions for them"
   (:gen-class))
 
+(defrecord Log
+    ;; Log representation
+           [level     ;; keyword, one of: :error, :info, :debug
+            name      ;; string of a logger name, e.g. "PyPI::version"
+            message   ;; string
+            ])
+
 (defrecord License
            [name  ;; nilable String
             type  ;; nilable String
-            error ;; nilable String
+            logs  ;; nilable vector of Log
             ])
 
 (defrecord Requirement
@@ -35,14 +42,14 @@
             requirement   ;; Requirement rec
             api-response  ;; nilable parsed JSON
             license       ;; License rec
-            error         ;; nilable String
+            logs          ;; nilable vector of Log
             ])
 
 (defrecord Dependency
            ;; General representation of dependency - PyPI project or external dep
            [requirement ;; Requirement rec
             license     ;; License rec
-            error       ;; nilable String
+            logs        ;; nilable vector of Log
             ])
 
 ;; Processed entities
@@ -60,11 +67,10 @@
 (defrecord ReportItem
            [dependency ;; ReportDependency
             license    ;; ReportLicense
-            error      ;; nilable String
+            misc       ;; nilable String
             ])
 
 (defrecord ReportHeader
-    ;;
            [items  ;; list of String
             totals ;; list of String
             ])

@@ -276,6 +276,7 @@
   (format "Invalid license type. Use one of: %s"
           (str/join ", " types)))
 
+;; FIXME shall we add error logs?
 (def license-error (d/->License name-error type-error nil))
 
 ;; Functions

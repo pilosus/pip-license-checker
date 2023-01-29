@@ -25,6 +25,7 @@
    [pip-license-checker.file :as file]
    [pip-license-checker.filters :as filters]
    [pip-license-checker.license :as license]
+   [pip-license-checker.logging :as logging]
    [pip-license-checker.pypi :as pypi]
    [pip-license-checker.report :as report]))
 
@@ -50,11 +51,12 @@
 
 (defn repack-dep
   "Remove unused keys from dependency record"
-  [dep]
-  (d/map->ReportItem
-   {:dependency (select-keys (:requirement dep) [:name :version])
-    :license (select-keys (:license dep) [:name :type])
-    :error (:error dep)}))
+  [dep options]
+  (let [misc (logging/format-logs (:logs dep) options)]
+    (d/map->ReportItem
+     {:dependency (select-keys (:requirement dep) [:name :version])
+      :license (select-keys (:license dep) [:name :type])
+      :misc misc})))
 
 (defn get-deps
   "Get a list of dependencies from various sources"
@@ -64,7 +66,7 @@
         external-deps (external/get-parsed-deps external options)
         deps (concat python-deps external-deps)
         filtered (filters/filter-parsed-deps deps options)]
-    (map repack-dep filtered)))
+    (map #(repack-dep % options) filtered)))
 
 (defn get-report
   "Get a formatted report"
@@ -145,7 +147,10 @@
   "Rate limits must be positive integers in format REQUESTS/MILLISECONDS")
 
 (def cli-options
-  [["-v" "--verbose" "Make output verbose" :default false]
+  [["-v" nil "Verbosity level"
+    :id :verbosity
+    :default 0
+    :update-fn inc]
    ["-r" "--requirements REQUIREMENTS_FILE" "Python pip requirement file name"
     :multi true
     :default []

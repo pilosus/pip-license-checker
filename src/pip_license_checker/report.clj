@@ -58,7 +58,7 @@
   "Get printf-style format string for given options and entity (:totals or :items)"
   [options entity]
   (let [{:keys [formatter] :or {formatter report-formatter}} options
-        fmt (if (:verbose options)
+        fmt (if (pos? (get options :verbosity))
               (format "%s %s" formatter verbose-formatter)
               formatter)
         fmt' (if (= entity :totals) (get-totals-fmt fmt) fmt)]
@@ -67,12 +67,12 @@
 (defn get-items
   "Get a list of dependency fields ready printing"
   [dep]
-  (let [{:keys [dependency license error]} dep
+  (let [{:keys [dependency license misc]} dep
         {dep-name :name dep-version :version} dependency
         {license-name :name license-type :type} license
         package (str/join ":" (remove str/blank? [dep-name dep-version]))
-        misc (or error "")]
-    [package license-name license-type misc]))
+        license-misc (or misc "")]
+    [package license-name license-type license-misc]))
 
 (defn print-line
   [items formatter]
