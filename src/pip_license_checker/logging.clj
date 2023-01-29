@@ -34,14 +34,11 @@
     (format "%s %s" name message)))
 
 (defn get-error-message
-  "Format error message"
+  "Format error message for a clj-http error response"
   [resp]
-  (let [data (ex-data resp)
-        message
-        (if data
-          (format "%s %s" (:status data) (:reason-phrase data))
-          (get-ex-info resp))]
-    message))
+  (if-let [data (ex-data resp)]
+    (format "%s %s" (:status data) (:reason-phrase data))
+    (get-ex-info resp)))
 
 (defn format-log-item
   "Format single log item to a string"
