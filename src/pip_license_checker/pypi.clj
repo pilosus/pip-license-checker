@@ -110,11 +110,11 @@
         resp (try
                (api-request-project url rate-limiter)
                (catch Exception e e))
-        log (when (instance? Exception resp)
-              {:level :error
-               :name "PyPI::project"
-               :message (l/get-error-message resp)})
-        resp-data (when (nil? log) resp)
+        logs (when (instance? Exception resp)
+               [{:level :error
+                 :name "PyPI::project"
+                 :message (l/get-error-message resp)}])
+        resp-data (when (nil? logs) resp)
         requirement-with-version
         (d/map->Requirement {:name name
                              :version (or version (:orig (last (first specifiers))))
@@ -129,13 +129,13 @@
                             :body
                             json/parse-string)
                            :license nil
-                           :logs [log]})
-      log
+                           :logs logs})
+      logs
       (d/map->PyPiProject {:status req-status-error
                            :requirement requirement-with-version
                            :api-response nil
                            :license (license/get-license-error nil)
-                           :logs [log]})
+                           :logs logs})
       (nil? version)
       (d/map->PyPiProject {:status req-status-error
                            :requirement requirement-with-version
@@ -176,10 +176,11 @@
                          :message "Fallback to GitHub for non-version-specific license"}])
         license-name (or name (:name gh-license))
         license (license/license-with-type license-name)
+        logs (not-empty (concat (:logs license) (:logs gh-license) gh-info-logs))
         result (d/->License
                 (:name license)
                 (:type license)
-                (concat (:logs license) (:logs gh-license) gh-info-logs))]
+                logs)]
     result))
 
 ;; Get license data from API JSON
@@ -207,7 +208,7 @@
         project (d/map->Dependency
                  {:requirement requirement
                   :license license
-                  :logs (concat (:logs license) logs)})]
+                  :logs (not-empty (concat (:logs license) logs))})]
     project))
 
 (defn get-all-requirements

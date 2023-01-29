@@ -57,7 +57,7 @@
 (defn get-log-level-number
   "Get log level number for a given verbosity number from CLI options"
   [options]
-  (let [verbosity (min (get options :verbose)
+  (let [verbosity (min (get options :verbose 0)
                        (apply max (keys verbosity-to-levels)))
         level (->> verbosity
                    (get verbosity-to-levels)

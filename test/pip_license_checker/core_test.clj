@@ -28,7 +28,7 @@
     {:requirements ["resources/requirements.txt"]
      :external []
      :packages []
-     :options {:verbose false
+     :options {:verbose 0
                :fail #{}
                :pre false
                :external-format "csv"
@@ -48,7 +48,7 @@
     {:requirements []
      :external []
      :packages ["django" "aiohttp==3.7.1"]
-     :options {:verbose false
+     :options {:verbose 0
                :fail #{}
                :pre false
                :external-format "csv"
@@ -68,7 +68,7 @@
     {:requirements []
      :external ["resources/external.csv"]
      :packages []
-     :options {:verbose false
+     :options {:verbose 0
                :fail #{}
                :pre false
                :external-format "csv"
@@ -94,7 +94,7 @@
     {:requirements ["resources/requirements.txt" "README.md"]
      :external ["resources/external.csv"]
      :packages ["django" "aiohttp==3.7.1"]
-     :options {:verbose false
+     :options {:verbose 0
                :fail #{}
                :pre false
                :external-format "csv"
@@ -116,7 +116,7 @@
     {:requirements ["resources/requirements.txt"]
      :external []
      :packages []
-     :options {:verbose false
+     :options {:verbose 0
                :fail #{}
                :pre false
                :external-format "csv"
@@ -140,7 +140,7 @@
     {:requirements ["resources/requirements.github.txt"]
      :external []
      :packages []
-     :options {:verbose false
+     :options {:verbose 0
                :fail #{}
                :pre false
                :external-format "csv"
@@ -165,7 +165,7 @@
     {:requirements []
      :external ["resources/external.cocoapods"]
      :packages []
-     :options {:verbose false
+     :options {:verbose 0
                :fail #{}
                :pre false
                :external-format "cocoapods"
@@ -189,7 +189,7 @@
     {:requirements []
      :external ["resources/external.cocoapods"]
      :packages []
-     :options {:verbose false
+     :options {:verbose 0
                :fail #{}
                :pre false
                :external-format "cocoapods"
@@ -214,7 +214,7 @@
     {:requirements []
      :external ["resources/external.cocoapods"]
      :packages []
-     :options {:verbose true
+     :options {:verbose 1
                :fail #{}
                :pre false
                :external-format "cocoapods"
@@ -229,6 +229,31 @@
                :exit true
                :rate-limits {:requests 120 :millis 60000}}}
     "Verbose output"]
+   [["-vvv"
+     "--external"
+     "resources/external.cocoapods"
+     "--external-format"
+     "cocoapods"
+     "--formatter"
+     "%-50s %-50s %-30s"]
+    {:requirements []
+     :external ["resources/external.cocoapods"]
+     :packages []
+     :options {:verbose 3
+               :fail #{}
+               :pre false
+               :external-format "cocoapods"
+               :external-options {:skip-header true, :skip-footer true}
+               :formatter "%-50s %-50s %-30s"
+               :totals false
+               :totals-only false
+               :headers false
+               :fails-only false
+               :github-token nil
+               :parallel true
+               :exit true
+               :rate-limits {:requests 120 :millis 60000}}}
+    "Very verbose output"]
    [["--help"]
     {:exit-message "placeholder" :ok? true}
     "Help run"]

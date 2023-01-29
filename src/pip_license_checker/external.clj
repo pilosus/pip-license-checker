@@ -78,7 +78,7 @@
   (d/map->Dependency
    {:requirement (package-name->requirement package)
     :license (license-name->map license)
-    :error (:error license)}))
+    :logs (:logs license)}))
 
 ;; External file format to function
 

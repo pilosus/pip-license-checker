@@ -122,7 +122,7 @@
                            :specifiers [[version/eq (version/parse-version "3.7.2")]]})
                          :api-response {}
                          :license nil
-                         :error nil})
+                         :logs nil})
     "Specific version"]
    [{:name "django" :specifiers nil}
     mock-pypi-api-request
@@ -135,7 +135,7 @@
                            :specifiers nil})
                          :api-response {}
                          :license nil
-                         :error nil})
+                         :logs nil})
     "Latest version"]
    [{:name "django"
      :specifiers [[version/eq (version/parse-version "777.666.555")]]}
@@ -151,8 +151,10 @@
                          :license (d/map->License
                                    {:name "Error"
                                     :type "Error"
-                                    :error nil})
-                         :error "PyPI::version Not found"})
+                                    :logs nil})
+                         :logs [{:level :error
+                                 :name "PyPI::version"
+                                 :message "Not found"}]})
     "Version not found"]
    [{:name "aiohttp"
      :specifiers [[version/eq (version/parse-version "3.7.2")]]}
@@ -168,8 +170,10 @@
                          :license (d/map->License
                                    {:name "Error"
                                     :type "Error"
-                                    :error nil})
-                         :error "PyPI::project 429 Rate limits exceeded"})
+                                    :logs nil})
+                         :logs [{:level :error
+                                 :name "PyPI::project"
+                                 :message "429 Rate limits exceeded"}]})
     "Expection"]])
 
 (deftest test-api-get-project
@@ -217,42 +221,45 @@
 
 ;; pypi/data->license-map
 
+(def gh-log-info
+  {:level :info, :name "Checker", :message "Fallback to GitHub for non-version-specific license"})
+
 (def params-api-response->license-map
   [[{"info"
      {"license" "MIT"
       "classifiers" ["License :: OSI Approved :: MIT License"]}}
     (d/->License "MIT" nil nil)
-    (d/map->License {:name "MIT License", :type "Permissive" :error nil})
+    (d/map->License {:name "MIT License", :type "Permissive" :logs nil})
     "Get from classifiers field"]
    [{"info"
      {"license" "MIT"
       "classifiers" ["Operating System :: Unix"]}}
     (d/->License "BSD" nil nil)
-    (d/map->License {:name "MIT", :type "Permissive" :error nil})
+    (d/map->License {:name "MIT", :type "Permissive" :logs nil})
     "Get from license field"]
    [{"info"
      {"license" ""
       "classifiers" []}}
     (d/->License "BSD" nil nil)
-    (d/map->License {:name "BSD", :type "Permissive" :error nil})
+    (d/map->License {:name "BSD", :type "Permissive" :logs [gh-log-info]})
     "Get from GitHub API"]
    [{"info"
      {"license" "UNKNOWN"
       "classifiers" []}}
     (d/->License "MIT" nil nil)
-    (d/map->License {:name "MIT", :type "Permissive" :error nil})
+    (d/map->License {:name "MIT", :type "Permissive" :logs [gh-log-info]})
     "Get from GitHub API for older metadata format for missing license field - UNKNOWN string"]
    [{"info"
      {"license" []
       "classifiers" []}}
     (d/->License "MIT" nil nil)
-    (d/map->License {:name "MIT", :type "Permissive" :error nil})
+    (d/map->License {:name "MIT", :type "Permissive" :logs [gh-log-info]})
     "Get from GitHub API for older metadata format for missing license field - empty list"]
    [{"info"
      {"license" ["UNKNOWN"]
       "classifiers" []}}
     (d/->License "MIT" nil nil)
-    (d/map->License {:name "MIT", :type "Permissive" :error nil})
+    (d/map->License {:name "MIT", :type "Permissive" :logs [gh-log-info]})
     "Get from GitHub API for older metadata format for missing license field - list with UNKNOWN"]
    [{"wut" 123}
     nil
@@ -358,8 +365,8 @@
        :license (d/map->License
                  {:name "MIT License"
                   :type "Permissive"
-                  :error nil})
-       :error nil})
+                  :logs nil})
+       :logs nil})
      (d/map->Dependency
       {:requirement (d/map->Requirement
                      {:name "test"
@@ -368,8 +375,8 @@
        :license (d/map->License
                  {:name "MIT License"
                   :type "Permissive"
-                  :error nil})
-       :error nil})]
+                  :logs nil})
+       :logs nil})]
     "Packages and requirements"]
    [["aiohttp==3.7.2"]
     ["test==3.7.2"]
@@ -383,8 +390,8 @@
        :license (d/map->License
                  {:name "MIT License"
                   :type "Permissive"
-                  :error nil})
-       :error nil})]
+                  :logs nil})
+       :logs nil})]
     "Exclude pattern"]])
 
 (deftest ^:integration ^:request
@@ -421,8 +428,10 @@
        :license (d/map->License
                  {:name "Error"
                   :type "Error"
-                  :error nil})
-       :error "PyPI::project 429 Rate limits exceeded"})]
+                  :logs nil})
+       :logs [{:level :error
+               :name "PyPI::project"
+               :message "429 Rate limits exceeded"}]})]
     "PyPI project request failed"]
    [(fn [& _] (throw (ex-info "Boom!" {:status 404 :reason-phrase "Page not found"})))
     (constantly {:body "{\"info\": {\"license\": \"MIT License\"}}"})
@@ -435,8 +444,8 @@
        :license (d/map->License
                  {:name "Error"
                   :type "Error"
-                  :error nil})
-       :error "PyPI::version Not found"})]
+                  :logs nil})
+       :logs [{:level :error :name "PyPI::version" :message "Not found"}]})]
     "PyPI version not found"]
    [(constantly
      {:body "{\"files\": [{\"filename\": \"aiohttp-3.7.1.win.zip\", \"yanked\": false}, {\"filename\": \"aiohttp-3.7.2-cp39-cp39-musllinux_1_1_x86_64.whl\", \"yanked\": false}]}"})
@@ -450,8 +459,12 @@
        :license (d/map->License
                  {:name "Error"
                   :type "Error"
-                  :error "GitHub::license 429 Rate limits exceeded"})
-       :error "GitHub::license 429 Rate limits exceeded"})]
+                  :logs [{:level :error
+                          :name "GitHub::license"
+                          :message "429 Rate limits exceeded"}]})
+       :logs [{:level :error
+               :name "GitHub::license"
+               :message "429 Rate limits exceeded"}]})]
     "GitHub link found, but request failed"]
    [(constantly
      {:body "{\"files\": [{\"filename\": \"aiohttp-3.7.1.tar.gz\", \"yanked\": false}, {\"filename\": \"aiohttp-3.7.2.tar.gz\", \"yanked\": false}]}"})
@@ -465,8 +478,8 @@
        :license (d/map->License
                  {:name "Error"
                   :type "Error"
-                  :error github/meta-not-found})
-       :error github/meta-not-found})]
+                  :logs [github/meta-not-found]})
+       :logs [github/meta-not-found]})]
     "No data in PyPI, no link to GitHub either"]])
 
 (deftest ^:integration ^:request
