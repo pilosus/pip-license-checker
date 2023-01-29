@@ -276,7 +276,9 @@
   (format "Invalid license type. Use one of: %s"
           (str/join ", " types)))
 
-;; FIXME shall we add error logs?
+;; Do not add logs here as they are excessive
+;; NPE is caught when license is nil,
+;; i.e. there were other reasons why license name is absent
 (def license-error (d/->License name-error type-error nil))
 
 ;; Functions
