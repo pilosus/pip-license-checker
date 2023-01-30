@@ -53,11 +53,11 @@
     "Permissive license"]
    ["GPL v3 or any later"
     (d/map->License
-     {:name "GPL v3 or any later" :type "StrongCopyleft" :error nil})
+     {:name "GPL v3 or any later" :type "StrongCopyleft" :logs nil})
     "Copyleft license"]
    ["Imaginary License"
     (d/map->License
-     {:name "Imaginary License" :type "Other" :error nil})
+     {:name "Imaginary License" :type "Other" :logs nil})
     "Unknown license"]])
 
 (deftest test-license-name->map
@@ -71,13 +71,13 @@
     (d/map->Dependency
      {:requirement (d/map->Requirement {:name "test-package" :version "0.1.2"})
       :license (d/map->License
-                {:name "MIT License" :type "Permissive" :error nil})})
+                {:name "MIT License" :type "Permissive" :logs nil})})
     "Test 1"]
    [{:package "test-package" :license "LGPL"}
     (d/map->Dependency
      {:requirement (d/map->Requirement {:name "test-package" :version nil})
       :license (d/map->License
-                {:name "LGPL" :type "WeakCopyleft" :error nil})})
+                {:name "LGPL" :type "WeakCopyleft" :logs nil})})
     "Test 2"]])
 
 (deftest test-external-obj->dep
@@ -94,11 +94,11 @@
     [(d/map->Dependency
       {:requirement (d/map->Requirement {:name "test-package" :version "0.1.2"})
        :license (d/map->License
-                 {:name "MIT License" :type "Permissive" :error nil})})
+                 {:name "MIT License" :type "Permissive" :logs nil})})
      (d/map->Dependency
       {:requirement (d/map->Requirement {:name "another-package" :version "21.04"})
        :license (d/map->License
-                 {:name "GPLv2" :type "StrongCopyleft" :error nil})})]
+                 {:name "GPLv2" :type "StrongCopyleft" :logs nil})})]
     "No headers"]
    [[["package name" "license name"]
      ["test-package@0.1.2" "MIT License"]
@@ -107,7 +107,7 @@
     [(d/map->Dependency
       {:requirement (d/map->Requirement {:name "test-package" :version "0.1.2"})
        :license (d/map->License
-                 {:name "MIT License" :type "Permissive" :error nil})})]
+                 {:name "MIT License" :type "Permissive" :logs nil})})]
     "Exclude pattern"]])
 
 (deftest test-get-parsed-requiements-csv
@@ -125,11 +125,11 @@
     [(d/map->Dependency
       {:requirement (d/map->Requirement {:name "test-package" :version nil})
        :license (d/map->License
-                 {:name "MIT License" :type "Permissive" :error nil})})
+                 {:name "MIT License" :type "Permissive" :logs nil})})
      (d/map->Dependency
       {:requirement (d/map->Requirement {:name "another-package" :version nil})
        :license (d/map->License
-                 {:name "GPLv2" :type "StrongCopyleft" :error nil})})]
+                 {:name "GPLv2" :type "StrongCopyleft" :logs nil})})]
     "No headers"]
    [[{:package "test-package" :license "MIT License"}
      {:package "another-package" :license "GPLv2"}]
@@ -137,7 +137,7 @@
     [(d/map->Dependency
       {:requirement (d/map->Requirement {:name "test-package" :version nil})
        :license (d/map->License
-                 {:name "MIT License" :type "Permissive" :error nil})})]
+                 {:name "MIT License" :type "Permissive" :logs nil})})]
     "Exclude pattern"]
    [[{:package "test-package" :license "MIT License"}
      {:package "another-package" :license "GPLv2"}]
@@ -145,7 +145,7 @@
     [(d/map->Dependency
       {:requirement (d/map->Requirement {:name "test-package" :version nil})
        :license (d/map->License
-                 {:name "MIT License" :type "Permissive" :error nil})})]
+                 {:name "MIT License" :type "Permissive" :logs nil})})]
     "Gradle license plugin"]
    [[{:package "test-package" :license "MIT License"}
      {:package "another-package" :license "GPLv2"}]
@@ -153,7 +153,7 @@
     [(d/map->Dependency
       {:requirement (d/map->Requirement {:name "test-package" :version nil})
        :license (d/map->License
-                 {:name "MIT License" :type "Permissive" :error nil})})]
+                 {:name "MIT License" :type "Permissive" :logs nil})})]
     "EDN plugin"]])
 
 (deftest test-get-parsed-deps-external-plugins

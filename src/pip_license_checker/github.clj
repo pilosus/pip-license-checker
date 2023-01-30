@@ -21,13 +21,18 @@
    [clojure.string :as str]
    [pip-license-checker.data :as d]
    [pip-license-checker.http :as http]
-   [pip-license-checker.exception :as exception]))
+   [pip-license-checker.logging :as l]))
 
 (def url-github-base "https://api.github.com/repos")
 
 (def header-github-api-version {"X-GitHub-API-Version" "2022-11-28"})
 
-(def meta-not-found "Checker::meta License sources not found")
+;; FIXME this is app-level error log
+;; it should not be set by github module?
+(def meta-not-found
+  {:level :error
+   :name "Checker"
+   :message "License sources not found"})
 
 (def settings-http-client
   {:socket-timeout 1000
@@ -57,14 +62,16 @@
         resp (try
                (api-request-license url settings rate-limiter)
                (catch Exception e e))
-        error (when (instance? Exception resp)
-                (exception/get-error-message "GitHub::license" resp))
-        resp-data (when (nil? error) resp)
+        logs (when (instance? Exception resp)
+               [{:level :error
+                 :name "GitHub::license"
+                 :message (l/get-error-message resp)}])
+        resp-data (when (nil? logs) resp)
         license-name (-> resp-data
                          :body
                          json/parse-string
                          (get-in ["license" "name"]))]
-    (d/map->License {:name license-name :type nil :error error})))
+    (d/map->License {:name license-name :type nil :logs logs})))
 
 (defn homepage->license
   "Get license name from homepage if it's a GitHub URL"
@@ -76,5 +83,5 @@
         url-valid? (= 3 (count github-url))
         license (if url-valid?
                   (api-get-license github-url options rate-limiter)
-                  (d/->License nil nil meta-not-found))]
+                  (d/->License nil nil [meta-not-found]))]
     license))

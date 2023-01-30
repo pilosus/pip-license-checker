@@ -28,7 +28,7 @@
     {:requirements ["resources/requirements.txt"]
      :external []
      :packages []
-     :options {:verbose false
+     :options {:verbose 0
                :fail #{}
                :pre false
                :external-format "csv"
@@ -48,7 +48,7 @@
     {:requirements []
      :external []
      :packages ["django" "aiohttp==3.7.1"]
-     :options {:verbose false
+     :options {:verbose 0
                :fail #{}
                :pre false
                :external-format "csv"
@@ -68,7 +68,7 @@
     {:requirements []
      :external ["resources/external.csv"]
      :packages []
-     :options {:verbose false
+     :options {:verbose 0
                :fail #{}
                :pre false
                :external-format "csv"
@@ -94,7 +94,7 @@
     {:requirements ["resources/requirements.txt" "README.md"]
      :external ["resources/external.csv"]
      :packages ["django" "aiohttp==3.7.1"]
-     :options {:verbose false
+     :options {:verbose 0
                :fail #{}
                :pre false
                :external-format "csv"
@@ -116,7 +116,7 @@
     {:requirements ["resources/requirements.txt"]
      :external []
      :packages []
-     :options {:verbose false
+     :options {:verbose 0
                :fail #{}
                :pre false
                :external-format "csv"
@@ -140,7 +140,7 @@
     {:requirements ["resources/requirements.github.txt"]
      :external []
      :packages []
-     :options {:verbose false
+     :options {:verbose 0
                :fail #{}
                :pre false
                :external-format "csv"
@@ -165,7 +165,7 @@
     {:requirements []
      :external ["resources/external.cocoapods"]
      :packages []
-     :options {:verbose false
+     :options {:verbose 0
                :fail #{}
                :pre false
                :external-format "cocoapods"
@@ -189,7 +189,7 @@
     {:requirements []
      :external ["resources/external.cocoapods"]
      :packages []
-     :options {:verbose false
+     :options {:verbose 0
                :fail #{}
                :pre false
                :external-format "cocoapods"
@@ -214,7 +214,7 @@
     {:requirements []
      :external ["resources/external.cocoapods"]
      :packages []
-     :options {:verbose true
+     :options {:verbose 1
                :fail #{}
                :pre false
                :external-format "cocoapods"
@@ -229,6 +229,31 @@
                :exit true
                :rate-limits {:requests 120 :millis 60000}}}
     "Verbose output"]
+   [["-vvv"
+     "--external"
+     "resources/external.cocoapods"
+     "--external-format"
+     "cocoapods"
+     "--formatter"
+     "%-50s %-50s %-30s"]
+    {:requirements []
+     :external ["resources/external.cocoapods"]
+     :packages []
+     :options {:verbose 3
+               :fail #{}
+               :pre false
+               :external-format "cocoapods"
+               :external-options {:skip-header true, :skip-footer true}
+               :formatter "%-50s %-50s %-30s"
+               :totals false
+               :totals-only false
+               :headers false
+               :fails-only false
+               :github-token nil
+               :parallel true
+               :exit true
+               :rate-limits {:requests 120 :millis 60000}}}
+    "Very verbose output"]
    [["--help"]
     {:exit-message "placeholder" :ok? true}
     "Help run"]
@@ -368,7 +393,48 @@
     (str/join
      [(str (format report/report-formatter "test:3.7.2" "MIT License" "Permissive") "\n")
       (str (format report/report-formatter "another:0.1.2" "BSD License" "Permissive") "\n")])
-    "Requirements and external file"]])
+    "Requirements and external file"]
+   [[{:ok? true,
+      :requirement {:name "test", :version "3.7.2"},
+      :license {:name "Error"
+                :type "Error"}
+      :logs [{:level :error
+              :name "PyPI::version"
+              :message "Not found"}
+             {:level :debug
+              :name "clj-http"
+              :message "TLS Handshake"}
+             {:level :info
+              :name "GitHub::version"
+              :message "Fallback to GitHub API"}]}]
+    [{:ok? true,
+      :requirement {:name "another" :version "0.1.2"},
+      :license {:name "BSD License"
+                :type "Permissive"}
+      :logs [{:level :info
+              :name "CSV::loader"
+              :message "File corrupted"}]}]
+    ["-r" "resources/requirements.txt"
+     "-x" "resources/external.csv"
+     "--verbose"
+     "--verbose"
+     "--no-totals"
+     "--no-totals-only"
+     "--no-headers"
+     "--no-parallel"
+     "--no-exit"]
+    (str/join
+     [(str (format "%-35s %-55s %-20s %-40s"
+                   "test:3.7.2"
+                   "Error"
+                   "Error"
+                   "Error: PyPI::version Not found\nInfo: GitHub::version Fallback to GitHub API") "\n")
+      (str (format "%-35s %-55s %-20s %-40s"
+                   "another:0.1.2"
+                   "BSD License"
+                   "Permissive"
+                   "Info: CSV::loader File corrupted        ") "\n")])
+    "Verbosity info level"]])
 
 (deftest test-main
   (testing "main function"

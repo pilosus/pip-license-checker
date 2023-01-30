@@ -46,15 +46,15 @@
 (def params-get-fmt
   [[{} :items "%-35s %-55s %-20s"
     "items, no options"]
-   [{:verbose true} :items "%-35s %-55s %-20s %-40s"
+   [{:verbose 1} :items "%-35s %-55s %-20s %-40s"
     "items, verbose"]
-   [{:verbose true :formatter "%s %s %s"} :items "%s %s %s %-40s"
+   [{:verbose 1 :formatter "%s %s %s"} :items "%s %s %s %-40s"
     "items, verbose, customer formatter"]
-   [{:verbose true :formatter "%s %s %s"} :totals "%s %s"
+   [{:verbose 1 :formatter "%s %s %s"} :totals "%s %s"
     "totals, verbose, customer formatter"]
-   [{:verbose false :formatter "%s %s %s"} :totals "%s %s"
+   [{:verbose 0 :formatter "%s %s %s"} :totals "%s %s"
     "totals, non-verbose, customer formatter"]
-   [{:verbose false} :totals "%-35s %-55s"
+   [{:verbose 0} :totals "%-35s %-55s"
     "totals, non-verbose, default formatter"]])
 
 (deftest test-get-fmt
@@ -68,7 +68,7 @@
      :license
      {:name "GNU General Public License v2 or later (GPLv2+)",
       :type "StrongCopyleft"},
-     :error nil}
+     :misc nil}
     ["basilic:0.1.3.4" "GNU General Public License v2 or later (GPLv2+)"
      "StrongCopyleft" ""]
     "No errors"]
@@ -76,13 +76,13 @@
      :license
      {:name "GNU General Public License v2 or later (GPLv2+)",
       :type "StrongCopyleft"},
-     :error nil}
+     :misc nil}
     ["basilic" "GNU General Public License v2 or later (GPLv2+)"
      "StrongCopyleft" ""]
     "Version is absent"]
    [{:dependency {:name "aiopg", :version "122.3.5"},
      :license {:name "Error", :type "Error"},
-     :error "PyPI::version Not found"}
+     :misc "PyPI::version Not found"}
     ["aiopg:122.3.5" "Error" "Error" "PyPI::version Not found"]
     "Error"]])
 
@@ -115,35 +115,35 @@
              :totals ["License Type" "Found"]}
    :items [{:dependency {:name "aiohttp" :version "3.7.2"}
             :license {:name "Apache Software License" :type "Permissive"}
-            :error "Too many requests"}]
+            :misc "Too many requests"}]
    :totals
    {"Permissive" 1}
    :fails nil})
 
 (def params-report
   [[report
-    {:verbose false
+    {:verbose 0
      :totals false
      :headers false
      :formatter "%s %s %s"}
     "aiohttp:3.7.2 Apache Software License Permissive\n"
     "Non-verbose, no headers, no-totals"]
    [report
-    {:verbose false
+    {:verbose 0
      :totals false
      :headers true
      :formatter "%s %s %s"}
     "Dependency License Name License Type\naiohttp:3.7.2 Apache Software License Permissive\n"
     "Non-verbose, with headers, no-totals"]
    [report
-    {:verbose false
+    {:verbose 0
      :totals true
      :headers true
      :formatter "%s %s %s"}
     "Dependency License Name License Type\naiohttp:3.7.2 Apache Software License Permissive\n\nLicense Type Found\nPermissive 1\n"
     "Non-verbose, with headers, with totals"]
    [report
-    {:verbose true
+    {:verbose 1
      :totals true
      :headers true
      :formatter "%s %s %s"}
@@ -155,7 +155,7 @@
      :items []
      :totals {}
      :fails nil}
-    {:verbose false
+    {:verbose 0
      :totals true
      :headers true
      :formatter "%s %s %s"}
@@ -167,7 +167,7 @@
      :items []
      :totals {}
      :fails nil}
-    {:verbose false
+    {:verbose 0
      :totals true
      :headers false
      :formatter "%s %s %s"}
@@ -179,7 +179,7 @@
      :items []
      :totals {}
      :fails nil}
-    {:verbose false
+    {:verbose 0
      :totals false
      :headers false
      :formatter "%s %s %s"}
