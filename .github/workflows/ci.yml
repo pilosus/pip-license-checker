@@ -1,0 +1,86 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+*'
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test and lint
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v3.3.0
+        with:
+          fetch-depth: 0
+      - name: Install dependencies
+        run: lein deps
+      - name: Run code formatting checks
+        run: lein cljfmt check
+      - name: Run linters
+        run: lein clj-kondo
+      - name: Run tests
+        run: lein cloverage --codecov
+      - name: Update code coverage report
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        run: |
+          curl https://keybase.io/codecovsecurity/pgp_keys.asc | gpg --no-default-keyring --keyring trustedkeys.gpg --import
+          curl -Os https://uploader.codecov.io/latest/linux/codecov
+          curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM
+          curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM.sig
+          gpgv codecov.SHA256SUM.sig codecov.SHA256SUM
+          shasum -a 256 -c codecov.SHA256SUM
+          chmod +x codecov
+          ./codecov -t ${CODECOV_TOKEN} -f target/coverage/codecov.json
+
+  license:
+    name: License compliance
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v3.3.0
+        with:
+          fetch-depth: 0
+      - name: Get deps licenses
+        run: lein licenses :csv > licenses.csv
+      - name: Check licenses
+        id: license_check_report
+        uses: pilosus/action-pip-license-checker@v0.8.1
+        with:
+          external: 'licenses.csv'
+          external-format: 'csv'
+          external-options: '{:skip-header false :package-column-index 0 :license-column-index 2}'
+          totals: true
+          headers: true
+          fail: 'StrongCopyleft,NetworkCopyleft,Other,Error'
+      - name: Print report
+        if: ${{ always() }}
+        run: echo "${{ steps.license_check_report.outputs.report }}"
+
+  publish:
+    name: Publish on Clojars
+    runs-on: ubuntu-22.04
+    needs: [test, license]
+    if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v3.3.0
+        with:
+          fetch-depth: 0
+      - name: Install dependencies
+        run: lein deps
+      - name: Publish artifact
+        env:
+          CLOJARS_USERNAME: ${{ secrets.CLOJARS_USERNAME }}
+          CLOJARS_PASSWORD: ${{ secrets.CLOJARS_PASSWORD }}
+        run: lein deploy releases
