@@ -1,4 +1,4 @@
-(defproject org.pilosus/pip-license-checker "0.43.0"
+(defproject org.pilosus/pip-license-checker "0.43.1-SNAPSHOT"
   :description "License compliance tool to identify dependencies license names and types: permissive, copyleft, proprietory, etc."
   :url "https://github.com/pilosus/pip-license-checker"
   :license {:name "Eclipse Public License 2.0 OR GNU GPL v2+ with Classpath exception"
@@ -15,7 +15,8 @@
   :plugins [[lein-cljfmt "0.9.0"]
             [lein-cloverage "1.2.1"]
             [lein-licenses "0.2.2"]
-            [lein-ancient "1.0.0-RC3"]]
+            [lein-ancient "1.0.0-RC3"]
+            [com.github.clj-kondo/lein-clj-kondo "0.2.4"]]
   :main pip-license-checker.core
   :aot [pip-license-checker.core]
   :target-path "target/%s"
