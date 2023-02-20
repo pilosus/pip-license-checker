@@ -55,7 +55,7 @@ jobs:
         run: lein licenses :csv > licenses.csv
       - name: Check licenses
         id: license_check_report
-        uses: pilosus/action-pip-license-checker@v0.9.0-rc2
+        uses: pilosus/action-pip-license-checker@v1.0.0-rc1
         with:
           external: 'licenses.csv'
           external-format: 'csv'
