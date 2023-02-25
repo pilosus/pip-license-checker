@@ -5,6 +5,13 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 
 ## [Unreleased]
 
+## [0.44.0] - 2023-02-25
+
+### Fixed
+- Allow pre-release versions for Python native packages in case of
+  exact equal (`==`) or arbitrary string equal (`===`) specifiers
+  ([#132](https://github.com/pilosus/pip-license-checker/issues/132))
+
 ## [0.43.0] - 2023-02-10
 
 ### Fixed
@@ -406,7 +413,8 @@ weak copyleft types.
 ### Added
 - Structure for Leiningen app project
 
-[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.43.0...HEAD
+[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.44.0...HEAD
+[0.44.0]: https://github.com/pilosus/pip-license-checker/compare/0.43.0...0.44.0
 [0.43.0]: https://github.com/pilosus/pip-license-checker/compare/0.42.1...0.43.0
 [0.42.1]: https://github.com/pilosus/pip-license-checker/compare/0.42.0...0.42.1
 [0.42.0]: https://github.com/pilosus/pip-license-checker/compare/0.42.0-SNAPSHOT...0.42.0

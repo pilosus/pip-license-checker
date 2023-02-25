@@ -314,7 +314,21 @@
      ["1.48.2" {:yanked false}]]
     false
     ["1.48.0"]
-    "use yanked version for arbitrary-string equal specifier"]])
+    "use yanked version for arbitrary-string equal specifier"]
+   [[["==" "0.0.2a32"]]
+    [["0.0.1" {:yanked false}]
+     ["0.0.2a32" {:yanked false}]
+     ["0.0.3" {:yanked false}]]
+    false
+    ["0.0.2a32"]
+    "use pre-release version for exact equal specifier with --no-pre option"]
+   [[["===" "0.0.2a32"]]
+    [["0.0.1" {:yanked false}]
+     ["0.0.2a32" {:yanked false}]
+     ["0.0.3" {:yanked false}]]
+    false
+    ["0.0.2a32"]
+    "use pre-release version for arbitrary-string equal specifier with --no-pre option"]])
 
 (deftest test-filter-versions
   (testing "Check versions filtering"
