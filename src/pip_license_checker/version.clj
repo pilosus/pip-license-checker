@@ -501,22 +501,29 @@
         result (and version-not-pre? version-not-dev?)]
     result))
 
+(defn- contains-eq-specifier?
+  "Return true if the specifiers vector contains `==` or `===`"
+  [specifiers]
+  (some #(contains? #{eq arbitrary-eq} (first %)) specifiers))
+
 (defn remove-yanked-versions
   "Remove yanked versions for non-exact specifiers"
   [specifiers versions]
-  (if (some #(contains? #{eq arbitrary-eq} (first %)) specifiers)
+  (if (contains-eq-specifier? specifiers)
     versions
     (remove #(= (get-in % [:meta :yanked]) true) versions)))
 
 (defn filter-versions
   "Return lazy seq of parsed versions that satisfy specifiers"
   [specifiers versions & {:keys [pre] :or {pre true}}]
-  (let [versions'
+  (let [pre-release-included?
+        (or pre (contains-eq-specifier? specifiers))
+        versions'
         (->>
          versions
          (filter #(version-ok? specifiers %))
          (remove-yanked-versions specifiers))]
-    (if pre
+    (if pre-release-included?
       versions'
       (filter version-stable? versions'))))
 
