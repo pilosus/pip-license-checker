@@ -17,6 +17,7 @@
   "Formatting and printing a report"
   (:gen-class)
   (:require
+   [cheshire.core :as json]
    [clojure.string :as str]
    [pip-license-checker.data :as d]))
 
@@ -29,6 +30,25 @@
 
 (def report-formatter "%-35s %-55s %-20s")
 (def verbose-formatter "%-40s")
+
+(def format-table "table")
+(def format-json "json")
+(def format-json-pretty "json-pretty")
+
+(def formats
+  (sorted-set
+   format-table
+   format-json
+   format-json-pretty))
+
+(def invalid-format
+  (format "Invalid external format. Use one of: %s"
+          (str/join ", " formats)))
+
+(defn valid-format?
+  "Return true if format string is valid, false otherwise"
+  [format]
+  (contains? formats format))
 
 (defn valid-formatter?
   "Check if printf-style formatter string is valid"
@@ -79,7 +99,7 @@
   (println (apply format formatter items)))
 
 (defn print-report
-  "Print report to standard output"
+  "Default report printer to standard output"
   [report options]
   (let [{headers-opt :headers
          totals-opt :totals
@@ -106,3 +126,21 @@
 
     ;; return report for pipe to work properly
     report))
+
+(defmulti format-report
+  "Format report and print to stdout"
+  (fn [_ options]
+    (get options :report-format)))
+
+(defmethod format-report :default [report options]
+  (print-report report options))
+
+(defmethod format-report "json" [report _]
+  (let [result (json/generate-string report)]
+    (println result)
+    result))
+
+(defmethod format-report "json-pretty" [report _]
+  (let [result (json/generate-string report {:pretty true})]
+    (println result)
+    result))

@@ -166,9 +166,13 @@
    [nil "--external-options OPTS_EDN_STRING" "String of options map in EDN format"
     :default external/default-options
     :parse-fn external/opts-str->map]
+   ;; TODO rename to --report-formatter?
    [nil "--formatter PRINTF_FMT" "Printf-style formatter string for report formatting"
     :default report/report-formatter
     :validate [report/valid-formatter? report/invalid-formatter]]
+   [nil "--report-format FORMAT" "Report format: table, json, json-pretty"
+    :default report/format-table
+    :validate [report/valid-format? report/invalid-format]]
    ["-f" "--fail LICENSE_TYPE" "Return non-zero exit code if license type is found"
     :default (sorted-set)
     :multi true
@@ -260,5 +264,5 @@
     (-> arguments
         get-deps
         (get-report options)
-        (report/print-report options)
+        (report/format-report options)
         (shutdown options))))
