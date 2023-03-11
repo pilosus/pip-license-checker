@@ -166,13 +166,12 @@
    [nil "--external-options OPTS_EDN_STRING" "String of options map in EDN format"
     :default external/default-options
     :parse-fn external/opts-str->map]
-   ;; TODO rename to --report-formatter?
-   [nil "--formatter PRINTF_FMT" "Printf-style formatter string for report formatting"
-    :default report/report-formatter
-    :validate [report/valid-formatter? report/invalid-formatter]]
    [nil "--report-format FORMAT" "Report format: stdout, json, json-pretty, csv"
     :default report/format-stdout
     :validate [report/valid-format? report/invalid-format]]
+   [nil "--formatter PRINTF_FMT" "Printf-style formatter string for stdout report formatting"
+    :default report/report-formatter
+    :validate [report/valid-formatter? report/invalid-formatter]]
    ["-f" "--fail LICENSE_TYPE" "Return non-zero exit code if license type is found"
     :default (sorted-set)
     :multi true

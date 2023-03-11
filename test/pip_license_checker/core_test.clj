@@ -33,6 +33,7 @@
                :pre false
                :external-format "csv"
                :external-options external/default-options
+               :report-format report/format-stdout
                :formatter report/report-formatter
                :totals false
                :totals-only false
@@ -53,6 +54,7 @@
                :pre false
                :external-format "csv"
                :external-options external/default-options
+               :report-format report/format-stdout
                :formatter report/report-formatter
                :totals false
                :totals-only false
@@ -73,6 +75,7 @@
                :pre false
                :external-format "csv"
                :external-options external/default-options
+               :report-format report/format-stdout
                :formatter report/report-formatter
                :totals false
                :totals-only false
@@ -99,6 +102,7 @@
                :pre false
                :external-format "csv"
                :external-options external/default-options
+               :report-format report/format-stdout
                :formatter report/report-formatter
                :totals false
                :totals-only false
@@ -121,6 +125,7 @@
                :pre false
                :external-format "csv"
                :external-options external/default-options
+               :report-format report/format-stdout
                :formatter report/report-formatter
                :totals false
                :totals-only false
@@ -145,6 +150,7 @@
                :pre false
                :external-format "csv"
                :external-options external/default-options
+               :report-format report/format-stdout
                :formatter report/report-formatter
                :totals false
                :totals-only false
@@ -170,6 +176,7 @@
                :pre false
                :external-format "cocoapods"
                :external-options {:skip-header false :skip-footer true :int-opt 42 :str-opt "str-val"}
+               :report-format report/format-stdout
                :formatter report/report-formatter
                :totals true
                :totals-only false
@@ -194,6 +201,7 @@
                :pre false
                :external-format "cocoapods"
                :external-options {:skip-header true, :skip-footer true}
+               :report-format report/format-stdout
                :formatter "%-50s %-50s %-30s"
                :totals false
                :totals-only false
@@ -204,6 +212,31 @@
                :exit true
                :rate-limits {:requests 120 :millis 60000}}}
     "Formatter string"]
+   [["--external"
+     "resources/external.cocoapods"
+     "--external-format"
+     "cocoapods"
+     "--report-format"
+     "json-pretty"]
+    {:requirements []
+     :external ["resources/external.cocoapods"]
+     :packages []
+     :options {:verbose 0
+               :fail #{}
+               :pre false
+               :external-format "cocoapods"
+               :external-options {:skip-header true, :skip-footer true}
+               :report-format report/format-json-pretty
+               :formatter report/report-formatter
+               :totals false
+               :totals-only false
+               :headers false
+               :fails-only false
+               :github-token nil
+               :parallel true
+               :exit true
+               :rate-limits {:requests 120 :millis 60000}}}
+    "Report format"]
    [["-v"
      "--external"
      "resources/external.cocoapods"
@@ -219,6 +252,7 @@
                :pre false
                :external-format "cocoapods"
                :external-options {:skip-header true, :skip-footer true}
+               :report-format report/format-stdout
                :formatter "%-50s %-50s %-30s"
                :totals false
                :totals-only false
@@ -244,6 +278,7 @@
                :pre false
                :external-format "cocoapods"
                :external-options {:skip-header true, :skip-footer true}
+               :report-format report/format-stdout
                :formatter "%-50s %-50s %-30s"
                :totals false
                :totals-only false

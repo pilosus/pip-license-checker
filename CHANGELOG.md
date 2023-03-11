@@ -5,6 +5,11 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 
 ## [Unreleased]
 
+### Added
+- Report output format option `--report-format` to support `stdout`,
+  `json`, `json-pretty` and `csv` formats
+  ([#90](https://github.com/pilosus/pip-license-checker/issues/90))
+
 ## [0.44.0] - 2023-02-25
 
 ### Fixed
