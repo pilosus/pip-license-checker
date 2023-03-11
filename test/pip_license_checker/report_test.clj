@@ -122,40 +122,69 @@
 
 (def params-report
   [[report
-    {:verbose 0
+    {:report-format "stdout"
+     :verbose 0
      :totals false
      :headers false
      :formatter "%s %s %s"}
     "aiohttp:3.7.2 Apache Software License Permissive\n"
     "Non-verbose, no headers, no-totals"]
    [report
-    {:verbose 0
+    {:report-format "json"
+     :verbose 0
+     :totals false
+     :headers false
+     :formatter "%s %s %s"}
+    "{\"headers\":{\"items\":[\"Dependency\",\"License Name\",\"License Type\",\"Misc\"],\"totals\":[\"License Type\",\"Found\"]},\"items\":[{\"dependency\":{\"name\":\"aiohttp\",\"version\":\"3.7.2\"},\"license\":{\"name\":\"Apache Software License\",\"type\":\"Permissive\"},\"misc\":\"Too many requests\"}],\"totals\":{\"Permissive\":1},\"fails\":null}\n"
+    "JSON, Non-verbose, no headers, no-totals"]
+   [report
+    {:report-format "json-pretty"
+     :verbose 0
+     :totals false
+     :headers false
+     :formatter "%s %s %s"}
+    "{\n  \"headers\" : {\n    \"items\" : [ \"Dependency\", \"License Name\", \"License Type\", \"Misc\" ],\n    \"totals\" : [ \"License Type\", \"Found\" ]\n  },\n  \"items\" : [ {\n    \"dependency\" : {\n      \"name\" : \"aiohttp\",\n      \"version\" : \"3.7.2\"\n    },\n    \"license\" : {\n      \"name\" : \"Apache Software License\",\n      \"type\" : \"Permissive\"\n    },\n    \"misc\" : \"Too many requests\"\n  } ],\n  \"totals\" : {\n    \"Permissive\" : 1\n  },\n  \"fails\" : null\n}\n"
+    "JSON pretty, Non-verbose, no headers, no-totals"]
+   [report
+    {:report-format "stdout"
+     :verbose 0
      :totals false
      :headers true
      :formatter "%s %s %s"}
     "Dependency License Name License Type\naiohttp:3.7.2 Apache Software License Permissive\n"
     "Non-verbose, with headers, no-totals"]
    [report
-    {:verbose 0
+    {:report-format "stdout"
+     :verbose 0
      :totals true
      :headers true
      :formatter "%s %s %s"}
     "Dependency License Name License Type\naiohttp:3.7.2 Apache Software License Permissive\n\nLicense Type Found\nPermissive 1\n"
     "Non-verbose, with headers, with totals"]
    [report
-    {:verbose 1
+    {:report-format "stdout"
+     :verbose 1
      :totals true
      :headers true
      :formatter "%s %s %s"}
     "Dependency License Name License Type\naiohttp:3.7.2 Apache Software License Permissive\n\nLicense Type Found\nPermissive 1\n"
     "Verbose, with headers, with totals"]
+   [report
+    {:report-format "csv"
+     :verbose 1
+     :totals true
+     :headers true
+     :formatter "%s %s %s"}
+    "\"Dependency\",\"License Name\",\"License Type\",\"Misc\"\n\"aiohttp:3.7.2\",\"Apache Software License\",\"Permissive\",\"Too many requests\"\n\n\"License Type\",\"Found\"\n\"Permissive\",\"1\"\n"
+    "CSV, verbose, with headers, with totals"]
    [{:headers
      {:items ["Dependency" "License Name" "License Type" "Misc"]
       :totals ["License Type" "Found"]}
      :items []
      :totals {}
      :fails nil}
-    {:verbose 0
+    {:report-format "stdout"
+     :verbose 0
      :totals true
      :headers true
      :formatter "%s %s %s"}
@@ -167,7 +196,8 @@
      :items []
      :totals {}
      :fails nil}
-    {:verbose 0
+    {:report-format "stdout"
+     :verbose 0
      :totals true
      :headers false
      :formatter "%s %s %s"}
@@ -179,15 +209,16 @@
      :items []
      :totals {}
      :fails nil}
-    {:verbose 0
+    {:report-format "stdout"
+     :verbose 0
      :totals false
      :headers false
      :formatter "%s %s %s"}
     ""
     "No items, no headers, no totals"]])
 
-(deftest test-print-report
-  (testing "Print report"
+(deftest test-format-report
+  (testing "Print formatted report"
     (doseq [[report options expected description] params-report]
       (testing description
-        (is (= expected (with-out-str (report/print-report report options))))))))
+        (is (= expected (with-out-str (report/format-report report options))))))))
