@@ -29,9 +29,8 @@
    {:items items-header
     :totals totals-header}))
 
-(def report-formatter "%-35s %-55s %-20s")
-(def verbose-formatter "%-40s")
-
+(def report-formatter "%-35s %-55s %-20s %-40s")
+(def printf-specifier-regex #"\%[0 #+-]?[0-9*]*\.?\d*[hl]{0,2}[jztL]?[diuoxXeEfgGaAcpsSn%]")
 (def format-stdout "stdout")
 (def format-json "json")
 (def format-json-pretty "json-pretty")
@@ -73,19 +72,25 @@
   ([] (get-totals-fmt report-formatter 2))
   ([s] (get-totals-fmt s 2))
   ([s n]
-   (let [parts (str/split s #"\s+")
-         fmt (->> parts (take n) (str/join " "))]
+   (let [delim
+         (-> s
+             (str/split printf-specifier-regex)
+             ;; first is the empty string
+             rest
+             ;; assume all specifiers separated with the same delimiter
+             first)
+         split-pattern (re-pattern delim)
+         parts (str/split s split-pattern)
+         fmt (->> parts (take n) (str/join delim))]
      fmt)))
 
 (defn get-fmt
   "Get printf-style format string for given options and entity (:totals or :items)"
   [options entity]
-  (let [{:keys [formatter] :or {formatter report-formatter}} options
-        fmt (if (pos? (get options :verbose 0))
-              (format "%s %s" formatter verbose-formatter)
-              formatter)
-        fmt' (if (= entity :totals) (get-totals-fmt fmt) fmt)]
-    fmt'))
+  (let [{:keys [formatter] :or {formatter report-formatter}} options]
+    (if (= entity :totals)
+      (get-totals-fmt formatter)
+      formatter)))
 
 (defn get-items
   "Get a list of dependency fields ready printing"

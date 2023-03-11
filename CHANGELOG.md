@@ -5,9 +5,21 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 
 ## [Unreleased]
 
+### Changed
+- `Misc` column no longer depends on the verbosity level and is always
+  shown. For `stdout` reports (default format) visibility of the
+  column can be suppresed via custom `formatter`
+- Default `--formatter` option spans 4 columns (`Dependency`, `License
+  name`, `License type`, `Misc`) and equals to `%-35s %-55s %-20s
+  %-40s`.
+- `--totals` formatting assumes that the first two columns delimited
+  with the same separator; the first separator is used (by default a
+  single space)
+
 ### Added
-- Report output format option `--report-format` to support `stdout`,
-  `json`, `json-pretty` and `csv` formats
+- Report output format option `--report-format` to support `stdout`
+  (default tabular report printed to the standard output), `json`,
+  `json-pretty` and `csv` formats
   ([#90](https://github.com/pilosus/pip-license-checker/issues/90))
 
 ## [0.44.0] - 2023-02-25

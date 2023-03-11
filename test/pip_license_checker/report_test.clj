@@ -44,16 +44,16 @@
         (is (= expected (apply report/get-totals-fmt args)))))))
 
 (def params-get-fmt
-  [[{} :items "%-35s %-55s %-20s"
+  [[{} :items "%-35s %-55s %-20s %-40s"
     "items, no options"]
    [{:verbose 1} :items "%-35s %-55s %-20s %-40s"
     "items, verbose"]
-   [{:verbose 1 :formatter "%s %s %s"} :items "%s %s %s %-40s"
-    "items, verbose, customer formatter"]
+   [{:verbose 1 :formatter "%s %s %s"} :items "%s %s %s"
+    "items, verbose, custom formatter"]
    [{:verbose 1 :formatter "%s %s %s"} :totals "%s %s"
     "totals, verbose, customer formatter"]
    [{:verbose 0 :formatter "%s %s %s"} :totals "%s %s"
-    "totals, non-verbose, customer formatter"]
+    "totals, non-verbose, custom formatter"]
    [{:verbose 0} :totals "%-35s %-55s"
     "totals, non-verbose, default formatter"]])
 
@@ -147,7 +147,7 @@
      :totals true
      :headers true
      :formatter "%s %s %s"}
-    "Dependency License Name License Type Misc                                    \naiohttp:3.7.2 Apache Software License Permissive Too many requests                       \n\nLicense Type Found\nPermissive 1\n"
+    "Dependency License Name License Type\naiohttp:3.7.2 Apache Software License Permissive\n\nLicense Type Found\nPermissive 1\n"
     "Verbose, with headers, with totals"]
    [{:headers
      {:items ["Dependency" "License Name" "License Type" "Misc"]

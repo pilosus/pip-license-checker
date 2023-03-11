@@ -297,7 +297,7 @@
     "No packages, no requirements, no external files"]
    [["-r" "--resources/requirements.txt"
      "--formatter" "%s %s %s %s %s %d"]
-    {:exit-message "The following errors occurred while parsing command arguments:\nFailed to validate \"-r --resources/requirements.txt\": Requirements file does not exist\nFailed to validate \"--formatter %s %s %s %s %s %d\": Invalid formatter string. Expected a printf-style formatter to cover 4 columns of string data, e.g. '%-35s %-55s %-20s'"}
+    {:exit-message "The following errors occurred while parsing command arguments:\nFailed to validate \"-r --resources/requirements.txt\": Requirements file does not exist\nFailed to validate \"--formatter %s %s %s %s %s %d\": Invalid formatter string. Expected a printf-style formatter to cover 4 columns of string data, e.g. '%-35s %-55s %-20s %-40s'"}
     "Invalid option"]])
 
 (deftest ^:cli ^:default
@@ -363,7 +363,7 @@
      "--no-headers"
      "--no-parallel"
      "--no-exit"]
-    (str (format report/report-formatter "test:3.7.2" "MIT License" "Permissive") "\n")
+    (str (format report/report-formatter "test:3.7.2" "MIT License" "Permissive" "") "\n")
     "No headers"]
    [[{:ok? true,
       :requirement {:name "test", :version "3.7.2"},
@@ -377,8 +377,8 @@
      "--no-parallel"
      "--no-exit"]
     (str/join
-     [(str (format report/report-formatter "Dependency" "License Name" "License Type") "\n")
-      (str (format report/report-formatter "test:3.7.2" "MIT License" "Permissive") "\n")])
+     [(str (format report/report-formatter "Dependency" "License Name" "License Type" "Misc") "\n")
+      (str (format report/report-formatter "test:3.7.2" "MIT License" "Permissive" "") "\n")])
     "With headers"]
    [[{:ok? true,
       :requirement {:name "test", :version "3.7.2"},
@@ -392,8 +392,8 @@
      "--no-parallel"
      "--no-exit"]
     (str/join
-     [(str (format report/report-formatter "Dependency" "License Name" "License Type") "\n")
-      (str (format report/report-formatter "test:3.7.2" "MIT License" "Permissive") "\n")
+     [(str (format report/report-formatter "Dependency" "License Name" "License Type" "Misc") "\n")
+      (str (format report/report-formatter "test:3.7.2" "MIT License" "Permissive" "") "\n")
       "\n"
       (str (format (report/get-totals-fmt) "License Type" "Found") "\n")
       (str (format (report/get-totals-fmt) "Permissive" 1) "\n")])
@@ -426,8 +426,8 @@
      "--no-parallel"
      "--no-exit"]
     (str/join
-     [(str (format report/report-formatter "test:3.7.2" "MIT License" "Permissive") "\n")
-      (str (format report/report-formatter "another:0.1.2" "BSD License" "Permissive") "\n")])
+     [(str (format report/report-formatter "test:3.7.2" "MIT License" "Permissive" "") "\n")
+      (str (format report/report-formatter "another:0.1.2" "BSD License" "Permissive" "") "\n")])
     "Requirements and external file"]
    [[{:ok? true,
       :requirement {:name "test", :version "3.7.2"},
