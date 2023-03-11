@@ -5,10 +5,16 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 
 ## [Unreleased]
 
+## [0.45.0] - 2023-03-11
+
+Release **breaks backward compatibility** by adding mandatory `Misc`
+column to the reports. See `Changed` sections for more details.
+
 ### Changed
 - `Misc` column no longer depends on the verbosity level and is always
   shown. For `stdout` reports (default format) visibility of the
-  column can be suppresed via custom `formatter`
+  column can be suppresed via custom `formatter` (e.g. `%s %s %s` to
+  show only first three columns)
 - Default `--formatter` option spans 4 columns (`Dependency`, `License
   name`, `License type`, `Misc`) and equals to `%-35s %-55s %-20s
   %-40s`.
@@ -430,7 +436,8 @@ weak copyleft types.
 ### Added
 - Structure for Leiningen app project
 
-[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.44.0...HEAD
+[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.45.0...HEAD
+[0.45.0]: https://github.com/pilosus/pip-license-checker/compare/0.44.0...0.45.0
 [0.44.0]: https://github.com/pilosus/pip-license-checker/compare/0.43.0...0.44.0
 [0.43.0]: https://github.com/pilosus/pip-license-checker/compare/0.42.1...0.43.0
 [0.42.1]: https://github.com/pilosus/pip-license-checker/compare/0.42.0...0.42.1
