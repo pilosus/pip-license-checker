@@ -18,6 +18,7 @@
   (:gen-class)
   (:require
    [cheshire.core :as json]
+   [clojure.data.csv :as csv]
    [clojure.string :as str]
    [pip-license-checker.data :as d]))
 
@@ -31,15 +32,17 @@
 (def report-formatter "%-35s %-55s %-20s")
 (def verbose-formatter "%-40s")
 
-(def format-table "table")
+(def format-stdout "stdout")
 (def format-json "json")
 (def format-json-pretty "json-pretty")
+(def format-csv "csv")
 
 (def formats
   (sorted-set
-   format-table
+   format-stdout
    format-json
-   format-json-pretty))
+   format-json-pretty
+   format-csv))
 
 (def invalid-format
   (format "Invalid external format. Use one of: %s"
@@ -127,6 +130,38 @@
     ;; return report for pipe to work properly
     report))
 
+(defn print-line-csv
+  [items]
+  (csv/write-csv *out* items :quote? (constantly true))
+  (flush))
+
+(defn print-csv
+  "CSV report printer to standard output"
+  [report options]
+  (let [{headers-opt :headers
+         totals-opt :totals
+         totals-only-opt :totals-only} options
+        {:keys [items totals headers]} report
+        show-totals (or totals-opt totals-only-opt)]
+
+    (when (not totals-only-opt)
+      (when headers-opt
+        (print-line-csv [(:items headers)]))
+
+      (print-line-csv (map get-items items))
+
+      (when totals-opt
+        (print-line-csv [[]])))
+
+    (when show-totals
+      (when headers-opt
+        (print-line-csv [(:totals headers)]))
+
+      (print-line-csv (vec totals)))
+
+    ;; return report for pipe to work properly
+    report))
+
 (defmulti format-report
   "Format report and print to stdout"
   (fn [_ options]
@@ -144,3 +179,6 @@
   (let [result (json/generate-string report {:pretty true})]
     (println result)
     result))
+
+(defmethod format-report "csv" [report options]
+  (print-csv report options))

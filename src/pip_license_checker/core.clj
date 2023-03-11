@@ -170,8 +170,8 @@
    [nil "--formatter PRINTF_FMT" "Printf-style formatter string for report formatting"
     :default report/report-formatter
     :validate [report/valid-formatter? report/invalid-formatter]]
-   [nil "--report-format FORMAT" "Report format: table, json, json-pretty"
-    :default report/format-table
+   [nil "--report-format FORMAT" "Report format: stdout, json, json-pretty, csv"
+    :default report/format-stdout
     :validate [report/valid-format? report/invalid-format]]
    ["-f" "--fail LICENSE_TYPE" "Return non-zero exit code if license type is found"
     :default (sorted-set)
