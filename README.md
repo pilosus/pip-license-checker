@@ -169,7 +169,8 @@ Description:
   -x, --external FILE_NAME                 []                                      File containing package names and license names
       --external-format FILE_FORMAT        csv                                     External file format: csv, cocoapods, gradle
       --external-options OPTS_EDN_STRING   {:skip-header true, :skip-footer true}  String of options map in EDN format
-      --formatter PRINTF_FMT               %-35s %-55s %-20s                       Printf-style formatter string for report formatting
+      --report-format FORMAT               stdout                                  Report format: stdout, json, json-pretty, csv
+      --formatter PRINTF_FMT               %-35s %-55s %-20s                       Printf-style formatter string for stdout report formatting
   -f, --fail LICENSE_TYPE                  #{}                                     Return non-zero exit code if license type is found
   -e, --exclude REGEX                                                              PCRE to exclude packages with matching names
       --exclude-license REGEX                                                      PCRE to exclude packages with matching license names

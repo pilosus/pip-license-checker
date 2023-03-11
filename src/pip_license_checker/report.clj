@@ -17,6 +17,8 @@
   "Formatting and printing a report"
   (:gen-class)
   (:require
+   [cheshire.core :as json]
+   [clojure.data.csv :as csv]
    [clojure.string :as str]
    [pip-license-checker.data :as d]))
 
@@ -27,8 +29,28 @@
    {:items items-header
     :totals totals-header}))
 
-(def report-formatter "%-35s %-55s %-20s")
-(def verbose-formatter "%-40s")
+(def report-formatter "%-35s %-55s %-20s %-40s")
+(def printf-specifier-regex #"\%[0 #+-]?[0-9*]*\.?\d*[hl]{0,2}[jztL]?[diuoxXeEfgGaAcpsSn%]")
+(def format-stdout "stdout")
+(def format-json "json")
+(def format-json-pretty "json-pretty")
+(def format-csv "csv")
+
+(def formats
+  (sorted-set
+   format-stdout
+   format-json
+   format-json-pretty
+   format-csv))
+
+(def invalid-format
+  (format "Invalid external format. Use one of: %s"
+          (str/join ", " formats)))
+
+(defn valid-format?
+  "Return true if format string is valid, false otherwise"
+  [format]
+  (contains? formats format))
 
 (defn valid-formatter?
   "Check if printf-style formatter string is valid"
@@ -50,19 +72,25 @@
   ([] (get-totals-fmt report-formatter 2))
   ([s] (get-totals-fmt s 2))
   ([s n]
-   (let [parts (str/split s #"\s+")
-         fmt (->> parts (take n) (str/join " "))]
+   (let [delim
+         (-> s
+             (str/split printf-specifier-regex)
+             ;; first is the empty string
+             rest
+             ;; assume all specifiers separated with the same delimiter
+             first)
+         split-pattern (re-pattern delim)
+         parts (str/split s split-pattern)
+         fmt (->> parts (take n) (str/join delim))]
      fmt)))
 
 (defn get-fmt
   "Get printf-style format string for given options and entity (:totals or :items)"
   [options entity]
-  (let [{:keys [formatter] :or {formatter report-formatter}} options
-        fmt (if (pos? (get options :verbose 0))
-              (format "%s %s" formatter verbose-formatter)
-              formatter)
-        fmt' (if (= entity :totals) (get-totals-fmt fmt) fmt)]
-    fmt'))
+  (let [{:keys [formatter] :or {formatter report-formatter}} options]
+    (if (= entity :totals)
+      (get-totals-fmt formatter)
+      formatter)))
 
 (defn get-items
   "Get a list of dependency fields ready printing"
@@ -79,7 +107,7 @@
   (println (apply format formatter items)))
 
 (defn print-report
-  "Print report to standard output"
+  "Default report printer to standard output"
   [report options]
   (let [{headers-opt :headers
          totals-opt :totals
@@ -106,3 +134,56 @@
 
     ;; return report for pipe to work properly
     report))
+
+(defn print-line-csv
+  [items]
+  (csv/write-csv *out* items :quote? (constantly true))
+  (flush))
+
+(defn print-csv
+  "CSV report printer to standard output"
+  [report options]
+  (let [{headers-opt :headers
+         totals-opt :totals
+         totals-only-opt :totals-only} options
+        {:keys [items totals headers]} report
+        show-totals (or totals-opt totals-only-opt)]
+
+    (when (not totals-only-opt)
+      (when headers-opt
+        (print-line-csv [(:items headers)]))
+
+      (print-line-csv (map get-items items))
+
+      (when totals-opt
+        (print-line-csv [[]])))
+
+    (when show-totals
+      (when headers-opt
+        (print-line-csv [(:totals headers)]))
+
+      (print-line-csv (vec totals)))
+
+    ;; return report for pipe to work properly
+    report))
+
+(defmulti format-report
+  "Format report and print to stdout"
+  (fn [_ options]
+    (get options :report-format)))
+
+(defmethod format-report :default [report options]
+  (print-report report options))
+
+(defmethod format-report "json" [report _]
+  (let [result (json/generate-string report)]
+    (println result)
+    result))
+
+(defmethod format-report "json-pretty" [report _]
+  (let [result (json/generate-string report {:pretty true})]
+    (println result)
+    result))
+
+(defmethod format-report "csv" [report options]
+  (print-csv report options))
