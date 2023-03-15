@@ -5,6 +5,13 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 
 ## [Unreleased]
 
+## [0.46.0] - 2023-03-15
+
+### Fixed
+- Address the bug with supporting `BigInteger` in epoch, major, minor,
+  and patch parts of the Python-native package versions
+  ([#136](https://github.com/pilosus/pip-license-checker/issues/136))
+
 ## [0.45.0] - 2023-03-11
 
 Release **breaks backward compatibility** by adding mandatory `Misc`
@@ -436,7 +443,8 @@ weak copyleft types.
 ### Added
 - Structure for Leiningen app project
 
-[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.45.0...HEAD
+[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.46.0...HEAD
+[0.46.0]: https://github.com/pilosus/pip-license-checker/compare/0.45.0...0.46.0
 [0.45.0]: https://github.com/pilosus/pip-license-checker/compare/0.44.0...0.45.0
 [0.44.0]: https://github.com/pilosus/pip-license-checker/compare/0.43.0...0.44.0
 [0.43.0]: https://github.com/pilosus/pip-license-checker/compare/0.42.1...0.43.0
