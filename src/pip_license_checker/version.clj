@@ -116,6 +116,16 @@
     0
     (read-string number)))
 
+(defn parse-number!
+  "Parse number string, throw NumberFormatException if parsing fails"
+  [number]
+  (cond
+    (not number)
+    (throw (IllegalArgumentException. "Wrong argument type"))
+    (not (re-find #"^[0-9]+$" number))
+    (throw (NumberFormatException. (format "For input string: \"%s\"" number)))
+    :else (read-string number)))
+
 (s/fdef parse-letter-version
   :args (s/cat :letter ::sp/matched-version-part
                :number ::sp/matched-version-part)
@@ -156,7 +166,7 @@
         parsed
         (vec (map
               #(try
-                 (Integer/parseInt %)
+                 (parse-number! %)
                  (catch NumberFormatException _ %))
               splitted))]
     (if (= parsed []) nil parsed)))
@@ -175,8 +185,8 @@
             meta]} version-map
           result
           {:orig orig
-           :epoch (if epoch (Integer/parseInt epoch) 0)
-           :release (vec (map #(Integer/parseInt %) (str/split release #"\.")))
+           :epoch (if epoch (parse-number! epoch) 0)
+           :release (vec (map #(parse-number! %) (str/split release #"\.")))
            :pre (parse-letter-version prel pren)
            :post (parse-letter-version postl (or postn1 postn2))
            :dev (parse-letter-version devl devn)
