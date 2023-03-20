@@ -5,6 +5,13 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 
 ## [Unreleased]
 
+## [0.46.1] - 2023-03-20
+
+### Fixed
+- Address the bug with exception throwing for leading zeros in integer
+  parts of the Python-native package versions
+  ([#138](https://github.com/pilosus/pip-license-checker/issues/138))
+
 ## [0.46.0] - 2023-03-15
 
 ### Fixed
@@ -443,7 +450,8 @@ weak copyleft types.
 ### Added
 - Structure for Leiningen app project
 
-[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.46.0...HEAD
+[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.46.1...HEAD
+[0.46.1]: https://github.com/pilosus/pip-license-checker/compare/0.46.0...0.46.1
 [0.46.0]: https://github.com/pilosus/pip-license-checker/compare/0.45.0...0.46.0
 [0.45.0]: https://github.com/pilosus/pip-license-checker/compare/0.44.0...0.45.0
 [0.44.0]: https://github.com/pilosus/pip-license-checker/compare/0.43.0...0.44.0

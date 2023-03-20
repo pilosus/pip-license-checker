@@ -107,24 +107,15 @@
 
 ;; version parsing
 
-(defn parse-number
+(defn parse-int
+  "Parse number string, assume BigInteger"
+  [number]
+  (BigInteger. number))
+
+(defn parse-int-or-get-0
   "Parse number string into integer or return 0"
   [number]
-  (if (or (not number)
-          ;; just to make sure no code execution is possible with read-string
-          (not (re-find #"^-?\d+\.?\d*$" number)))
-    0
-    (read-string number)))
-
-(defn parse-number!
-  "Parse number string, throw NumberFormatException if parsing fails"
-  [number]
-  (cond
-    (not number)
-    (throw (IllegalArgumentException. "Wrong argument type"))
-    (not (re-find #"^[0-9]+$" number))
-    (throw (NumberFormatException. (format "For input string: \"%s\"" number)))
-    :else (read-string number)))
+  (try (parse-int number) (catch Exception _ 0)))
 
 (s/fdef parse-letter-version
   :args (s/cat :letter ::sp/matched-version-part
@@ -145,11 +136,11 @@
                   (contains? #{"c" "pre" "preview"} sanitized-letter) "rc"
                   (contains? #{"rev" "r"} sanitized-letter) "post"
                   :else sanitized-letter)
-                canonical-number (parse-number number)]
+                canonical-number (parse-int-or-get-0 number)]
             [canonical-letter canonical-number])
           (and (not letter) number)
           (let [canonical-letter "post"
-                canonical-number (parse-number number)]
+                canonical-number (parse-int-or-get-0 number)]
             [canonical-letter canonical-number])
           :else nil)]
     result))
@@ -166,7 +157,7 @@
         parsed
         (vec (map
               #(try
-                 (parse-number! %)
+                 (parse-int %)
                  (catch NumberFormatException _ %))
               splitted))]
     (if (= parsed []) nil parsed)))
@@ -185,8 +176,8 @@
             meta]} version-map
           result
           {:orig orig
-           :epoch (if epoch (parse-number! epoch) 0)
-           :release (vec (map #(parse-number! %) (str/split release #"\.")))
+           :epoch (if epoch (parse-int epoch) 0)
+           :release (vec (map #(parse-int %) (str/split release #"\.")))
            :pre (parse-letter-version prel pren)
            :post (parse-letter-version postl (or postn1 postn2))
            :dev (parse-letter-version devl devn)

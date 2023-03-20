@@ -28,7 +28,7 @@
   (testing "Number parsing"
     (doseq [[number expected description] params-parse-number]
       (testing description
-        (is (= expected (v/parse-number number)))))))
+        (is (= expected (v/parse-int-or-get-0 number)))))))
 
 (defn enum
   "Enumerate sequence ([idx1 elem1] [id2 elem2] ...)"
@@ -125,6 +125,26 @@
      :local nil
      :meta nil}
     "Make sure long numbers handled correctly"]
+   ["020230213094415!0020230213094415.00020230213094415.000020230213094415.dev0000020160909030348"
+    {:orig "020230213094415!0020230213094415.00020230213094415.000020230213094415.dev0000020160909030348"
+     :epoch 20230213094415
+     :release [20230213094415 20230213094415 20230213094415]
+     :pre nil
+     :post nil
+     :dev ["dev" 20160909030348]
+     :local nil
+     :meta nil}
+    "Make sure leading zeros parsed as integers, not as octal or hex"]
+   ["1.0.dev"
+    {:orig "1.0.dev"
+     :epoch 0
+     :release [1 0]
+     :pre nil
+     :post nil
+     :dev ["dev" 0]
+     :local nil
+     :meta nil}
+    "If dev version cannot be parsed, use 0"]
    ["1.0.dev(exploit-run)"
     nil
     "Make sure no read-string expoit is possible"]])
