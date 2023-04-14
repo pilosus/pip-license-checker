@@ -5,6 +5,16 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 
 ## [Unreleased]
 
+## [0.47.0] - 2023-04-14
+
+### Changed
+- Docker base image's pinned sha256 digest removed for quicker and
+  easier security updates
+
+### Fixed
+- Clojure package `org.pilosus/pip-license-checker` to be updated
+  since the release `0.45.0`
+
 ## [0.46.1] - 2023-03-20
 
 ### Fixed
@@ -450,7 +460,8 @@ weak copyleft types.
 ### Added
 - Structure for Leiningen app project
 
-[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.46.1...HEAD
+[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.47.0...HEAD
+[0.47.0]: https://github.com/pilosus/pip-license-checker/compare/0.46.1...0.47.0
 [0.46.1]: https://github.com/pilosus/pip-license-checker/compare/0.46.0...0.46.1
 [0.46.0]: https://github.com/pilosus/pip-license-checker/compare/0.45.0...0.46.0
 [0.45.0]: https://github.com/pilosus/pip-license-checker/compare/0.44.0...0.45.0
