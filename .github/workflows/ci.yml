@@ -60,7 +60,7 @@ jobs:
           external: 'licenses.csv'
           external-format: 'csv'
           external-options: '{:skip-header false :package-column-index 0 :license-column-index 2}'
-          formatter: '%-65s %-65s %-20s'
+          formatter: '%-65s %-65s %-20s %-40s'
           totals: true
           headers: true
           fail: 'StrongCopyleft,NetworkCopyleft,Other,Error'
