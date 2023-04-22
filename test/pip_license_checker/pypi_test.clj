@@ -17,6 +17,7 @@
   (:require
    [cheshire.core :as json]
    [clojure.spec.gen.alpha :as gen]
+   [clojure.spec.test.alpha :as stest]
    [clojure.test :refer [deftest is testing]]
    [pip-license-checker.data :as d]
    [pip-license-checker.file :as file]
@@ -26,6 +27,12 @@
    [pip-license-checker.pypi :as pypi]
    [pip-license-checker.spec :as sp]
    [pip-license-checker.version :as version]))
+
+;; instrument all functions to test functions :args
+(stest/instrument)
+
+;; check all functions :ret and :fn
+(stest/check)
 
 (def mock-pypi-api-request (constantly {:status 200 :body "{}"}))
 

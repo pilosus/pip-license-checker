@@ -550,8 +550,8 @@
 (s/fdef get-version
   :args (s/cat :specifiers ::sp/specifiers
                :versions ::sp/versions
-               :pre (s/? keyword?)
-               :value (s/? boolean?))
+               :pre (s/nilable keyword?)
+               :value (s/nilable boolean?))
   :ret ::sp/version-str)
 
 (defn get-version
