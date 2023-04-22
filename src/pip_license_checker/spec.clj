@@ -26,10 +26,14 @@
 ;; (require '[pip-license-checker.spec :as sp])
 ;; (s/valid? ::sp/requirement "abc")
 
+;; Common
+
+(s/def ::nilable-string (s/nilable string?))
+
 ;; Versions
 
 (s/def ::version-str string?)
-(s/def ::matched-version-part (s/nilable string?))
+(s/def ::matched-version-part ::nilable-string)
 (s/def ::non-negative-number (s/and number? (fn [n] (>= n 0))))
 (s/def ::version-orig string?)
 (s/def ::version-epoch ::non-negative-number)
@@ -76,6 +80,9 @@
 (s/def ::specifier-str string?)
 
 ;; TODO must be rewritten with s/fspec or s/fdef?
+;; not sure why this doesn't conform the spec
+;; (s/def ::op (s/fspec :args (s/cat :a ::version :b ::version) :ret boolean?))
+;; TODO minimal reproducable example of fns & specs to debug
 (s/def ::op fn?)
 
 (s/def ::specifier
@@ -83,6 +90,137 @@
 
 (s/def ::specifiers
   (s/nilable (s/coll-of ::specifier)))
+
+;; Logging
+
+(s/def :log/level #{:error :info :debug})
+(s/def :log/name string?)
+(s/def :log/message string?)
+
+(s/def ::log
+  (s/keys :req-un
+          [:log/level
+           :log/name
+           :log/message]))
+
+(s/def ::logs (s/coll-of ::log))
+
+;; License
+
+(s/def :license/name ::nilable-string)
+(s/def :license/type ::nilable-string)
+(s/def :license/logs (s/nilable ::logs))
+
+(s/def ::license
+  (s/keys :req-un
+          [:license/name
+           :license/type
+           :license/logs]))
+
+;; Requirement
+
+(s/def :requirement/name ::nilable-string)
+(s/def :requirement/version ::nilable-string)
+(s/def :requirement/specifiers (s/nilable ::specifiers))
+
+(s/def ::requirement
+  (s/keys :req-un
+          [:requirement/name
+           :requirement/version
+           :requirement/specifiers]))
+
+;; PyPI Project
+;; as represented by JSON API reponse from
+;; https://pypi.org/project/<project-name>
+
+(s/def :pypi-project/status keyword?)
+(s/def :pypi-project/requirement ::requirement)
+(s/def :pypi-project/api-response (s/nilable map?))
+(s/def :pypi-project/license ::license)
+(s/def :pypi-project/logs (s/nilable ::logs))
+
+(s/def ::pypi-project
+  (s/keys :req-un
+          [:pypi-project/status
+           :pypi-project/requirement
+           :pypi-project/api-response
+           :pypi-project/license
+           :pypi-project/logs]))
+
+;; Dependency
+;; General representation of dependency: PyPI project or external dep
+
+(s/def :dependency/requirement ::requirement)
+(s/def :dependency/license ::license)
+(s/def :dependency/logs (s/nilable ::logs))
+
+(s/def ::dependency
+  (s/keys :req-un
+          [:dependency/requirement
+           :dependency/license
+           :dependency/logs]))
+
+;; Report elements
+
+;; Report Dependency
+
+(s/def :report-dependency/name ::nilable-string)
+(s/def :report-dependency/version ::nilable-string)
+
+(s/def ::report-dependency
+  (s/keys :req-un
+          [:report-dependency/name
+           :report-dependency/version]))
+
+;; Report License
+
+(s/def :report-license/name ::nilable-string)
+(s/def :report-license/type ::nilable-string)
+
+(s/def ::report-license
+  (s/keys :req-un
+          [:report-license/name
+           :report-license/type]))
+
+;; Report Item
+
+(s/def :report-item/dependency ::report-dependency)
+(s/def :report-item/license ::report-license)
+(s/def :report-item/misc ::nilable-string)
+
+(s/def ::report-item
+  (s/keys :req-un
+          [:report-item/dependency
+           :report-item/license
+           :report-item/misc]))
+
+;; Report Header
+
+(s/def :report-header/items (s/coll-of string?))
+(s/def :report-header/totals (s/coll-of string?))
+
+(s/def ::report-header
+  (s/keys :req-un
+          [:report-header/items
+           :report-header/totals]))
+
+;; Report
+
+(s/def :report/headers (s/nilable (s/coll-of ::report-header)))
+(s/def :report/items (s/coll-of ::report-item))
+
+;; mapping license type => frequency
+(s/def :report/totals (s/map-of string? number?))
+
+;; list of license types that make program fail
+(s/def :report/fails (s/nilable (s/coll-of string?)))
+
+(s/def ::report
+  (s/keys :req-un
+          [:report/headers
+           :report/items
+           :report/totals
+           :report/fails]))
 
 ;;
 ;; Generators
