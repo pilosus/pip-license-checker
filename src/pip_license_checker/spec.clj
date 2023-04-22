@@ -30,16 +30,22 @@
 
 (s/def ::version-str string?)
 (s/def ::matched-version-part (s/nilable string?))
-(s/def ::non-negative-int (s/and int? (fn [n] (>= n 0))))
+(s/def ::non-negative-number (s/and number? (fn [n] (>= n 0))))
 (s/def ::version-orig string?)
-(s/def ::version-epoch ::non-negative-int)
-(s/def ::version-release (s/coll-of int?))
+(s/def ::version-epoch ::non-negative-number)
+(s/def ::version-release (s/coll-of number?))
 
 (s/def ::opt-version-letter
-  (s/nilable (s/tuple string? int?)))
+  (s/nilable (s/tuple string? number?)))
 
 (s/def ::opt-version-local
-  (s/nilable (s/* (s/alt :letter string? :number int?))))
+  (s/nilable (s/* (s/alt :letter string? :number number?))))
+
+(s/def :version-meta/yanked boolean?)
+
+(s/def ::version-meta
+  (s/nilable
+   (s/keys :req-un [:version-meta/yanked])))
 
 (s/def :version/orig ::version-orig)
 (s/def :version/epoch ::version-epoch)
@@ -48,6 +54,7 @@
 (s/def :version/post ::opt-version-letter)
 (s/def :version/dev ::opt-version-letter)
 (s/def :version/local ::opt-version-local)
+(s/def :version/meta ::version-meta)
 
 (s/def ::version
   (s/keys :req-un
@@ -57,7 +64,9 @@
            :version/pre
            :version/post
            :version/dev
-           :version/local]))
+           :version/local
+           :version/meta
+           ]))
 
 (s/def ::versions
   (s/nilable (s/coll-of ::version)))
@@ -65,9 +74,9 @@
 ;; Specifiers
 
 (s/def ::specifier-str string?)
-(s/def ::op
-  (s/fspec :args (s/cat :a ::version :b ::version)
-           :ret boolean?))
+
+;; TODO must be rewritten with s/fspec or s/fdef?
+(s/def ::op fn?)
 
 (s/def ::specifier
   (s/nilable (s/tuple ::op ::version)))

@@ -16,9 +16,16 @@
 (ns pip-license-checker.version-test
   (:require
    [clojure.spec.gen.alpha :as gen]
+   [clojure.spec.test.alpha :as stest]
    [clojure.test :refer [deftest is testing]]
    [pip-license-checker.spec :as sp]
    [pip-license-checker.version :as v]))
+
+;; instrument all functions to test functions :args
+(stest/instrument)
+
+;; check all functions :ret and :fn
+(stest/check)
 
 (def params-parse-number
   [["1" 1 "Ok"]
@@ -153,6 +160,8 @@
   (testing "Version parsing"
     (doseq [[version expected description] params-parse-version]
       (testing description
+        (stest/instrument `v/parse-version)
+        (stest/check `v/parse-version)
         (is (= expected (v/parse-version version)))))))
 
 (def params-generators-parse-version (gen/sample sp/version-str-gen 1000))

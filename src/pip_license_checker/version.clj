@@ -187,7 +187,10 @@
     nil))
 
 (s/fdef parse-version
-  :args (s/cat :version-str ::sp/version-str)
+  ;; address mutli-arity with s/alt
+  :args (s/alt :unary (s/cat :version-str ::sp/version-str)
+               :binary (s/cat :version-str ::sp/version-str
+                              :meta ::sp/version-meta))
   :ret ::sp/version)
 
 (defn parse-version
