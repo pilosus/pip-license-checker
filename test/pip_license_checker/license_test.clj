@@ -15,9 +15,21 @@
 
 (ns pip-license-checker.license-test
   (:require
+   [clojure.spec.alpha :as s]
+   [clojure.spec.test.alpha :as stest]
    [clojure.test :refer [deftest is testing]]
-   [pip-license-checker.data :as d]
-   [pip-license-checker.license :as license]))
+   [pip-license-checker.license :as license]
+   [pip-license-checker.spec :as sp]
+))
+
+;; set up assertions for spec validation
+(s/check-asserts true)
+
+;; instrument all functions to test functions :args
+(stest/instrument)
+
+;; check all functions :ret and :fn
+(stest/check)
 
 ;; license/is-type-valid?
 
@@ -54,117 +66,183 @@
 
 (def params-license-with-type
   [["MIT License"
-    (d/->License "MIT License" license/type-permissive nil)
+    (s/assert
+     ::sp/license
+     {:name "MIT License" :type license/type-permissive :logs nil})
     "Permissive"]
    ["Artistic license"
-    (d/->License "Artistic license" license/type-permissive nil)
+    (s/assert
+     ::sp/license
+     {:name "Artistic license" :type license/type-permissive :logs nil})
     "Permissive"]
    ["zope public license"
-    (d/->License "zope public license" license/type-permissive nil)
+    (s/assert
+     ::sp/license
+     {:name "zope public license" :type license/type-permissive :logs nil})
     "Permissive"]
    ["WTFPL"
-    (d/->License "WTFPL" license/type-permissive nil)
+    (s/assert
+     ::sp/license
+     {:name "WTFPL" :type license/type-permissive :logs nil})
     "Permissive"]
    ["CC0"
-    (d/->License "CC0" license/type-permissive nil)
+    (s/assert
+     ::sp/license
+     {:name "CC0" :type license/type-permissive :logs nil})
     "Permissive"]
    ["CC-BY-4.0"
-    (d/->License "CC-BY-4.0" license/type-permissive nil)
+    (s/assert
+     ::sp/license
+     {:name "CC-BY-4.0" :type license/type-permissive :logs nil})
     "Permissive"]
    ["CC BY 4.0"
-    (d/->License "CC BY 4.0" license/type-permissive nil)
+    (s/assert
+     ::sp/license
+     {:name "CC BY 4.0" :type license/type-permissive :logs nil})
     "Permissive"]
    ["cc  by 2.0"
-    (d/->License "cc  by 2.0" license/type-permissive nil)
+    (s/assert
+     ::sp/license
+     {:name "cc  by 2.0" :type license/type-permissive :logs nil})
     "Permissive"]
    ["ODC BY 1.0"
-    (d/->License "ODC BY 1.0" license/type-permissive nil)
+    (s/assert
+     ::sp/license
+     {:name "ODC BY 1.0" :type license/type-permissive :logs nil})
     "Permissive"]
    ["ODC-BY-1.0"
-    (d/->License "ODC-BY-1.0" license/type-permissive nil)
+    (s/assert
+     ::sp/license
+     {:name "ODC-BY-1.0" :type license/type-permissive :logs nil})
     "Permissive"]
    ["Open Data Commons Attribution License"
-    (d/->License "Open Data Commons Attribution License" license/type-permissive nil)
+    (s/assert
+     ::sp/license
+     {:name "Open Data Commons Attribution License"
+      :type license/type-permissive
+      :logs nil})
     "Permissive"]
    ["zlib"
-    (d/->License "zlib" license/type-permissive nil)
+    (s/assert
+     ::sp/license
+     {:name "zlib" :type license/type-permissive :logs nil})
     "Permissive"]
    ["zlib/libpng License with Acknowledgement"
-    (d/->License "zlib/libpng License with Acknowledgement" license/type-permissive nil)
+    (s/assert
+     ::sp/license
+     {:name "zlib/libpng License with Acknowledgement"
+      :type license/type-permissive
+      :logs nil})
     "Permissive"]
    ["ODbL-1.0"
-    (d/->License "ODbL-1.0" license/type-copyleft-weak nil)
+    (s/assert
+     ::sp/license
+     {:name "ODbL-1.0" :type license/type-copyleft-weak :logs nil})
     license/type-copyleft-weak
     "WeakCopyleft"]
    ["Open Data Commons Open Database License v1.0"
-    (d/->License
-     "Open Data Commons Open Database License v1.0"
-     license/type-copyleft-weak
-     nil)
+    (s/assert
+     ::sp/license
+     {:name "Open Data Commons Open Database License v1.0"
+      :type license/type-copyleft-weak
+      :logs nil})
     "WeakCopyleft"]
    ["Mozilla Public License 2.0"
-    (d/->License "Mozilla Public License 2.0" license/type-copyleft-weak nil)
+    (s/assert
+     ::sp/license
+     {:name "Mozilla Public License 2.0" :type license/type-copyleft-weak :logs nil})
     "WeakCopyleft"]
    ["GPL with linking exception"
-    (d/->License "GPL with linking exception" license/type-copyleft-weak nil)
+    (s/assert
+     ::sp/license
+     {:name "GPL with linking exception" :type license/type-copyleft-weak :logs nil})
     "WeakCopyleft"]
    ["GPL Classpath"
-    (d/->License "GPL Classpath" license/type-copyleft-weak nil)
+    (s/assert
+     ::sp/license
+     {:name "GPL Classpath" :type license/type-copyleft-weak :logs nil})
     "WeakCopyleft"]
    ["GPL v2 or later with classpath exception"
-    (d/->License
-     "GPL v2 or later with classpath exception"
-     license/type-copyleft-weak
-     nil)
+    (s/assert
+     ::sp/license
+     {:name "GPL v2 or later with classpath exception"
+      :type license/type-copyleft-weak
+      :logs nil})
     "WeakCopyleft"]
    ["GNU General Public License v2 or later (GPLv2+)"
-    (d/->License
-     "GNU General Public License v2 or later (GPLv2+)"
-     license/type-copyleft-strong
-     nil)
+    (s/assert
+     ::sp/license
+     {:name "GNU General Public License v2 or later (GPLv2+)"
+      :type license/type-copyleft-strong
+      :logs nil})
     "StrongCopyleft"]
    ["GPLv3"
-    (d/->License "GPLv3" license/type-copyleft-strong nil)
+    (s/assert
+     ::sp/license
+     {:name "GPLv3" :type license/type-copyleft-strong :logs nil})
     "StrongCopyleft"]
    ["BSD-3-Clause OR GPL-2.0"
-    (d/->License "BSD-3-Clause OR GPL-2.0" license/type-copyleft-strong nil)
+    (s/assert
+     ::sp/license
+     {:name "BSD-3-Clause OR GPL-2.0" :type license/type-copyleft-strong :logs nil})
     "StrongCopyleft"]
    ["GNU General Public License version 3"
-    (d/->License
-     "GNU General Public License version 3"
-     license/type-copyleft-strong
-     nil)
+    (s/assert
+     ::sp/license
+     {:name "GNU General Public License version 3"
+      :type license/type-copyleft-strong
+      :logs nil})
     "StrongCopyleft"]
    ["AGPLv3"
-    (d/->License "AGPLv3" license/type-copyleft-network nil)
+    (s/assert
+     ::sp/license
+     {:name "AGPLv3" :type license/type-copyleft-network :logs nil})
     license/type-copyleft-network
     "NetworkCopyleft"]
    ["GNU Affero GPL version 3"
-    (d/->License "GNU Affero GPL version 3" license/type-copyleft-network nil)
+    (s/assert
+     ::sp/license
+     {:name "GNU Affero GPL version 3" :type license/type-copyleft-network :logs nil})
     "NetworkCopyleft"]
    ["zlib/whatever-new"
-    (d/->License "zlib/whatever-new" license/type-other nil)
+    (s/assert
+     ::sp/license
+     {:name "zlib/whatever-new" :type license/type-other :logs nil})
     "Other"]
    ["CC-BY-SA"
-    (d/->License "CC-BY-SA" license/type-other nil)
+    (s/assert
+     ::sp/license
+     {:name "CC-BY-SA" :type license/type-other :logs nil})
     "Other"]
    ["CC BY-NC"
-    (d/->License "CC BY-NC" license/type-other nil)
+    (s/assert
+     ::sp/license
+     {:name "CC BY-NC" :type license/type-other :logs nil})
     "Other"]
    ["CC BY-ND"
-    (d/->License "CC BY-ND" license/type-other nil)
+    (s/assert
+     ::sp/license
+     {:name "CC BY-ND" :type license/type-other :logs nil})
     "Other"]
    ["CC BY-NC-ND"
-    (d/->License "CC BY-NC-ND" license/type-other nil)
+    (s/assert
+     ::sp/license
+     {:name "CC BY-NC-ND" :type license/type-other :logs nil})
     "Other"]
    ["CC BY-NC-SA-4.0"
-    (d/->License "CC BY-NC-SA-4.0" license/type-other nil)
+    (s/assert
+     ::sp/license
+     {:name "CC BY-NC-SA-4.0" :type license/type-other :logs nil})
     "Other"]
    ["EULA"
-    (d/->License "EULA" license/type-other nil)
+    (s/assert
+     ::sp/license
+     {:name "EULA" :type license/type-other :logs nil})
     "Other"]
    [nil
-    (d/->License license/name-error license/type-error nil)
+    (s/assert
+     ::sp/license
+     {:name license/name-error :type license/type-error :logs nil})
     "Exception catched"]])
 
 (deftest test-license-with-type
