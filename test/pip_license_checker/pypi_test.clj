@@ -16,17 +16,21 @@
 (ns pip-license-checker.pypi-test
   (:require
    [cheshire.core :as json]
+   [clojure.spec.alpha :as s]
    [clojure.spec.gen.alpha :as gen]
    [clojure.spec.test.alpha :as stest]
    [clojure.test :refer [deftest is testing]]
-   [pip-license-checker.data :as d]
    [pip-license-checker.file :as file]
    [pip-license-checker.github :as github]
    [pip-license-checker.http :as http]
    [pip-license-checker.license :as license]
    [pip-license-checker.pypi :as pypi]
    [pip-license-checker.spec :as sp]
-   [pip-license-checker.version :as version]))
+   [pip-license-checker.version :as version]
+))
+
+;; set up assertions for spec validation
+(s/check-asserts true)
 
 ;; instrument all functions to test functions :args
 (stest/instrument)
@@ -121,66 +125,80 @@
      :specifiers [[version/eq (version/parse-version "3.7.2")]]}
     mock-pypi-api-request
     [(version/parse-version "3.7.1") (version/parse-version "3.7.2")]
-    (d/map->PyPiProject {:status :found
-                         :requirement
-                         (d/map->Requirement
-                          {:name "aiohttp"
-                           :version "3.7.2"
-                           :specifiers [[version/eq (version/parse-version "3.7.2")]]})
-                         :api-response {}
-                         :license nil
-                         :logs nil})
+    (s/assert
+     ::sp/pypi-project
+     {:status :found
+      :requirement
+      (s/assert
+       ::sp/requirement
+       {:name "aiohttp"
+        :version "3.7.2"
+        :specifiers [[version/eq (version/parse-version "3.7.2")]]})
+      :api-response {}
+      :license nil
+      :logs nil})
     "Specific version"]
    [{:name "django" :specifiers nil}
     mock-pypi-api-request
     [(version/parse-version "3.1.1") (version/parse-version "3.1.2")]
-    (d/map->PyPiProject {:status :found
-                         :requirement
-                         (d/map->Requirement
-                          {:name "django"
-                           :version "3.1.2"
-                           :specifiers nil})
-                         :api-response {}
-                         :license nil
-                         :logs nil})
+    (s/assert
+     ::sp/pypi-project
+     {:status :found
+      :requirement
+      (s/assert
+       ::sp/requirement
+       {:name "django"
+        :version "3.1.2"
+        :specifiers nil})
+      :api-response {}
+      :license nil
+      :logs nil})
     "Latest version"]
    [{:name "django"
      :specifiers [[version/eq (version/parse-version "777.666.555")]]}
     mock-pypi-api-request
     [(version/parse-version "3.1.1") (version/parse-version "3.1.2")]
-    (d/map->PyPiProject {:status :error
-                         :requirement
-                         (d/map->Requirement
-                          {:name "django"
-                           :version "777.666.555"
-                           :specifiers [[version/eq (version/parse-version "777.666.555")]]})
-                         :api-response nil
-                         :license (d/map->License
-                                   {:name "Error"
-                                    :type "Error"
-                                    :logs nil})
-                         :logs [{:level :error
-                                 :name "PyPI::version"
-                                 :message "Not found"}]})
+    (s/assert
+     ::sp/pypi-project
+     {:status :error
+      :requirement
+      (s/assert
+       ::sp/requirement
+       {:name "django"
+        :version "777.666.555"
+        :specifiers [[version/eq (version/parse-version "777.666.555")]]})
+      :api-response nil
+      :license (s/assert
+                ::sp/license
+                {:name "Error"
+                 :type "Error"
+                 :logs nil})
+      :logs [{:level :error
+              :name "PyPI::version"
+              :message "Not found"}]})
     "Version not found"]
    [{:name "aiohttp"
      :specifiers [[version/eq (version/parse-version "3.7.2")]]}
     mock-pypi-api-throw-exception
     [(version/parse-version "3.7.1") (version/parse-version "3.7.2")]
-    (d/map->PyPiProject {:status :error
-                         :requirement
-                         (d/map->Requirement
-                          {:name "aiohttp"
-                           :version "3.7.2"
-                           :specifiers [[version/eq (version/parse-version "3.7.2")]]})
-                         :api-response nil
-                         :license (d/map->License
-                                   {:name "Error"
-                                    :type "Error"
-                                    :logs nil})
-                         :logs [{:level :error
-                                 :name "PyPI::project"
-                                 :message "429 Rate limits exceeded"}]})
+    (s/assert
+     ::sp/pypi-project
+     {:status :error
+      :requirement
+      (s/assert
+       ::sp/requirement
+       {:name "aiohttp"
+        :version "3.7.2"
+        :specifiers [[version/eq (version/parse-version "3.7.2")]]})
+      :api-response nil
+      :license (s/assert
+                ::sp/license
+                {:name "Error"
+                 :type "Error"
+                 :logs nil})
+      :logs [{:level :error
+              :name "PyPI::project"
+              :message "429 Rate limits exceeded"}]})
     "Expection"]])
 
 (deftest test-api-get-project
@@ -235,38 +253,38 @@
   [[{"info"
      {"license" "MIT"
       "classifiers" ["License :: OSI Approved :: MIT License"]}}
-    (d/->License "MIT" nil nil)
-    (d/map->License {:name "MIT License", :type "Permissive" :logs nil})
+    (s/assert ::sp/license {:name "MIT" :type nil :logs nil})
+    (s/assert ::sp/license {:name "MIT License", :type "Permissive" :logs nil})
     "Get from classifiers field"]
    [{"info"
      {"license" "MIT"
       "classifiers" ["Operating System :: Unix"]}}
-    (d/->License "BSD" nil nil)
-    (d/map->License {:name "MIT", :type "Permissive" :logs nil})
+    (s/assert ::sp/license {:name "BSD" :type nil :logs nil})
+    (s/assert ::sp/license {:name "MIT" :type "Permissive" :logs nil})
     "Get from license field"]
    [{"info"
      {"license" ""
       "classifiers" []}}
-    (d/->License "BSD" nil nil)
-    (d/map->License {:name "BSD", :type "Permissive" :logs [gh-log-info]})
+    (s/assert ::sp/license {:name "BSD" :type nil :logs nil})
+    (s/assert ::sp/license {:name "BSD" :type "Permissive" :logs [gh-log-info]})
     "Get from GitHub API"]
    [{"info"
      {"license" "UNKNOWN"
       "classifiers" []}}
-    (d/->License "MIT" nil nil)
-    (d/map->License {:name "MIT", :type "Permissive" :logs [gh-log-info]})
+    (s/assert ::sp/license {:name "MIT" :type nil :logs nil})
+    (s/assert ::sp/license {:name "MIT" :type "Permissive" :logs [gh-log-info]})
     "Get from GitHub API for older metadata format for missing license field - UNKNOWN string"]
    [{"info"
      {"license" []
       "classifiers" []}}
-    (d/->License "MIT" nil nil)
-    (d/map->License {:name "MIT", :type "Permissive" :logs [gh-log-info]})
+    (s/assert ::sp/license {:name "MIT" :type nil :logs nil})
+    (s/assert ::sp/license {:name "MIT" :type "Permissive" :logs [gh-log-info]})
     "Get from GitHub API for older metadata format for missing license field - empty list"]
    [{"info"
      {"license" ["UNKNOWN"]
       "classifiers" []}}
-    (d/->License "MIT" nil nil)
-    (d/map->License {:name "MIT", :type "Permissive" :logs [gh-log-info]})
+    (s/assert ::sp/license {:name "MIT" :type nil :logs nil})
+    (s/assert ::sp/license {:name "MIT" :type "Permissive" :logs [gh-log-info]})
     "Get from GitHub API for older metadata format for missing license field - list with UNKNOWN"]
    [{"wut" 123}
     nil
@@ -285,56 +303,76 @@
 
 (def params-requirement->rec
   [["aiohttp==3.7.2"
-    (d/map->Requirement
+    (s/assert
+     ::sp/requirement
      {:name "aiohttp"
+      :version nil
       :specifiers [[version/eq (version/parse-version "3.7.2")]]})
     "Equal =="]
    ["aiohttp===3.7.2"
-    (d/map->Requirement
+    (s/assert
+     ::sp/requirement
      {:name "aiohttp"
+      :version nil
       :specifiers [[version/arbitrary-eq (version/parse-version "3.7.2")]]})
     "Equal ==="]
    ["aiohttp!=3.7.2"
-    (d/map->Requirement
+    (s/assert
+     ::sp/requirement
      {:name "aiohttp"
+      :version nil
       :specifiers [[version/neq (version/parse-version "3.7.2")]]})
     "Not equal to !="]
    ["aiohttp~=3.7.2"
-    (d/map->Requirement
+    (s/assert
+     ::sp/requirement
      {:name "aiohttp"
+      :version nil
       :specifiers [[version/compatible (version/parse-version "3.7.2")]]})
     "Compatible ~="]
    ["aiohttp>3.7.2"
-    (d/map->Requirement
+    (s/assert
+     ::sp/requirement
      {:name "aiohttp"
+      :version nil
       :specifiers [[version/gt (version/parse-version "3.7.2")]]})
     "Greater than >"]
    ["aiohttp>=3.7.2"
-    (d/map->Requirement
+    (s/assert
+     ::sp/requirement
      {:name "aiohttp"
+      :version nil
       :specifiers [[version/ge (version/parse-version "3.7.2")]]})
     "Greater or equal to >="]
    ["aiohttp<3.7.2"
-    (d/map->Requirement
+    (s/assert
+     ::sp/requirement
      {:name "aiohttp"
+      :version nil
       :specifiers [[version/lt (version/parse-version "3.7.2")]]})
     "Less than <"]
    ["aiohttp<=3.7.2"
-    (d/map->Requirement
+    (s/assert
+     ::sp/requirement
      {:name "aiohttp"
+      :version nil
       :specifiers [[version/le (version/parse-version "3.7.2")]]})
     "Less than equal to <="]
    ["aiohttp>=3.7,<4,!=3.7.2"
-    (d/map->Requirement
+    (s/assert
+     ::sp/requirement
      {:name "aiohttp"
+      :version nil
       :specifiers
       [[version/ge (version/parse-version "3.7")]
        [version/lt (version/parse-version "4")]
        [version/neq (version/parse-version "3.7.2")]]})
     "Multiple specifiers"]
    ["aiohttp"
-    (d/map->Requirement
+    (s/assert
+     ::sp/requirement
      {:name "aiohttp"
+      :version nil
       :specifiers nil})
     "No specifiers"]])
 
@@ -364,22 +402,28 @@
     ["test==3.7.2"]
     {}
     "{\"info\": {\"license\": \"MIT License\"}}"
-    [(d/map->Dependency
-      {:requirement (d/map->Requirement
+    [(s/assert
+      ::sp/dependency
+      {:requirement (s/assert
+                     ::sp/requirement
                      {:name "aiohttp"
                       :version "3.7.2"
                       :specifiers [[version/eq (version/parse-version "3.7.2")]]})
-       :license (d/map->License
+       :license (s/assert
+                 ::sp/license
                  {:name "MIT License"
                   :type "Permissive"
                   :logs nil})
        :logs nil})
-     (d/map->Dependency
-      {:requirement (d/map->Requirement
+     (s/assert
+      ::sp/dependency
+      {:requirement (s/assert
+                     ::sp/requirement
                      {:name "test"
                       :version "3.7.2"
                       :specifiers [[version/eq (version/parse-version "3.7.2")]]})
-       :license (d/map->License
+       :license (s/assert
+                 ::sp/license
                  {:name "MIT License"
                   :type "Permissive"
                   :logs nil})
@@ -389,12 +433,15 @@
     ["test==3.7.2"]
     {:exclude #"aio.*" :rate-limits {:requests 1 :millis 60000}}
     "{\"info\": {\"license\": \"MIT License\"}}"
-    [(d/map->Dependency
-      {:requirement (d/map->Requirement
+    [(s/assert
+      ::sp/dependency
+      {:requirement (s/assert
+                     ::sp/requirement
                      {:name "test"
                       :version "3.7.2"
                       :specifiers [[version/eq (version/parse-version "3.7.2")]]})
-       :license (d/map->License
+       :license (s/assert
+                 ::sp/license
                  {:name "MIT License"
                   :type "Permissive"
                   :logs nil})
@@ -427,12 +474,15 @@
      {:body "{\"files\": [{\"filename\": \"aiohttp-3.7.1.tar.gz\", \"yanked\": false}, {\"filename\": \"aiohttp-3.7.2.tar.gz\", \"yanked\": false}]}"})
     (fn [& _] (throw (ex-info "Boom!" {:status 429 :reason-phrase "Rate limits exceeded"})))
     (constantly {:body "{\"license\": {\"name\": \"MIT License\"}}"})
-    [(d/map->Dependency
-      {:requirement (d/map->Requirement
+    [(s/assert
+      ::sp/dependency
+      {:requirement (s/assert
+                     ::sp/requirement
                      {:name "aiohttp"
                       :version "3.7.2"
                       :specifiers [[version/eq (version/parse-version "3.7.2")]]})
-       :license (d/map->License
+       :license (s/assert
+                 ::sp/license
                  {:name "Error"
                   :type "Error"
                   :logs nil})
@@ -443,12 +493,15 @@
    [(fn [& _] (throw (ex-info "Boom!" {:status 404 :reason-phrase "Page not found"})))
     (constantly {:body "{\"info\": {\"license\": \"MIT License\"}}"})
     (constantly {:body "{\"license\": {\"name\": \"MIT License\"}}"})
-    [(d/map->Dependency
-      {:requirement (d/map->Requirement
+    [(s/assert
+      ::sp/dependency
+      {:requirement (s/assert
+                     ::sp/requirement
                      {:name "aiohttp"
                       :version "3.7.2"
                       :specifiers [[version/eq (version/parse-version "3.7.2")]]})
-       :license (d/map->License
+       :license (s/assert
+                 ::sp/license
                  {:name "Error"
                   :type "Error"
                   :logs nil})
@@ -458,12 +511,15 @@
      {:body "{\"files\": [{\"filename\": \"aiohttp-3.7.1.win.zip\", \"yanked\": false}, {\"filename\": \"aiohttp-3.7.2-cp39-cp39-musllinux_1_1_x86_64.whl\", \"yanked\": false}]}"})
     (constantly {:body "{\"info\": {\"home_page\": \"https://github.com/aio-libs/aiohttp\"}}"})
     (fn [& _] (throw (ex-info "Boom!" {:status 429 :reason-phrase "Rate limits exceeded"})))
-    [(d/map->Dependency
-      {:requirement (d/map->Requirement
+    [(s/assert
+      ::sp/dependency
+      {:requirement (s/assert
+                     ::sp/requirement
                      {:name "aiohttp"
                       :version "3.7.2"
                       :specifiers [[version/eq (version/parse-version "3.7.2")]]})
-       :license (d/map->License
+       :license (s/assert
+                 ::sp/license
                  {:name "Error"
                   :type "Error"
                   :logs [{:level :error
@@ -477,12 +533,15 @@
      {:body "{\"files\": [{\"filename\": \"aiohttp-3.7.1.tar.gz\", \"yanked\": false}, {\"filename\": \"aiohttp-3.7.2.tar.gz\", \"yanked\": false}]}"})
     (constantly {:body "{\"info\": {\"author\": \"me\"}}"})
     (fn [& _] (throw (ex-info "Boom!" {:status 429 :reason-phrase "Rate limits exceeded"})))
-    [(d/map->Dependency
-      {:requirement (d/map->Requirement
+    [(s/assert
+      ::sp/dependency
+      {:requirement (s/assert
+                     ::sp/requirement
                      {:name "aiohttp"
                       :version "3.7.2"
                       :specifiers [[version/eq (version/parse-version "3.7.2")]]})
-       :license (d/map->License
+       :license (s/assert
+                 ::sp/license
                  {:name "Error"
                   :type "Error"
                   :logs [github/meta-not-found]})

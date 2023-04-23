@@ -124,10 +124,13 @@
 (s/def :requirement/specifiers (s/nilable ::specifiers))
 
 (s/def ::requirement
-  (s/keys :req-un
-          [:requirement/name
-           :requirement/version
-           :requirement/specifiers]))
+  (s/keys
+   :req-un
+   [:requirement/name
+    :requirement/version]
+   :opt-un
+   ;; specifiers not used for non-Python requirements
+   [:requirement/specifiers]))
 
 ;; PyPI Project
 ;; as represented by JSON API reponse from
@@ -136,7 +139,7 @@
 (s/def :pypi-project/status keyword?)
 (s/def :pypi-project/requirement ::requirement)
 (s/def :pypi-project/api-response (s/nilable map?))
-(s/def :pypi-project/license ::license)
+(s/def :pypi-project/license (s/nilable ::license))
 (s/def :pypi-project/logs (s/nilable ::logs))
 
 (s/def ::pypi-project
