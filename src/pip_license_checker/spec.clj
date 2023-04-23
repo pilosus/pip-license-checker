@@ -209,7 +209,7 @@
 
 ;; Report
 
-(s/def :report/headers (s/nilable (s/coll-of ::report-header)))
+(s/def :report/headers (s/nilable ::report-header))
 (s/def :report/items (s/coll-of ::report-item))
 
 ;; mapping license type => frequency

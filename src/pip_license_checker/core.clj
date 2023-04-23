@@ -20,14 +20,16 @@
    [clojure.set :refer [intersection]]
    [clojure.string :as str]
    [clojure.tools.cli :refer [parse-opts]]
-   [pip-license-checker.data :as d]
    [pip-license-checker.external :as external]
    [pip-license-checker.file :as file]
    [pip-license-checker.filters :as filters]
    [pip-license-checker.license :as license]
    [pip-license-checker.logging :as logging]
    [pip-license-checker.pypi :as pypi]
-   [pip-license-checker.report :as report]))
+   [pip-license-checker.report :as report]
+   [clojure.spec.alpha :as s]
+   [pip-license-checker.spec :as sp]
+))
 
 ;; helpers
 
@@ -53,7 +55,8 @@
   "Remove unused keys from dependency record"
   [dep options]
   (let [misc (logging/format-logs (:logs dep) options)]
-    (d/map->ReportItem
+    (s/assert
+     ::sp/report-item
      {:dependency (select-keys (:requirement dep) [:name :version])
       :license (select-keys (:license dep) [:name :type])
       :misc misc})))
@@ -77,10 +80,12 @@
                    (into (sorted-set))
                    (intersection (:fail options))
                    seq)]
-    (d/map->Report {:headers report/report-headers
-                    :items items
-                    :totals totals
-                    :fails fails})))
+    (s/assert
+     ::sp/report
+     {:headers report/report-headers
+      :items items
+      :totals totals
+      :fails fails})))
 
 (defn shutdown
   "Shutdown the app gracefully"
