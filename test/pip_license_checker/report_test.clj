@@ -15,8 +15,19 @@
 
 (ns pip-license-checker.report-test
   (:require
+   [clojure.spec.alpha :as s]
+   [clojure.spec.test.alpha :as stest]
    [clojure.test :refer [deftest is testing]]
    [pip-license-checker.report :as report]))
+
+;; set up assertions for spec validation
+(s/check-asserts true)
+
+;; instrument all functions to test functions :args
+(stest/instrument)
+
+;; check all functions :ret and :fn
+(stest/check)
 
 (def params-valid-formatter?
   [["%s %s %s" ["A" "B" "C"] true "Valid"]
@@ -215,7 +226,16 @@
      :headers false
      :formatter "%s %s %s"}
     ""
-    "No items, no headers, no totals"]])
+    "No items, no headers, no totals"]
+   [{:headers
+     {:items ["Dependency" "License Name" "License Type" "Misc"]
+      :totals ["License Type" "Found"]}
+     :items []
+     :totals {}
+     :fails nil}
+    {}
+    ""
+    "No items, no headers, no totals, no options"]])
 
 (deftest test-format-report
   (testing "Print formatted report"

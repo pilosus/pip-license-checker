@@ -15,8 +15,19 @@
 
 (ns pip-license-checker.file-test
   (:require
+   [clojure.spec.alpha :as s]
+   [clojure.spec.test.alpha :as stest]
    [clojure.test :refer [deftest is testing]]
    [pip-license-checker.file :as file]))
+
+;; set up assertions for spec validation
+(s/check-asserts true)
+
+;; instrument all functions to test functions :args
+(stest/instrument)
+
+;; check all functions :ret and :fn
+(stest/check)
 
 ;; file/exists?
 

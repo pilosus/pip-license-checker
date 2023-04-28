@@ -5,6 +5,12 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 
 ## [Unreleased]
 
+## [0.48.0] - 2023-04-28
+
+### Changed
+- Code refactoing to remove `defrecord` in favour of
+  [clojure.spec.alpha](https://clojure.org/guides/spec)
+
 ## [0.47.0] - 2023-04-14
 
 ### Changed
@@ -460,7 +466,8 @@ weak copyleft types.
 ### Added
 - Structure for Leiningen app project
 
-[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.47.0...HEAD
+[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.48.0...HEAD
+[0.48.0]: https://github.com/pilosus/pip-license-checker/compare/0.47.0...0.48.0
 [0.47.0]: https://github.com/pilosus/pip-license-checker/compare/0.46.1...0.47.0
 [0.46.1]: https://github.com/pilosus/pip-license-checker/compare/0.46.0...0.46.1
 [0.46.0]: https://github.com/pilosus/pip-license-checker/compare/0.45.0...0.46.0

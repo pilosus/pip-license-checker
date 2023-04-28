@@ -15,29 +15,40 @@
 
 (ns pip-license-checker.external-test
   (:require
+   [clojure.spec.alpha :as s]
+   [clojure.spec.test.alpha :as stest]
    [clojure.test :refer [deftest is testing]]
-   [pip-license-checker.data :as d]
    [pip-license-checker.external :as external]
-   [pip-license-checker.file :as file]))
+   [pip-license-checker.file :as file]
+   [pip-license-checker.spec :as sp]))
+
+;; set up assertions for spec validation
+(s/check-asserts true)
+
+;; instrument all functions to test functions :args
+(stest/instrument)
+
+;; check all functions :ret and :fn
+(stest/check)
 
 (def params-package-name->requirement
   [[nil
-    (d/map->Requirement {:name nil :version nil})
+    (s/assert ::sp/requirement {:name nil :version nil})
     "No package"]
    ["test-package"
-    (d/map->Requirement {:name "test-package" :version nil})
+    (s/assert ::sp/requirement {:name "test-package" :version nil})
     "No separators"]
    ["test-package_0.10.0"
-    (d/map->Requirement {:name "test-package_0.10.0" :version nil})
+    (s/assert ::sp/requirement {:name "test-package_0.10.0" :version nil})
     "Unknown separator"]
    ["node-forge@0.10.0"
-    (d/map->Requirement {:name "node-forge" :version "0.10.0"})
+    (s/assert ::sp/requirement {:name "node-forge" :version "0.10.0"})
     "Single @ separator"]
    ["node-forge:0.10.0"
-    (d/map->Requirement {:name "node-forge" :version "0.10.0"})
+    (s/assert ::sp/requirement {:name "node-forge" :version "0.10.0"})
     "Single : separator"]
    ["@org-name/node-forge@0.10.0"
-    (d/map->Requirement {:name "org-name/node-forge" :version "0.10.0"})
+    (s/assert ::sp/requirement {:name "org-name/node-forge" :version "0.10.0"})
     "Multiple @ separators"]])
 
 (deftest test-remove-requirements-internal-rules
@@ -48,15 +59,18 @@
 
 (def params-license-name->map
   [["MIT License"
-    (d/map->License
-     {:name "MIT License" :type "Permissive"})
+    (s/assert
+     ::sp/license
+     {:name "MIT License" :type "Permissive" :logs nil})
     "Permissive license"]
    ["GPL v3 or any later"
-    (d/map->License
+    (s/assert
+     ::sp/license
      {:name "GPL v3 or any later" :type "StrongCopyleft" :logs nil})
     "Copyleft license"]
    ["Imaginary License"
-    (d/map->License
+    (s/assert
+     ::sp/license
      {:name "Imaginary License" :type "Other" :logs nil})
     "Unknown license"]])
 
@@ -68,16 +82,29 @@
 
 (def params-external-obj->dep
   [[{:package "test-package@0.1.2" :license "MIT License"}
-    (d/map->Dependency
-     {:requirement (d/map->Requirement {:name "test-package" :version "0.1.2"})
-      :license (d/map->License
-                {:name "MIT License" :type "Permissive" :logs nil})})
+    (s/assert
+     ::sp/dependency
+     {:requirement
+      (s/assert
+       ::sp/requirement
+       {:name "test-package" :version "0.1.2"})
+      :license
+      (s/assert
+       ::sp/license
+       {:name "MIT License" :type "Permissive" :logs nil})
+      :logs nil})
     "Test 1"]
    [{:package "test-package" :license "LGPL"}
-    (d/map->Dependency
-     {:requirement (d/map->Requirement {:name "test-package" :version nil})
-      :license (d/map->License
-                {:name "LGPL" :type "WeakCopyleft" :logs nil})})
+    (s/assert
+     ::sp/dependency
+     {:requirement
+      (s/assert
+       ::sp/requirement {:name "test-package" :version nil})
+      :license
+      (s/assert
+       ::sp/license
+       {:name "LGPL" :type "WeakCopyleft" :logs nil})
+      :logs nil})
     "Test 2"]])
 
 (deftest test-external-obj->dep
@@ -91,23 +118,43 @@
      ["test-package@0.1.2" "MIT License"]
      ["another-package@21.04" "GPLv2"]]
     {:external-options {:skip-header true}}
-    [(d/map->Dependency
-      {:requirement (d/map->Requirement {:name "test-package" :version "0.1.2"})
-       :license (d/map->License
-                 {:name "MIT License" :type "Permissive" :logs nil})})
-     (d/map->Dependency
-      {:requirement (d/map->Requirement {:name "another-package" :version "21.04"})
-       :license (d/map->License
-                 {:name "GPLv2" :type "StrongCopyleft" :logs nil})})]
+    [(s/assert
+      ::sp/dependency
+      {:requirement
+       (s/assert
+        ::sp/requirement
+        {:name "test-package" :version "0.1.2"})
+       :license
+       (s/assert
+        ::sp/license
+        {:name "MIT License" :type "Permissive" :logs nil})
+       :logs nil})
+     (s/assert
+      ::sp/dependency
+      {:requirement
+       (s/assert
+        ::sp/requirement {:name "another-package" :version "21.04"})
+       :license
+       (s/assert
+        ::sp/license
+        {:name "GPLv2" :type "StrongCopyleft" :logs nil})
+       :logs nil})]
     "No headers"]
    [[["package name" "license name"]
      ["test-package@0.1.2" "MIT License"]
      ["another-package@21.04" "GPLv2"]]
     {:external-options {:skip-header true} :exclude #"another-.*"}
-    [(d/map->Dependency
-      {:requirement (d/map->Requirement {:name "test-package" :version "0.1.2"})
-       :license (d/map->License
-                 {:name "MIT License" :type "Permissive" :logs nil})})]
+    [(s/assert
+      ::sp/dependency
+      {:requirement
+       (s/assert
+        ::sp/requirement
+        {:name "test-package" :version "0.1.2"})
+       :license
+       (s/assert
+        ::sp/license
+        {:name "MIT License" :type "Permissive" :logs nil})
+       :logs nil})]
     "Exclude pattern"]])
 
 (deftest test-get-parsed-requiements-csv
@@ -122,38 +169,72 @@
   [[[{:package "test-package" :license "MIT License"}
      {:package "another-package" :license "GPLv2"}]
     {:external-format external/format-cocoapods}
-    [(d/map->Dependency
-      {:requirement (d/map->Requirement {:name "test-package" :version nil})
-       :license (d/map->License
-                 {:name "MIT License" :type "Permissive" :logs nil})})
-     (d/map->Dependency
-      {:requirement (d/map->Requirement {:name "another-package" :version nil})
-       :license (d/map->License
-                 {:name "GPLv2" :type "StrongCopyleft" :logs nil})})]
+    [(s/assert
+      ::sp/dependency
+      {:requirement
+       (s/assert
+        ::sp/requirement
+        {:name "test-package" :version nil})
+       :license
+       (s/assert
+        ::sp/license
+        {:name "MIT License" :type "Permissive" :logs nil})
+       :logs nil})
+     (s/assert
+      ::sp/dependency
+      {:requirement
+       (s/assert
+        ::sp/requirement
+        {:name "another-package" :version nil})
+       :license
+       (s/assert
+        ::sp/license
+        {:name "GPLv2" :type "StrongCopyleft" :logs nil})
+       :logs nil})]
     "No headers"]
    [[{:package "test-package" :license "MIT License"}
      {:package "another-package" :license "GPLv2"}]
     {:external-format external/format-cocoapods :exclude #"another-.*"}
-    [(d/map->Dependency
-      {:requirement (d/map->Requirement {:name "test-package" :version nil})
-       :license (d/map->License
-                 {:name "MIT License" :type "Permissive" :logs nil})})]
+    [(s/assert
+      ::sp/dependency
+      {:requirement
+       (s/assert
+        ::sp/requirement
+        {:name "test-package" :version nil})
+       :license
+       (s/assert
+        ::sp/license
+        {:name "MIT License" :type "Permissive" :logs nil})
+       :logs nil})]
     "Exclude pattern"]
    [[{:package "test-package" :license "MIT License"}
      {:package "another-package" :license "GPLv2"}]
     {:external-format external/format-gradle :exclude #"another-.*"}
-    [(d/map->Dependency
-      {:requirement (d/map->Requirement {:name "test-package" :version nil})
-       :license (d/map->License
-                 {:name "MIT License" :type "Permissive" :logs nil})})]
+    [(s/assert
+      ::sp/dependency
+      {:requirement
+       (s/assert
+        ::sp/requirement
+        {:name "test-package" :version nil})
+       :license
+       (s/assert
+        ::sp/license
+        {:name "MIT License" :type "Permissive" :logs nil})
+       :logs nil})]
     "Gradle license plugin"]
    [[{:package "test-package" :license "MIT License"}
      {:package "another-package" :license "GPLv2"}]
     {:external-format external/format-edn :exclude #"another-.*"}
-    [(d/map->Dependency
-      {:requirement (d/map->Requirement {:name "test-package" :version nil})
-       :license (d/map->License
-                 {:name "MIT License" :type "Permissive" :logs nil})})]
+    [(s/assert
+      ::sp/dependency
+      {:requirement
+       (s/assert
+        ::sp/requirement {:name "test-package" :version nil})
+       :license
+       (s/assert
+        ::sp/license
+        {:name "MIT License" :type "Permissive" :logs nil})
+       :logs nil})]
     "EDN plugin"]])
 
 (deftest test-get-parsed-deps-external-plugins

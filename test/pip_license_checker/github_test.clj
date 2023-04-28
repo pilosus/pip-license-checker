@@ -16,29 +16,42 @@
 (ns pip-license-checker.github-test
   (:require
    [clj-http.client :as http]
+   [clojure.spec.alpha :as s]
+   [clojure.spec.test.alpha :as stest]
    [clojure.test :refer [deftest is testing]]
    [indole.core :refer [make-rate-limiter]]
-   [pip-license-checker.data :as d]
-   [pip-license-checker.github :as g]))
+   [pip-license-checker.github :as g]
+   [pip-license-checker.spec :as sp]))
+
+;; set up assertions for spec validation
+(s/check-asserts true)
+
+;; instrument all functions to test functions :args
+(stest/instrument)
+
+;; check all functions :ret and :fn
+(stest/check)
 
 (def rate-limits (make-rate-limiter 1000 100))
 
 (def params-api-get-license
   [[["" "owner" "repo"]
     (constantly {:body "{\"license\": {\"name\": \"MIT License\"}}"})
-    (d/map->License {:name "MIT License" :type nil :logs nil})
+    (s/assert ::sp/license {:name "MIT License" :type nil :logs nil})
     "Ok"]
    [["" "owner" "repo"]
     (constantly {:body "{\"errors\": {\"message\": \"No License Found\"}}"})
-    (d/map->License {:name nil :type nil :logs nil})
+    (s/assert ::sp/license {:name nil :type nil :logs nil})
     "Fallback"]
    [["" "owner" "repo"]
     (fn [& _] (throw (ex-info "Boom!" {:status 404 :reason-phrase "Page not found"})))
-    (d/map->License {:name nil
-                     :type nil
-                     :logs [{:level :error
-                             :name "GitHub::license"
-                             :message "404 Page not found"}]})
+    (s/assert
+     ::sp/license
+     {:name nil
+      :type nil
+      :logs [{:level :error
+              :name "GitHub::license"
+              :message "404 Page not found"}]})
     "Exception"]])
 
 (deftest test-api-get-license
@@ -51,19 +64,19 @@
 (def params-homepage->license
   [["http://example.com"
     "{\"license\": {\"name\": \"MIT License\"}}"
-    (d/map->License {:name nil :type nil :logs [g/meta-not-found]})
+    (s/assert ::sp/license {:name nil :type nil :logs [g/meta-not-found]})
     "Not a GitHub URL"]
    ["https://github.com/pilosus"
     "{\"license\": {\"name\": \"MIT License\"}}"
-    (d/map->License {:name nil :type nil :logs [g/meta-not-found]})
+    (s/assert ::sp/license {:name nil :type nil :logs [g/meta-not-found]})
     "Malformed GitHub URL"]
    ["https://github.com/pilosus/piny/"
     "{\"license\": {\"name\": \"MIT License\"}}"
-    (d/map->License {:name "MIT License" :type nil :logs nil})
+    (s/assert ::sp/license {:name "MIT License" :type nil :logs nil})
     "Ok GitHub URL"]
    [nil
     "{\"license\": {\"name\": \"MIT License\"}}"
-    (d/map->License {:name nil :type nil :logs [g/meta-not-found]})
+    (s/assert ::sp/license {:name nil :type nil :logs [g/meta-not-found]})
     "nil URL"]])
 
 (deftest test-homepage->license

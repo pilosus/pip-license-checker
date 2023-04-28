@@ -46,12 +46,15 @@ dicussed on the code review).
 
 ### Release management
 
-#### Checlist
+#### Checklist
 
 1. Follow the [SemVer](https://semver.org/) conventions for the release number.
 2. Update the [project version](https://github.com/pilosus/pip-license-checker/blob/main/project.clj).
 3. Update the [CHANGELOG](https://github.com/pilosus/action-pip-license-checker/blob/main/CHANGELOG.md).
-4. Update the [README](https://github.com/pilosus/action-pip-license-checker/blob/main/README.md) if needed.
+4. Update the [README](https://github.com/pilosus/action-pip-license-checker/blob/main/README.md) if needed:
+- check if the `Help` section is in line with `lein run` output, especially if CLI options are updated
+- check if versions mentioned in the text are still relevant
+
 5. Merge the changes to the `main` branch.
 6. Push a version-specific tag, e.g. `2.1.9`:
 

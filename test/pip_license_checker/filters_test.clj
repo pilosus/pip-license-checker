@@ -15,10 +15,21 @@
 
 (ns pip-license-checker.filters-test
   (:require
+   [clojure.spec.alpha :as s]
    [clojure.spec.gen.alpha :as gen]
+   [clojure.spec.test.alpha :as stest]
    [clojure.test :refer [deftest is testing]]
-   [pip-license-checker.spec :as sp]
-   [pip-license-checker.filters :as filters]))
+   [pip-license-checker.filters :as filters]
+   [pip-license-checker.spec :as sp]))
+
+;; set up assertions for spec validation
+(s/check-asserts true)
+
+;; instrument all functions to test functions :args
+(stest/instrument)
+
+;; check all functions :ret and :fn
+(stest/check)
 
 ;; filters/remove-requirements-internal-rules
 

@@ -17,8 +17,9 @@
   "Licenses constants"
   (:gen-class)
   (:require
+   [clojure.spec.alpha :as s]
    [clojure.string :as str]
-   [pip-license-checker.data :as d]))
+   [pip-license-checker.spec :as sp]))
 
 ;; Lincense regex
 
@@ -279,14 +280,23 @@
 ;; Do not add logs here as they are excessive
 ;; NPE is caught when license is nil,
 ;; i.e. there were other reasons why license name is absent
-(def license-error (d/->License name-error type-error nil))
+(def license-error
+  (s/assert
+   ::sp/license
+   {:name name-error
+    :type type-error
+    :logs nil}))
 
 ;; Functions
 
 (defn get-license-error
   "Get license object of error type"
   [ex]
-  (d/->License name-error type-error ex))
+  (s/assert
+   ::sp/license
+   {:name name-error
+    :type type-error
+    :logs ex}))
 
 (defn is-type-valid?
   "Return true if license-type string is valid, false otherwise"
@@ -314,10 +324,14 @@
           regex-permissive (strings->pattern regex-list-permissive)
           match-permissive (some? (re-find regex-permissive name))]
       (cond
-        match-copyleft-network (d/->License name type-copyleft-network nil)
-        match-copyleft-strong (d/->License name type-copyleft-strong nil)
-        match-copyleft-weak (d/->License name type-copyleft-weak nil)
-        match-permissive (d/->License name type-permissive nil)
-        :else (d/->License name type-other nil)))
+        match-copyleft-network
+        (s/assert ::sp/license {:name name :type type-copyleft-network :logs nil})
+        match-copyleft-strong
+        (s/assert ::sp/license {:name name :type type-copyleft-strong :logs nil})
+        match-copyleft-weak
+        (s/assert ::sp/license {:name name :type type-copyleft-weak :logs nil})
+        match-permissive
+        (s/assert ::sp/license {:name name :type type-permissive :logs nil})
+        :else (s/assert ::sp/license {:name name :type type-other :logs nil})))
     (catch NullPointerException _
       license-error)))

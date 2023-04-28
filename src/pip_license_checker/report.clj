@@ -19,13 +19,15 @@
   (:require
    [cheshire.core :as json]
    [clojure.data.csv :as csv]
+   [clojure.spec.alpha :as s]
    [clojure.string :as str]
-   [pip-license-checker.data :as d]))
+   [pip-license-checker.spec :as sp]))
 
 (def items-header ["Dependency" "License Name" "License Type" "Misc"])
 (def totals-header ["License Type" "Found"])
 (def report-headers
-  (d/map->ReportHeader
+  (s/assert
+   ::sp/report-header
    {:items items-header
     :totals totals-header}))
 

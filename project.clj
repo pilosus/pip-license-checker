@@ -1,4 +1,4 @@
-(defproject org.pilosus/pip-license-checker "0.47.0"
+(defproject org.pilosus/pip-license-checker "0.48.0"
   :description "License compliance tool to identify dependencies license names and types: permissive, copyleft, proprietory, etc."
   :url "https://github.com/pilosus/pip-license-checker"
   :license {:name "Eclipse Public License 2.0 OR GNU GPL v2+ with Classpath exception"
@@ -21,9 +21,13 @@
   :aot [pip-license-checker.core]
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all
-                       :jvm-opts ["-Dclojure.compiler.direct-linking=true"]}}
+                       :jvm-opts ["-Dclojure.compiler.direct-linking=true"]}
+             :test {:cloverage {:fail-threshold 80
+                                :exclude-call [clojure.spec.alpha/assert
+                                               clojure.spec.alpha/def]}}}
   :test-selectors {:integration :integration
                    :cli :cli}
+  :cljfmt {:sort-ns-references? true}
   :repositories [["releases" {:url "https://repo.clojars.org"
                               :sign-releases false
                               :username :env/clojars_username

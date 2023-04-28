@@ -18,11 +18,12 @@
   (:gen-class)
   (:require
    [clojure.edn :as edn]
+   [clojure.spec.alpha :as s]
    [clojure.string :as str]
-   [pip-license-checker.data :as d]
    [pip-license-checker.file :as file]
    [pip-license-checker.filters :as filters]
-   [pip-license-checker.license :as license]))
+   [pip-license-checker.license :as license]
+   [pip-license-checker.spec :as sp]))
 
 (def regex-version-separator #"(@|:)")
 
@@ -65,7 +66,7 @@
         splitted? (> (count split) 1)
         version (if splitted? (last split) nil)
         name (if splitted? (str/join (butlast split)) (first split))]
-    (d/map->Requirement {:name name :version version})))
+    (s/assert ::sp/requirement {:name name :version version})))
 
 (defn license-name->map
   "Format license name into a license record"
@@ -75,7 +76,8 @@
 (defn external-obj->dep
   "Format object parsed from external file into dependency object"
   [{:keys [package license]}]
-  (d/map->Dependency
+  (s/assert
+   ::sp/dependency
    {:requirement (package-name->requirement package)
     :license (license-name->map license)
     :logs (:logs license)}))

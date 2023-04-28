@@ -15,10 +15,21 @@
 
 (ns pip-license-checker.http-test
   (:require
-   [clojure.test :refer [deftest is testing]]
    [clj-http.client :as clj-http]
+   [clojure.spec.alpha :as s]
+   [clojure.spec.test.alpha :as stest]
+   [clojure.test :refer [deftest is testing]]
    [indole.core :refer [make-rate-limiter]]
    [pip-license-checker.http :as http]))
+
+;; set up assertions for spec validation
+(s/check-asserts true)
+
+;; instrument all functions to test functions :args
+(stest/instrument)
+
+;; check all functions :ret and :fn
+(stest/check)
 
 (def hit-counter (atom 0))
 

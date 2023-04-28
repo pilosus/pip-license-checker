@@ -15,12 +15,23 @@
 
 (ns pip-license-checker.core-test
   (:require
+   [clojure.spec.alpha :as s]
+   [clojure.spec.test.alpha :as stest]
    [clojure.string :as str]
    [clojure.test :refer [deftest is testing]]
    [pip-license-checker.core :as core]
    [pip-license-checker.external :as external]
    [pip-license-checker.pypi :as pypi]
    [pip-license-checker.report :as report]))
+
+;; set up assertions for spec validation
+(s/check-asserts true)
+
+;; instrument all functions to test functions :args
+(stest/instrument)
+
+;; check all functions :ret and :fn
+(stest/check)
 
 (def params-validate-args
   [[["--requirements"

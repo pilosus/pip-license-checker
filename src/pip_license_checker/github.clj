@@ -18,10 +18,11 @@
   (:gen-class)
   (:require
    [cheshire.core :as json]
+   [clojure.spec.alpha :as s]
    [clojure.string :as str]
-   [pip-license-checker.data :as d]
    [pip-license-checker.http :as http]
-   [pip-license-checker.logging :as l]))
+   [pip-license-checker.logging :as l]
+   [pip-license-checker.spec :as sp]))
 
 (def url-github-base "https://api.github.com/repos")
 
@@ -71,7 +72,7 @@
                          :body
                          json/parse-string
                          (get-in ["license" "name"]))]
-    (d/map->License {:name license-name :type nil :logs logs})))
+    (s/assert ::sp/license {:name license-name :type nil :logs logs})))
 
 (defn homepage->license
   "Get license name from homepage if it's a GitHub URL"
@@ -83,5 +84,7 @@
         url-valid? (= 3 (count github-url))
         license (if url-valid?
                   (api-get-license github-url options rate-limiter)
-                  (d/->License nil nil [meta-not-found]))]
+                  (s/assert
+                   ::sp/license
+                   {:name nil :type nil :logs [meta-not-found]}))]
     license))

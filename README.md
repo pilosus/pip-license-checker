@@ -170,7 +170,7 @@ Description:
       --external-format FILE_FORMAT        csv                                     External file format: csv, cocoapods, gradle
       --external-options OPTS_EDN_STRING   {:skip-header true, :skip-footer true}  String of options map in EDN format
       --report-format FORMAT               stdout                                  Report format: stdout, json, json-pretty, csv
-      --formatter PRINTF_FMT               %-35s %-55s %-20s                       Printf-style formatter string for stdout report formatting
+      --formatter PRINTF_FMT               %-35s %-55s %-20s %-40s                 Printf-style formatter string for stdout report formatting
   -f, --fail LICENSE_TYPE                  #{}                                     Return non-zero exit code if license type is found
   -e, --exclude REGEX                                                              PCRE to exclude packages with matching names
       --exclude-license REGEX                                                      PCRE to exclude packages with matching license names
@@ -199,7 +199,8 @@ pip-license-checker -r resources/requirements.github.txt --github-token your-tok
 pip-license-checker -x resources/external.csv --exclude-license '(?i).*(?:mit|bsd).*'
 pip-license-checker -x resources/external.csv --external-options '{:skip-header false}'
 pip-license-checker -x resources/external.cocoapods --external-format cocoapods'
-pip-license-checker -x resources/external.edn --external-format edn --formatter '%-70s %-60s %-35s'
+pip-license-checker -x resources/external.edn --external-format edn --formatter '%-70s %-60s %-35s %-40s'
+pip-license-checker -r resources/requirements.txt --report-format 'json-pretty' --totals --headers -vvv
 ```
 
 ### License types

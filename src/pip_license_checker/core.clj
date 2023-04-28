@@ -18,16 +18,17 @@
   (:gen-class)
   (:require
    [clojure.set :refer [intersection]]
+   [clojure.spec.alpha :as s]
    [clojure.string :as str]
    [clojure.tools.cli :refer [parse-opts]]
-   [pip-license-checker.data :as d]
    [pip-license-checker.external :as external]
    [pip-license-checker.file :as file]
    [pip-license-checker.filters :as filters]
    [pip-license-checker.license :as license]
    [pip-license-checker.logging :as logging]
    [pip-license-checker.pypi :as pypi]
-   [pip-license-checker.report :as report]))
+   [pip-license-checker.report :as report]
+   [pip-license-checker.spec :as sp]))
 
 ;; helpers
 
@@ -53,7 +54,8 @@
   "Remove unused keys from dependency record"
   [dep options]
   (let [misc (logging/format-logs (:logs dep) options)]
-    (d/map->ReportItem
+    (s/assert
+     ::sp/report-item
      {:dependency (select-keys (:requirement dep) [:name :version])
       :license (select-keys (:license dep) [:name :type])
       :misc misc})))
@@ -77,10 +79,12 @@
                    (into (sorted-set))
                    (intersection (:fail options))
                    seq)]
-    (d/map->Report {:headers report/report-headers
-                    :items items
-                    :totals totals
-                    :fails fails})))
+    (s/assert
+     ::sp/report
+     {:headers report/report-headers
+      :items items
+      :totals totals
+      :fails fails})))
 
 (defn shutdown
   "Shutdown the app gracefully"
@@ -120,7 +124,8 @@
         "pip-license-checker -x resources/external.csv --exclude-license '(?i).*(?:mit|bsd).*'"
         "pip-license-checker -x resources/external.csv --external-options '{:skip-header false}'"
         "pip-license-checker -x resources/external.cocoapods --external-format cocoapods'"
-        "pip-license-checker -x resources/external.edn --external-format edn --formatter '%-70s %-60s %-35s'"]
+        "pip-license-checker -x resources/external.edn --external-format edn --formatter '%-70s %-60s %-35s %-40s'"
+        "pip-license-checker -r resources/requirements.txt --report-format 'json-pretty' --totals --headers -vvv"]
        (str/join \newline)))
 
 (defn error-msg [errors]
