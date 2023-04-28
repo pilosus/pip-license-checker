@@ -5,6 +5,10 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 
 ## [Unreleased]
 
+### Changed
+- Code refactoing to remove `defrecord` in favour of
+  [clojure.spec.alpha](https://clojure.org/guides/spec)
+
 ## [0.47.0] - 2023-04-14
 
 ### Changed

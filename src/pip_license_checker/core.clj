@@ -124,7 +124,8 @@
         "pip-license-checker -x resources/external.csv --exclude-license '(?i).*(?:mit|bsd).*'"
         "pip-license-checker -x resources/external.csv --external-options '{:skip-header false}'"
         "pip-license-checker -x resources/external.cocoapods --external-format cocoapods'"
-        "pip-license-checker -x resources/external.edn --external-format edn --formatter '%-70s %-60s %-35s'"]
+        "pip-license-checker -x resources/external.edn --external-format edn --formatter '%-70s %-60s %-35s %-40s'"
+        "pip-license-checker -r resources/requirements.txt --report-format 'json-pretty' --totals --headers -vvv"]
        (str/join \newline)))
 
 (defn error-msg [errors]
