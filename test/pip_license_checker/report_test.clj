@@ -215,7 +215,16 @@
      :headers false
      :formatter "%s %s %s"}
     ""
-    "No items, no headers, no totals"]])
+    "No items, no headers, no totals"]
+   [{:headers
+     {:items ["Dependency" "License Name" "License Type" "Misc"]
+      :totals ["License Type" "Found"]}
+     :items []
+     :totals {}
+     :fails nil}
+    {}
+    ""
+    "No items, no headers, no totals, no options"]])
 
 (deftest test-format-report
   (testing "Print formatted report"

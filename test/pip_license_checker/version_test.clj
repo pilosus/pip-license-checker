@@ -15,11 +15,15 @@
 
 (ns pip-license-checker.version-test
   (:require
+   [clojure.spec.alpha :as s]
    [clojure.spec.gen.alpha :as gen]
    [clojure.spec.test.alpha :as stest]
    [clojure.test :refer [deftest is testing]]
    [pip-license-checker.spec :as sp]
    [pip-license-checker.version :as v]))
+
+;; set up assertions for spec validation
+(s/check-asserts true)
 
 ;; instrument all functions to test functions :args
 (stest/instrument)

@@ -22,7 +22,9 @@
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all
                        :jvm-opts ["-Dclojure.compiler.direct-linking=true"]}
-             :test {:cloverage {:exclude-call [clojure.spec.alpha/assert]}}}
+             :test {:cloverage {:fail-threshold 80
+                                :exclude-call [clojure.spec.alpha/assert
+                                               clojure.spec.alpha/def]}}}
   :test-selectors {:integration :integration
                    :cli :cli}
   :cljfmt {:sort-ns-references? true}
