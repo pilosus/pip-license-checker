@@ -20,8 +20,7 @@
    [clojure.test :refer [deftest is testing]]
    [pip-license-checker.external :as external]
    [pip-license-checker.file :as file]
-   [pip-license-checker.spec :as sp]
-))
+   [pip-license-checker.spec :as sp]))
 
 ;; set up assertions for spec validation
 (s/check-asserts true)

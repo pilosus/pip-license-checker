@@ -69,8 +69,7 @@
            :version/post
            :version/dev
            :version/local
-           :version/meta
-           ]))
+           :version/meta]))
 
 (s/def ::versions
   (s/nilable (s/coll-of ::version)))

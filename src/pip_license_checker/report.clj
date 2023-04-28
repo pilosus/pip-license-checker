@@ -21,8 +21,7 @@
    [clojure.data.csv :as csv]
    [clojure.spec.alpha :as s]
    [clojure.string :as str]
-   [pip-license-checker.spec :as sp]
-))
+   [pip-license-checker.spec :as sp]))
 
 (def items-header ["Dependency" "License Name" "License Type" "Misc"])
 (def totals-header ["License Type" "Found"])

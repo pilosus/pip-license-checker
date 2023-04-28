@@ -15,8 +15,8 @@
 
 (ns pip-license-checker.http-test
   (:require
-   [clojure.test :refer [deftest is testing]]
    [clj-http.client :as clj-http]
+   [clojure.test :refer [deftest is testing]]
    [indole.core :refer [make-rate-limiter]]
    [pip-license-checker.http :as http]))
 

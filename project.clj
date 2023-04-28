@@ -24,6 +24,7 @@
                        :jvm-opts ["-Dclojure.compiler.direct-linking=true"]}}
   :test-selectors {:integration :integration
                    :cli :cli}
+  :cljfmt {:sort-ns-references? true}
   :repositories [["releases" {:url "https://repo.clojars.org"
                               :sign-releases false
                               :username :env/clojars_username

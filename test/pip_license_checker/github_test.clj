@@ -21,8 +21,7 @@
    [clojure.test :refer [deftest is testing]]
    [indole.core :refer [make-rate-limiter]]
    [pip-license-checker.github :as g]
-   [pip-license-checker.spec :as sp]
-))
+   [pip-license-checker.spec :as sp]))
 
 ;; set up assertions for spec validation
 (s/check-asserts true)
@@ -32,7 +31,6 @@
 
 ;; check all functions :ret and :fn
 (stest/check)
-
 
 (def rate-limits (make-rate-limiter 1000 100))
 

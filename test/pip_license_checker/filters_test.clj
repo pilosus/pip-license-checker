@@ -17,8 +17,8 @@
   (:require
    [clojure.spec.gen.alpha :as gen]
    [clojure.test :refer [deftest is testing]]
-   [pip-license-checker.spec :as sp]
-   [pip-license-checker.filters :as filters]))
+   [pip-license-checker.filters :as filters]
+   [pip-license-checker.spec :as sp]))
 
 ;; filters/remove-requirements-internal-rules
 

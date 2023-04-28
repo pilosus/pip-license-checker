@@ -18,6 +18,7 @@
   (:gen-class)
   (:require
    [clojure.set :refer [intersection]]
+   [clojure.spec.alpha :as s]
    [clojure.string :as str]
    [clojure.tools.cli :refer [parse-opts]]
    [pip-license-checker.external :as external]
@@ -27,9 +28,7 @@
    [pip-license-checker.logging :as logging]
    [pip-license-checker.pypi :as pypi]
    [pip-license-checker.report :as report]
-   [clojure.spec.alpha :as s]
-   [pip-license-checker.spec :as sp]
-))
+   [pip-license-checker.spec :as sp]))
 
 ;; helpers
 

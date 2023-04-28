@@ -23,8 +23,7 @@
    [pip-license-checker.file :as file]
    [pip-license-checker.filters :as filters]
    [pip-license-checker.license :as license]
-   [pip-license-checker.spec :as sp]
-))
+   [pip-license-checker.spec :as sp]))
 
 (def regex-version-separator #"(@|:)")
 

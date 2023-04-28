@@ -22,8 +22,7 @@
    [pip-license-checker.core :as core]
    [pip-license-checker.external :as external]
    [pip-license-checker.pypi :as pypi]
-   [pip-license-checker.report :as report]
-))
+   [pip-license-checker.report :as report]))
 
 ;; set up assertions for spec validation
 (s/check-asserts true)

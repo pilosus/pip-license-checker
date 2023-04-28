@@ -19,8 +19,7 @@
   (:require
    [clojure.spec.alpha :as s]
    [clojure.string :as str]
-   [pip-license-checker.spec :as sp]
-))
+   [pip-license-checker.spec :as sp]))
 
 ;; Lincense regex
 

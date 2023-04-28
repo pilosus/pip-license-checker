@@ -28,8 +28,7 @@
    [pip-license-checker.license :as license]
    [pip-license-checker.logging :as l]
    [pip-license-checker.spec :as sp]
-   [pip-license-checker.version :as version]
-))
+   [pip-license-checker.version :as version]))
 
 (def settings-http-client
   {:socket-timeout 3000

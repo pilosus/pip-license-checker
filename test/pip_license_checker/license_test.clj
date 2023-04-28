@@ -19,8 +19,7 @@
    [clojure.spec.test.alpha :as stest]
    [clojure.test :refer [deftest is testing]]
    [pip-license-checker.license :as license]
-   [pip-license-checker.spec :as sp]
-))
+   [pip-license-checker.spec :as sp]))
 
 ;; set up assertions for spec validation
 (s/check-asserts true)

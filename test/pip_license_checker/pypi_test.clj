@@ -26,8 +26,7 @@
    [pip-license-checker.license :as license]
    [pip-license-checker.pypi :as pypi]
    [pip-license-checker.spec :as sp]
-   [pip-license-checker.version :as version]
-))
+   [pip-license-checker.version :as version]))
 
 ;; set up assertions for spec validation
 (s/check-asserts true)

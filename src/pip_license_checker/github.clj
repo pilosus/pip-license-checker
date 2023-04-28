@@ -18,10 +18,10 @@
   (:gen-class)
   (:require
    [cheshire.core :as json]
+   [clojure.spec.alpha :as s]
    [clojure.string :as str]
    [pip-license-checker.http :as http]
    [pip-license-checker.logging :as l]
-   [clojure.spec.alpha :as s]
    [pip-license-checker.spec :as sp]))
 
 (def url-github-base "https://api.github.com/repos")
