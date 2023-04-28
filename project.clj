@@ -21,7 +21,8 @@
   :aot [pip-license-checker.core]
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all
-                       :jvm-opts ["-Dclojure.compiler.direct-linking=true"]}}
+                       :jvm-opts ["-Dclojure.compiler.direct-linking=true"]}
+             :test {:cloverage {:exclude-call [clojure.spec.alpha/assert]}}}
   :test-selectors {:integration :integration
                    :cli :cli}
   :cljfmt {:sort-ns-references? true}
