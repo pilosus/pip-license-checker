@@ -15,8 +15,19 @@
 
 (ns pip-license-checker.report-test
   (:require
+   [clojure.spec.alpha :as s]
+   [clojure.spec.test.alpha :as stest]
    [clojure.test :refer [deftest is testing]]
    [pip-license-checker.report :as report]))
+
+;; set up assertions for spec validation
+(s/check-asserts true)
+
+;; instrument all functions to test functions :args
+(stest/instrument)
+
+;; check all functions :ret and :fn
+(stest/check)
 
 (def params-valid-formatter?
   [["%s %s %s" ["A" "B" "C"] true "Valid"]
