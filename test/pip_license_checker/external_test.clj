@@ -241,7 +241,6 @@
   (testing "Test license name formatting"
     (doseq [[external-data options expected description] params-get-parsed-deps-cocoapods]
       (testing description
-        #_:clj-kondo/ignore
         (with-redefs
          [file/cocoapods-plist->data (constantly external-data)
           file/gradle-json->data (constantly external-data)

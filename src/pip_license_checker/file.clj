@@ -185,7 +185,6 @@
 
 (defn gradle-json->data
   "Parse gradle-license-plugin JSON into vector of {:package PACKAGE :license LICENSE} maps"
-  #_:clj-kondo/ignore
   [path options]
   (let [content (path->string path)
         dependencies (json/parse-string content)
