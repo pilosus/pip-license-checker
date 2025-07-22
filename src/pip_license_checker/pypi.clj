@@ -171,7 +171,9 @@
   "Get license name from info.classifiers or info.license field of PyPI API data"
   [api-response options rate-limiter]
   (let [info (get api-response "info")
-        {:strs [license classifiers home_page]} info
+        {:strs [license_expression license classifiers home_page]} info
+        ;; license expression has higher priority as license
+        license (or license_expression license)
         license-license (if (contains? license-undefined license) nil license)
         classifiers-license (classifiers->license classifiers)
         name (or
