@@ -5,6 +5,16 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 
 ## [Unreleased]
 
+## [0.49.0] - 2025-07-22
+
+### Changed
+
+- PyPI JSON API's `license_expr` is used as a primary source for the
+  license name (SPDX identifier). If absent, fall back to the
+  `license` field
+  ([#152](https://github.com/pilosus/pip-license-checker/issues/152)).
+
+
 ## [0.48.0] - 2023-04-28
 
 ### Changed
