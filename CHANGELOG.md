@@ -14,7 +14,8 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
   `license` field
   ([#152](https://github.com/pilosus/pip-license-checker/issues/152)).
 
-- Dump Docker base images to `eclipse-temurin:21`
+- Bump Docker base images to `eclipse-temurin:21`
+- Bump Clojure dependencies
 
 
 ## [0.48.0] - 2023-04-28
