@@ -16,7 +16,7 @@ permissions:
 jobs:
   test:
     name: Test and lint
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout the code
         uses: actions/checkout@v4
@@ -71,7 +71,7 @@ jobs:
 
   publish:
     name: Publish on Clojars
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [test, license]
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
     steps:
