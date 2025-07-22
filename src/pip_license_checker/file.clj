@@ -1,4 +1,4 @@
-;; Copyright © 2020-2023 Vitaly Samigullin
+;; Copyright © Vitaly Samigullin
 ;;
 ;; This program and the accompanying materials are made available under the
 ;; terms of the Eclipse Public License 2.0 which is available at
@@ -185,7 +185,6 @@
 
 (defn gradle-json->data
   "Parse gradle-license-plugin JSON into vector of {:package PACKAGE :license LICENSE} maps"
-  #_:clj-kondo/ignore
   [path options]
   (let [content (path->string path)
         dependencies (json/parse-string content)

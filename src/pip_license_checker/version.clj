@@ -1,4 +1,4 @@
-;; Copyright © 2020-2023 Vitaly Samigullin
+;; Copyright © Vitaly Samigullin
 ;;
 ;; This program and the accompanying materials are made available under the
 ;; terms of the Eclipse Public License 2.0 which is available at
@@ -240,24 +240,24 @@
         release (truncate-release release)
         pre
         (cond
-          (and (not pre) (not post) dev) (Double/NEGATIVE_INFINITY)
-          (not pre) (Double/POSITIVE_INFINITY)
+          (and (not pre) (not post) dev) Double/NEGATIVE_INFINITY
+          (not pre) Double/POSITIVE_INFINITY
           :else pre)
         post
         (cond
-          (not post) (Double/NEGATIVE_INFINITY)
+          (not post) Double/NEGATIVE_INFINITY
           :else post)
         dev
         (cond
-          (not dev) (Double/POSITIVE_INFINITY)
+          (not dev) Double/POSITIVE_INFINITY
           :else dev)
         local
         (cond
-          (not local) [[(Double/NEGATIVE_INFINITY) ""]]
+          (not local) [[Double/NEGATIVE_INFINITY ""]]
           :else
           (vec (map #(if (integer? %)
                        [% ""]
-                       [(Double/NEGATIVE_INFINITY) %]) local)))]
+                       [Double/NEGATIVE_INFINITY %]) local)))]
     {:orig orig
      :epoch epoch
      :release release

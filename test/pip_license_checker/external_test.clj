@@ -1,4 +1,4 @@
-;; Copyright © 2020-2023 Vitaly Samigullin
+;; Copyright © Vitaly Samigullin
 ;;
 ;; This program and the accompanying materials are made available under the
 ;; terms of the Eclipse Public License 2.0 which is available at
@@ -241,7 +241,6 @@
   (testing "Test license name formatting"
     (doseq [[external-data options expected description] params-get-parsed-deps-cocoapods]
       (testing description
-        #_:clj-kondo/ignore
         (with-redefs
          [file/cocoapods-plist->data (constantly external-data)
           file/gradle-json->data (constantly external-data)
