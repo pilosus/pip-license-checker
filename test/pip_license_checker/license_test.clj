@@ -84,6 +84,11 @@
      ::sp/license
      {:name "WTFPL" :type license/type-permissive :logs nil})
     "Permissive"]
+   ["PSF-2.0"
+    (s/assert
+     ::sp/license
+     {:name "PSF-2.0" :type license/type-permissive :logs nil})
+    "Permissive"]
    ["CC0"
     (s/assert
      ::sp/license

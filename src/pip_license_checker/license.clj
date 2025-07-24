@@ -213,6 +213,7 @@
 
    #"Python Software Foundation License"
    #"Python License"
+   #"PSF-2\.0"
 
    #"Public Domain"
 
