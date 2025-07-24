@@ -5,6 +5,12 @@ This change log follows the conventions of [keepachangelog.com](http://keepachan
 
 ## [Unreleased]
 
+## [0.50.0] - 2025-07-24
+
+### Added
+
+- `PSF-2.0` license support ([#143](https://github.com/pilosus/pip-license-checker/issues/143))
+
 ## [0.49.0] - 2025-07-22
 
 ### Changed
@@ -479,7 +485,8 @@ weak copyleft types.
 ### Added
 - Structure for Leiningen app project
 
-[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.49.0...HEA
+[Unreleased]: https://github.com/pilosus/pip-license-checker/compare/0.50.0...HEAD
+[0.59.0]: https://github.com/pilosus/pip-license-checker/compare/0.49.0...0.50.0
 [0.49.0]: https://github.com/pilosus/pip-license-checker/compare/0.48.0...0.49.0
 [0.48.0]: https://github.com/pilosus/pip-license-checker/compare/0.47.0...0.48.0
 [0.47.0]: https://github.com/pilosus/pip-license-checker/compare/0.46.1...0.47.0
